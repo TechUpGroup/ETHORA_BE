@@ -1,0 +1,36 @@
+node_env: development
+cron: false
+
+server:
+  port: 8080
+  host: 0.0.0.0
+  url: http://localhost/
+  web_url: http://localhost:8080
+
+swagger:
+  name: Backend API
+  doc_url: /api/docs
+  description: Backend 
+  version: 1.0
+  is_auth: false
+  username: root
+  password: 123456
+
+mongodb:
+  uri: mongodb://localhost:27017/bo-be
+
+i18n:
+  fallback_language: en
+
+network_supported: [base, goerli]
+
+blockchain:
+  private_key: ''
+  base:
+    provider: https://base.publicnode.com
+    chain_id: 8453
+    contract:
+  goerli:
+    provider: https://1rpc.io/base-goerli
+    chain_id: 84531
+    contract:
