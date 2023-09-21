@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  cityofgreed-backend: 
+    ports:
+      - 8080:8080
+    image: 834298190262.dkr.ecr.ap-southeast-1.amazonaws.com/cityofgreed_be:develop
+    pull_policy: always
+    build:
+      dockerfile: .docker/Dockerfile
+    volumes:
+      - ./config.yaml:/app/config/prod.yaml
