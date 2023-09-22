@@ -1,4 +1,5 @@
 export enum TRADE_STATE {
+  QUEUED = "QUEUED",
   CREATED = "CREATED",
   OPENED = "OPENED",
   CLOSED = "CLOSED",

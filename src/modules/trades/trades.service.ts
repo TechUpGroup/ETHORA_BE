@@ -30,7 +30,7 @@ export class TradesService {
     const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
 
     return await this.model.paginate(
-      { address, state: TRADE_STATE.OPENED },
+      { address, state: { $in: [TRADE_STATE.OPENED, TRADE_STATE.QUEUED] } },
       {
         page,
         limit,
@@ -56,7 +56,7 @@ export class TradesService {
     const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
 
     return await this.model.paginate(
-      { address, state: { $in: [TRADE_STATE.CLOSED, TRADE_STATE.CANCELLED] } },
+      { address },
       {
         page,
         limit,

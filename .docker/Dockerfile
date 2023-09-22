@@ -1,4 +1,4 @@
-FROM node:18-alpine as builder1
+FROM node:18-alpine as builder
 
 # Workdir
 WORKDIR /app
@@ -23,8 +23,9 @@ RUN apk add --no-cache curl
 
 # Copy source built BE
 COPY package.json yarn.lock ./
-COPY --from=builder1 /app/node_modules ./node_modules
-COPY --from=builder1 /app/dist ./dist
+COPY public ./public
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
 COPY ./config/example.yaml ./config/default.yaml
 
 # Env default
