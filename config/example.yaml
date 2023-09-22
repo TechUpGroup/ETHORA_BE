@@ -19,6 +19,11 @@ swagger:
 mongodb:
   uri: mongodb://localhost:27017/bo-be
 
+jwt:
+  secret: W53!ns!g&1P4
+  access_expiration_minutes: 1440
+  refresh_expiration_days: 30
+
 i18n:
   fallback_language: en
 

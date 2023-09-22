@@ -1,0 +1,10 @@
+export enum TRADE_STATE {
+  CREATED = "CREATED",
+  OPENED = "OPENED",
+  CLOSED = "CLOSED",
+  CANCELLED = "CANCELLED",
+}
+
+export enum TRADE_TOKEN {
+  USDC = "USDC",
+}

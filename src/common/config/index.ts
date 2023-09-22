@@ -70,6 +70,14 @@ class Config {
     };
   }
 
+  get jwt() {
+    return {
+      secret: this.getString("jwt.secret"),
+      accessExpirationMinutes: this.getNumber("jwt.access_expiration_minutes"),
+      refreshExpirationDays: this.getNumber("jwt.refresh_expiration_days"),
+    };
+  }
+
   get fallbackLanguage(): string {
     return this.getString("i18n.fallback_language");
   }
@@ -103,7 +111,12 @@ class Config {
 
   listRPC(network: Network) {
     return network === Network.goerli
-      ? ["https://1rpc.io/base-goerli", "https://base-goerli.publicnode.com", "https://goerli.base.org", "https://rpc.notadegen.com/base/goerli"]
+      ? [
+          "https://1rpc.io/base-goerli",
+          "https://base-goerli.publicnode.com",
+          "https://goerli.base.org",
+          "https://rpc.notadegen.com/base/goerli",
+        ]
       : ["https://base.publicnode.com", "https://base.meowrpc.com", "https://1rpc.io/base", "https://base.drpc.org"];
   }
 

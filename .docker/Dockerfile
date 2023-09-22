@@ -13,8 +13,7 @@ RUN yarn build
 
 # ===========================
 FROM node:18-alpine
-LABEL maintainer="nakamuraos"
-LABEL description="Setup server and serve static resource."
+LABEL authors="ThinhHV <thinh@thinhhv.com>"
 
 # Workdir
 WORKDIR /app

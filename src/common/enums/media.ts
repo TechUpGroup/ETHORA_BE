@@ -1,5 +1,4 @@
 export enum TypeMedia {
-    VIDEO = "VIDEO",
-    IMAGE = "IMAGE"
-
+  VIDEO = "VIDEO",
+  IMAGE = "IMAGE",
 }

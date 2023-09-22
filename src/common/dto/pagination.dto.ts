@@ -15,7 +15,7 @@ export class PaginationDto {
   @IsDefined()
   @ToInt()
   @IsPositive()
-  @Max(1000)
+  @Max(100)
   limit: number;
 }
 
