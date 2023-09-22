@@ -8,6 +8,7 @@ import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 
 import setupSwagger from "./helpers/swagger";
+import { join } from "path";
 
 export async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true });
@@ -16,6 +17,9 @@ export async function bootstrap(): Promise<void> {
   setupSwagger(app);
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
+
+  //
+  app.useStaticAssets(join(__dirname, "..", "public"));
 
   await app.listen(config.server.port, config.server.host);
 

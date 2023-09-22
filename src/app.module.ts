@@ -10,6 +10,9 @@ import { APP_FILTER } from "@nestjs/core";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ScheduleModule } from "@nestjs/schedule";
 import { UsersModule } from "modules/users/users.module";
+import { AuthModule } from "modules/auth/auth.module";
+import { TradesModule } from "modules/trades/trades.module";
+import { HealthModule } from "modules/health/health.module";
 
 @Module({
   imports: [
@@ -27,10 +30,13 @@ import { UsersModule } from "modules/users/users.module";
       resolvers: [{ use: QueryResolver, options: ["lang"] }, AcceptLanguageResolver],
     }),
     SharedModule,
+    HealthModule,
     // jobs module
     JobModule,
     // app modules
+    AuthModule,
     UsersModule,
+    TradesModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: I18nAllExceptionFilter },
