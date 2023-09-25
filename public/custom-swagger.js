@@ -164,7 +164,7 @@ var version = (function (exports) {
     }
   }
 
-  console.log("hello from Metaxy");
+  console.log("Hello from BO");
   const gameAPI = new GameAPI();
   const etherumWallet = new EtherumWallet();
   const manageCookie = new ManageCookie();

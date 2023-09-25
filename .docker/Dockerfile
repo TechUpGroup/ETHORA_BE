@@ -9,7 +9,7 @@ RUN yarn
 
 # Copy source code & build
 COPY . .
-RUN yarn build
+RUN yarn patches && yarn build
 
 # ===========================
 FROM node:18-alpine
@@ -24,9 +24,9 @@ RUN apk add --no-cache curl
 # Copy source built BE
 COPY package.json yarn.lock ./
 COPY public ./public
+COPY ./config/example.yaml ./config/default.yaml
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
-COPY ./config/example.yaml ./config/default.yaml
 
 # Env default
 ENV NODE_ENV=prod

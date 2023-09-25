@@ -6,7 +6,7 @@ import { isNil } from "lodash";
 import { Schema } from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
-import { CacheModuleOptions } from "@nestjs/common";
+import { CacheModuleOptions } from "@nestjs/cache-manager";
 import { MongooseModuleOptions } from "@nestjs/mongoose";
 import { ContractName, Token } from "common/constants/contract";
 

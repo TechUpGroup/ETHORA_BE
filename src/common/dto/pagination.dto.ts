@@ -21,6 +21,7 @@ export class PaginationDto {
 
 export class SortDto<T = string> {
   @IsOptional()
+  @ApiProperty({ type: String, required: false, default: 'createdAt' })
   sortBy?: T;
 
   @ApiProperty({ enum: SortType, required: false })
@@ -32,6 +33,7 @@ export class SortDto<T = string> {
 
 export class PaginationDtoAndSortDto<T = string> extends PaginationDto {
   @IsOptional()
+  @ApiProperty({ type: String, required: false, default: 'createdAt' })
   sortBy?: T;
 
   @ApiProperty({ enum: SortType, required: false })

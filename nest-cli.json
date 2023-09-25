@@ -4,7 +4,13 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "assets": ["i18n/**/*","**/*.html"],
+    "assets": [
+      {
+        "include": "i18n/**/*",
+        "outDir": "dist",
+        "watchAssets": true
+      }
+    ],
     "plugins": ["@nestjs/swagger"]
   }
 }
