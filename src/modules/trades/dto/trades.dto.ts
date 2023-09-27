@@ -20,7 +20,7 @@ export class GetTradesUserActiveDto extends PaginationDtoAndSortDto {
   @IsOptional()
   @Trim()
   @IsEthereumAddress()
-  address?: string;
+  userAddress?: string;
 
   @ApiProperty()
   @ToLowerCase()

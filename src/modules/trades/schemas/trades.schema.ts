@@ -34,7 +34,6 @@ export class Trades {
 
   @Prop({
     required: true,
-    index: true,
     trim: true,
     lowercase: true,
     validate: validateAddress,
@@ -51,6 +50,9 @@ export class Trades {
   referralCode: string;
 
   @Prop()
+  traderNftId: number;
+
+  @Prop()
   slippage: number;
 
   @Prop()
@@ -62,8 +64,8 @@ export class Trades {
   @Prop()
   settlementFeeSignature: string;
 
-  @Prop()
-  expirationDate: Date;
+  @Prop({ type: Date, required: false })
+  expirationDate: Date | null;
 
   @Prop()
   isAbove: boolean;
@@ -71,8 +73,8 @@ export class Trades {
   @Prop()
   state: TRADE_STATE;
 
-  @Prop()
-  optionId: number;
+  @Prop({ type: Number, required: false })
+  optionId: number | null;
 
   @Prop()
   isLimitOrder: boolean;
@@ -83,41 +85,47 @@ export class Trades {
   @Prop({ require: true })
   chain: Network;
 
-  @Prop()
-  expiryPrice: number;
+  @Prop({ type: Number, required: false })
+  expiryPrice: number | null;
 
-  @Prop()
-  payout: string;
+  @Prop({ type: String, required: false })
+  payout: string | null;
 
-  @Prop()
-  closeDate: Date;
+  @Prop({ type: Date, required: false })
+  closeDate: Date | null;
 
   @Prop()
   limitOrderDuration: number;
 
-  @Prop()
-  lockedAmount: string;
+  @Prop({ type: String, required: false })
+  lockedAmount: string | null;
 
   @Prop()
   isCancelled: boolean;
 
-  @Prop()
-  cancellationReason: string;
+  @Prop({ type: String, required: false })
+  cancellationReason: string | null;
 
-  @Prop()
-  cancellationDate: Date;
+  @Prop({ type: Date, required: false })
+  cancellationDate: Date | null;
 
-  @Prop()
-  earlyCloseSignature: string;
+  @Prop({ type: String, required: false })
+  earlyCloseSignature: string | null;
 
-  @Prop()
-  userCloseDate: Date;
+  @Prop({ type: Date, required: false })
+  userCloseDate: Date | null;
 
   @Prop()
   openDate: Date;
 
   @Prop()
   token: TRADE_TOKEN;
+
+  @Prop()
+  router?: string;
+
+  @Prop({ type: String, required: false })
+  pendingOperation?: string | null;
 }
 
 export type TradesDocument = Trades & Document;
