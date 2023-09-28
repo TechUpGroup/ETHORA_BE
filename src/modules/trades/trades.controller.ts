@@ -54,6 +54,13 @@ export class TradesController {
     return this.service.getActiveUserTrades(user.address, query);
   }
 
+  @Get("user/limit-orders")
+  @Auth()
+  @ApiOperation({ summary: `Get Limit Orders User Trades` })
+  getLimitOrdersUserTrades(@User() user: UsersDocument, @Query() query: GetTradesUserActiveDto) {
+    return this.service.getLimitOrdersUserTrades(user.address, query);
+  }
+
   @Get("user/history")
   @Auth()
   @ApiOperation({ summary: `Get History User Trades` })

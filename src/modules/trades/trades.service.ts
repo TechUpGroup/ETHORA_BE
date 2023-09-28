@@ -33,7 +33,21 @@ export class TradesService {
 
     // TODO: address remove for data test
     return await this.model.paginate(
-      { state: { $in: [TRADE_STATE.OPENED, TRADE_STATE.QUEUED] } },
+      { state: TRADE_STATE.OPENED },
+      {
+        page,
+        limit,
+        sort: { [sortBy]: sortType },
+      },
+    );
+  }
+
+  async getLimitOrdersUserTrades(address: string, query: GetTradesUserActiveDto) {
+    const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
+
+    // TODO: address remove for data test
+    return await this.model.paginate(
+      { state: TRADE_STATE.QUEUED },
       {
         page,
         limit,
