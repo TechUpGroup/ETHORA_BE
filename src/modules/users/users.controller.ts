@@ -1,7 +1,7 @@
 import { User } from "common/decorators/user.decorator";
 
 import { Controller, Get, Post, Query, UseInterceptors } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { UsersDocument } from "./schemas/users.schema";
 import { UsersService } from "./users.service";
@@ -21,15 +21,16 @@ export class UsersController {
     return user;
   }
 
-  @Post("faucet")
-  @Auth()
-  postFaucet(@User() user: UsersDocument) {
-    return this.service.postFaucet(user.address);
-  }
+  // @Post("faucet")
+  // @Auth()
+  // postFaucet(@User() user: UsersDocument) {
+  //   return this.service.postFaucet(user.address);
+  // }
 
   @Get("stats")
   @Auth()
   @CacheTTL(60 * 1000)
+  @ApiOperation({ summary: `Get stats of user in profile` })
   getStats(@User() user: UsersDocument, @Query() query: UserStatsRequest) {
     return this.service.getStats(user.address, query.chain);
   }
