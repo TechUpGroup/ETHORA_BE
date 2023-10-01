@@ -45,6 +45,8 @@
     "class-validator": "^0.14.0",
     "config": "^3.3.9",
     "express-basic-auth": "^1.2.1",
+    "graphql": "^16.8.1",
+    "graphql-request": "^6.1.0",
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",

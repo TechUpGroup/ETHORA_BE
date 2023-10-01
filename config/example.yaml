@@ -10,7 +10,7 @@ server:
 swagger:
   name: Backend API
   doc_url: /api/docs
-  description: Backend 
+  description: Backend
   version: 1.0
   is_auth: false
   username: root
@@ -18,6 +18,9 @@ swagger:
 
 mongodb:
   uri: mongodb://localhost:27017/bo-be
+
+graphql:
+  uri: https://api.studio.thegraph.com/query/53818/bo-devtest/version/latest
 
 jwt:
   secret: W53!ns!g&1P4
@@ -30,7 +33,7 @@ i18n:
 network_supported: [base, goerli]
 
 blockchain:
-  private_key: ''
+  private_key: ""
   base:
     provider: https://base.publicnode.com
     chain_id: 8453

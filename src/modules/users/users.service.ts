@@ -1,10 +1,11 @@
 import { PaginateModel } from "mongoose";
-
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-
 import { USERS_MODEL, UsersDocument } from "./schemas/users.schema";
 import { ErrorMessages } from "./users.constant";
+import { request } from "graphql-request";
+import config from "common/config";
+import { readFile } from "common/utils/string";
 
 @Injectable()
 export class UsersService {
@@ -126,6 +127,12 @@ export class UsersService {
       address,
     });
     return user;
+  }
+
+  async getMetrics(address: string) {
+    const metricsGql = readFile("./graphql/metrics.gql", __dirname);
+    const data = await request<any>(config.graphql.uri, metricsGql, { address });
+    return data;
   }
 
   async getListUserByIds(ids: string[]) {

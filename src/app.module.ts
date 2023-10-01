@@ -7,13 +7,14 @@ import { join } from "path";
 
 import { Module } from "@nestjs/common";
 import { CacheModule } from "@nestjs/cache-manager";
-import { APP_FILTER } from "@nestjs/core";
+import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ScheduleModule } from "@nestjs/schedule";
 import { UsersModule } from "modules/users/users.module";
 import { AuthModule } from "modules/auth/auth.module";
 import { TradesModule } from "modules/trades/trades.module";
 import { HealthModule } from "modules/health/health.module";
+import { TransformInterceptor } from "common/interceptors/transform.interceptor";
 
 @Module({
   imports: [
@@ -41,7 +42,7 @@ import { HealthModule } from "modules/health/health.module";
   ],
   providers: [
     { provide: APP_FILTER, useClass: I18nAllExceptionFilter },
-    // { provide: APP_INTERCEPTOR, useClass: CacheInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
   ],
 })
 export class AppModule {}

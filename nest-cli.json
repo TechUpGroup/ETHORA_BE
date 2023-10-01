@@ -9,6 +9,11 @@
         "include": "i18n/**/*",
         "outDir": "dist",
         "watchAssets": true
+      },
+      {
+        "include": "**/*.gql",
+        "outDir": "dist",
+        "watchAssets": true
       }
     ],
     "plugins": ["@nestjs/swagger"]

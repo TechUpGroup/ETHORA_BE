@@ -101,6 +101,12 @@ class Config {
     return networkSupport;
   }
 
+  get graphql() {
+    return {
+      uri: this.getString('graphql.uri')
+    }
+  }
+
   getChainId(network: Network) {
     return this.getNumber(`blockchain.${network}.chain_id`);
   }

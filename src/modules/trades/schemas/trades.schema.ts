@@ -41,6 +41,7 @@ export class Trades {
     lowercase: true,
     validate: validateAddress,
   })
+  @Exclude()
   userAddress: string;
 
   @Prop()
