@@ -21,6 +21,9 @@ export class Users {
 
   @Prop({ required: true, default: false })
   banned: boolean;
+
+  @Prop({ required: true, default: false })
+  faucet: boolean;
 }
 
 export type UsersDocument = Users & Document;

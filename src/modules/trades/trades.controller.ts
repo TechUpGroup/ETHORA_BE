@@ -1,6 +1,6 @@
 import { User } from "common/decorators/user.decorator";
 
-import { Body, Controller, Get, Post, Put, Query } from "@nestjs/common";
+import { Body, Controller, Get, Post, Put, Query, UseInterceptors } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { TradesService } from "./trades.service";
@@ -13,9 +13,12 @@ import {
   UpdateTradeDto,
 } from "./dto/trades.dto";
 import { UsersDocument } from "modules/users/schemas/users.schema";
+import MongooseClassSerializerInterceptor from "common/interceptors/mongodb.interceptor";
+import { Trades } from "./schemas/trades.schema";
 
 @ApiTags("Trades")
 @Controller("trades")
+@UseInterceptors(MongooseClassSerializerInterceptor(Trades))
 export class TradesController {
   constructor(private readonly service: TradesService) {}
 

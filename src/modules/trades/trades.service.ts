@@ -82,6 +82,7 @@ export class TradesService {
     );
   }
 
+  // TODO: remove
   @Timeout(1000)
   async insertDataTest() {
     console.log("Removing trades history...");

@@ -121,6 +121,13 @@ export class UsersService {
     return user;
   }
 
+  async postFaucet(address: string) {
+    const user = await this.usersModel.find({
+      address,
+    });
+    return user;
+  }
+
   async getListUserByIds(ids: string[]) {
     const users = await this.usersModel.aggregate([
       { $match: { _id: { $in: ids } } },

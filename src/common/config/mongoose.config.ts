@@ -11,6 +11,7 @@ export const Options: SchemaOptions = {
     transform: function (_, ret: any) {
       delete ret.id;
       delete ret.__v;
+      ret._id = ret._id?.toString();
       return formatDecimal(ret);
     },
   },

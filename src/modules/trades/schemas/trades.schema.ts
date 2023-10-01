@@ -2,7 +2,8 @@ import { Options, validateAddress } from "common/config/mongoose.config";
 import { Document } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { TRADE_STATE, TRADE_TOKEN } from "common/enums/trades.enum";
-import { Network } from "common/enums/network.enum";
+import { NetworkId } from "common/enums/network.enum";
+import { Exclude } from "class-transformer";
 
 export const TRADES_MODEL = "trades";
 
@@ -27,9 +28,11 @@ export class Trades {
   targetContract: string;
 
   @Prop()
+  @Exclude()
   userPartialSignature: string;
 
   @Prop()
+  @Exclude()
   userFullSignature: string;
 
   @Prop({
@@ -50,6 +53,7 @@ export class Trades {
   referralCode: string;
 
   @Prop()
+  @Exclude()
   traderNftId: number;
 
   @Prop()
@@ -59,9 +63,11 @@ export class Trades {
   settlementFee: number;
 
   @Prop()
+  @Exclude()
   settlementFeeSignExpiration: number;
 
   @Prop()
+  @Exclude()
   settlementFeeSignature: string;
 
   @Prop({ type: Date, required: false })
@@ -83,7 +89,7 @@ export class Trades {
   limitOrderExpirationDate: Date;
 
   @Prop({ require: true })
-  chain: Network;
+  chain: NetworkId;
 
   @Prop({ type: Number, required: false })
   expiryPrice: number | null;
