@@ -105,9 +105,9 @@ export interface UserStatsResponse {
   metrics: {
     referral: {
       totalRebateEarned: number;
-      totalVolumeOfReferredTrades: number;
-      totalTradesReferred: number;
-      totalTradesReferredDetail: {
+      totalVolumeTrades: number;
+      totalTrades: number;
+      totalTradesDetail: {
         [key: string]: number;
       } | null;
     };

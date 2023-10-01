@@ -1,6 +1,6 @@
 import { User } from "common/decorators/user.decorator";
 
-import { Controller, Get, Post, Query, UseInterceptors } from "@nestjs/common";
+import { Controller, Get, Query, UseInterceptors } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { UsersDocument } from "./schemas/users.schema";

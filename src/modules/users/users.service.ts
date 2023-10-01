@@ -134,11 +134,14 @@ export class UsersService {
   async getStats(address: string, chain: ChainId): Promise<UserStatsResponse> {
     const graphql = config.getGraphql(Object.keys(ChainId)[Object.values(ChainId).indexOf(chain)] as Network);
     const metricsGql = readFile("./graphql/stats.gql", __dirname);
-    const data = await request<MetricsGql>(graphql.uri, metricsGql, { address });
+    const data: MetricsGql = await request<MetricsGql>(graphql.uri, metricsGql, { address }).catch((error) => {
+      console.error(error);
+      return {} as MetricsGql;
+    });
 
     // rank
-    const daily = data.userStatsDaily.findIndex((e) => e.user.toLowerCase() === address) || -1;
-    const weekly = data.userStatsWeekly.findIndex((e) => e.user.toLowerCase() === address) || -1;
+    const daily = data.userStatsDaily?.findIndex((e) => e.user.toLowerCase() === address) || -1;
+    const weekly = data.userStatsWeekly?.findIndex((e) => e.user.toLowerCase() === address) || -1;
 
     //
     let winTrade = 0;
@@ -146,13 +149,13 @@ export class UsersService {
     const metrics: UserStatsResponse["metrics"] = {
       referral: {
         totalRebateEarned: 0,
-        totalVolumeOfReferredTrades: 0,
-        totalTradesReferred: 0,
-        totalTradesReferredDetail: null,
+        totalVolumeTrades: 0,
+        totalTrades: 0,
+        totalTradesDetail: null,
       },
     };
     const tmpMostAssets: { [key: string]: number } = {};
-    data.userOptionDatas.forEach((e) => {
+    data.userOptionDatas?.forEach((e) => {
       const { asset, address, token } = e.optionContract;
       totalTrade++;
       tmpMostAssets[asset] = (tmpMostAssets[asset] || 0) + 1;
@@ -174,7 +177,7 @@ export class UsersService {
     });
 
     // interest
-    data.activeData.forEach((e) => (metrics[e.optionContract.token].openInterest += +e.totalFee));
+    data.activeData?.forEach((e) => (metrics[e.optionContract.token].openInterest += +e.totalFee));
 
     // referral
 
