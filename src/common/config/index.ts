@@ -102,9 +102,7 @@ class Config {
   }
 
   get graphql() {
-    return {
-      uri: this.getString('graphql.uri')
-    }
+    return {};
   }
 
   getChainId(network: Network) {
@@ -132,6 +130,13 @@ class Config {
     return {
       address,
       blocknumber_creator: Number(blocknumber_creator || 0),
+    };
+  }
+
+  getGraphql(network: Network) {
+    const uri = this.getBlockChainInfo(network, `graphql.uri`);
+    return {
+      uri,
     };
   }
 

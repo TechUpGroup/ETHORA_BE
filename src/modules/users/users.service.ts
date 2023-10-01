@@ -6,6 +6,8 @@ import { ErrorMessages } from "./users.constant";
 import { request } from "graphql-request";
 import config from "common/config";
 import { readFile } from "common/utils/string";
+import { MetricsGql, UserStatsResponse } from "./dto/stats.dto";
+import { ChainId, Network } from "common/enums/network.enum";
 
 @Injectable()
 export class UsersService {
@@ -129,10 +131,63 @@ export class UsersService {
     return user;
   }
 
-  async getMetrics(address: string) {
-    const metricsGql = readFile("./graphql/metrics.gql", __dirname);
-    const data = await request<any>(config.graphql.uri, metricsGql, { address });
-    return data;
+  async getStats(address: string, chain: ChainId): Promise<UserStatsResponse> {
+    const graphql = config.getGraphql(Object.keys(ChainId)[Object.values(ChainId).indexOf(chain)] as Network);
+    const metricsGql = readFile("./graphql/stats.gql", __dirname);
+    const data = await request<MetricsGql>(graphql.uri, metricsGql, { address });
+
+    // rank
+    const daily = data.userStatsDaily.findIndex((e) => e.user.toLowerCase() === address) || -1;
+    const weekly = data.userStatsWeekly.findIndex((e) => e.user.toLowerCase() === address) || -1;
+
+    //
+    let winTrade = 0;
+    let totalTrade = 0;
+    const metrics: UserStatsResponse["metrics"] = {
+      referral: {
+        totalRebateEarned: 0,
+        totalVolumeOfReferredTrades: 0,
+        totalTradesReferred: 0,
+        totalTradesReferredDetail: null,
+      },
+    };
+    const tmpMostAssets: { [key: string]: number } = {};
+    data.userOptionDatas.forEach((e) => {
+      const { asset, address, token } = e.optionContract;
+      totalTrade++;
+      tmpMostAssets[asset] = (tmpMostAssets[asset] || 0) + 1;
+      if (!metrics[token]) {
+        metrics[token] = {
+          contract: address,
+          totalPayout: 0,
+          netPnl: 0,
+          openInterest: 0,
+          volume: 0,
+        };
+      }
+      if (e.payout > 0) {
+        winTrade++;
+        metrics[token].totalPayout += +e.payout;
+        metrics[token].netPnl += e.payout - e.totalFee;
+        metrics[token].volume += +e.totalFee;
+      }
+    });
+
+    // interest
+    data.activeData.forEach((e) => (metrics[e.optionContract.token].openInterest += +e.totalFee));
+
+    // referral
+
+    return {
+      stats: {
+        daily,
+        weekly,
+        winTrade,
+        totalTrade,
+        mostTradedContract: Object.keys(tmpMostAssets).sort((a, b) => tmpMostAssets[a] - tmpMostAssets[b])[0] || null,
+      },
+      metrics,
+    };
   }
 
   async getListUserByIds(ids: string[]) {

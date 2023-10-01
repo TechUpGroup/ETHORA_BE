@@ -2,7 +2,7 @@ import { Options, validateAddress } from "common/config/mongoose.config";
 import { Document } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { TRADE_STATE, TRADE_TOKEN } from "common/enums/trades.enum";
-import { NetworkId } from "common/enums/network.enum";
+import { ChainId } from "common/enums/network.enum";
 import { Exclude } from "class-transformer";
 
 export const TRADES_MODEL = "trades";
@@ -90,7 +90,7 @@ export class Trades {
   limitOrderExpirationDate: Date;
 
   @Prop({ require: true })
-  chain: NetworkId;
+  chain: ChainId;
 
   @Prop({ type: Number, required: false })
   expiryPrice: number | null;

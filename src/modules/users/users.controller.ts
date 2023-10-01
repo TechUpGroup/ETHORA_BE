@@ -1,15 +1,17 @@
 import { User } from "common/decorators/user.decorator";
 
-import { Controller, Get, Post, UseInterceptors } from "@nestjs/common";
+import { Controller, Get, Post, Query, UseInterceptors } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 
 import { UsersDocument } from "./schemas/users.schema";
 import { UsersService } from "./users.service";
 import { Auth } from "common/decorators/http.decorators";
-import { CacheInterceptor } from "@nestjs/cache-manager";
+import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
+import { UserStatsRequest } from "./dto/stats.dto";
 
 @ApiTags("Users")
 @Controller("users")
+@UseInterceptors(CacheInterceptor)
 export class UsersController {
   constructor(private readonly service: UsersService) {}
 
@@ -25,10 +27,10 @@ export class UsersController {
     return this.service.postFaucet(user.address);
   }
 
-  @Get("metrics")
+  @Get("stats")
   @Auth()
-  @UseInterceptors(CacheInterceptor)
-  getMetrics(@User() user: UsersDocument) {
-    return this.service.getMetrics(user.address);
+  @CacheTTL(60 * 1000)
+  getStats(@User() user: UsersDocument, @Query() query: UserStatsRequest) {
+    return this.service.getStats(user.address, query.chain);
   }
 }

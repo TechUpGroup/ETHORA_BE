@@ -3,16 +3,16 @@ import { ToLowerCase, Trim } from "common/decorators/transforms.decorator";
 import { PaginationDtoAndSortDto } from "common/dto/pagination.dto";
 
 import { ApiProperty } from "@nestjs/swagger";
-import { NetworkId } from "common/enums/network.enum";
+import { ChainId } from "common/enums/network.enum";
 import { Transform, Type } from "class-transformer";
 
 export class BaseTradesRequest {
   @ApiProperty()
   @ToLowerCase()
   @Trim()
-  @IsEnum(NetworkId)
+  @IsEnum(ChainId)
   @Transform(({ value }) => Number(value))
-  chain: NetworkId;
+  chain: ChainId;
 }
 
 export class GetTradesUserActiveDto extends PaginationDtoAndSortDto {
@@ -27,8 +27,8 @@ export class GetTradesUserActiveDto extends PaginationDtoAndSortDto {
   @ToLowerCase()
   @Trim()
   @Transform(({ value }) => Number(value))
-  @IsEnum(NetworkId)
-  chain: NetworkId;
+  @IsEnum(ChainId)
+  chain: ChainId;
 }
 
 export class CreateTradeDto extends BaseTradesRequest {

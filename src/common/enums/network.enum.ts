@@ -3,7 +3,7 @@ export enum Network {
   goerli = "goerli",
 }
 
-export enum NetworkId {
+export enum ChainId {
   base = 8453,
   goerli = 84531,
 }

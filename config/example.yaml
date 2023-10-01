@@ -19,9 +19,6 @@ swagger:
 mongodb:
   uri: mongodb://localhost:27017/bo-be
 
-graphql:
-  uri: https://api.studio.thegraph.com/query/53818/bo-devtest/version/latest
-
 jwt:
   secret: W53!ns!g&1P4
   access_expiration_minutes: 1440
@@ -37,8 +34,12 @@ blockchain:
   base:
     provider: https://base.publicnode.com
     chain_id: 8453
+    graphql:
+      uri: https://api.studio.thegraph.com/query/53818/bo-devtest/version/latest
     contract:
   goerli:
     provider: https://1rpc.io/base-goerli
     chain_id: 84531
+    graphql:
+      uri: https://api.studio.thegraph.com/query/53818/bo-devtest/version/latest
     contract:
