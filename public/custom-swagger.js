@@ -49,7 +49,7 @@ var version = (function (exports) {
           },
         });
         const data = await response.json();
-        return data;
+        return data?.data;
       } catch (error) {
         console.log(error, "login error");
       }
@@ -59,7 +59,7 @@ var version = (function (exports) {
       try {
         const response = await fetch(`${this.baseUrl}/auth/get-nonce/${address}`);
         const data = await response.json();
-        return data;
+        return data?.data;
       } catch (error) {
         console.log(error, "get nonce error");
       }
@@ -76,7 +76,7 @@ var version = (function (exports) {
         },
       });
       const data = await response.json();
-      return data;
+      return data?.data;
     }
   }
 
@@ -103,8 +103,8 @@ var version = (function (exports) {
         // personal_sign
         const msg = `Sign this message to prove you have access to this wallet in order to sign in to BO Finance\n\nNonce: ${nonce}`;
         return await ethereum.request({
-          method: 'personal_sign',
-          params: [msg, publicAddress, ''],
+          method: "personal_sign",
+          params: [msg, publicAddress, ""],
         });
       } catch (error) {
         console.error(error, "Error personal sign signature");

@@ -19,7 +19,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> 
           message: data.message,
           data: docs
             ? {
-                result: docs,
+                docs,
                 meta: others,
               }
             : others,

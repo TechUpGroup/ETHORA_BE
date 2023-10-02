@@ -10,6 +10,7 @@ export const TRADES_MODEL = "trades";
 @Schema(Options)
 export class Trades {
   @Prop()
+  @Exclude()
   signatureDate: Date;
 
   @Prop()
