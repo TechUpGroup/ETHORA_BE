@@ -8,8 +8,6 @@ export class AuthCacheInterceptor extends CacheInterceptor {
     const oldKey = super.trackBy(context);
     const key = Buffer.from(`${req.headers["Authorization"] || req.headers["authorization"]}`.replace(/Bearer\s/, ''), "utf8").toString("hex");
 
-    console.log(oldKey, `${req.headers["Authorization"] || req.headers["authorization"]}`.replace(/Bearer\s/, ''));
-
     return `${oldKey}${key}`;
   }
 }

@@ -16,7 +16,7 @@ export const getTimeLeftOfDay = () => {
 
 export const getTimeLeftOfWeek = () => {
   const now = new Date();
-  const endDayOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 6));
+  const endDayOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 7));
   const endDateTime = new Date(`${endDayOfWeek.toISOString().split("T")[0]}T23:59:59.999Z`);
 
   return {
