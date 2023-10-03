@@ -29,8 +29,8 @@ export class LeaderboardService {
 
   async getOffsets(chain: ChainId): Promise<any> {
     return {
-      dailyOffset: getCurrentDayIndex(chain),
-      weeklyOffset: getCurrentWeekIndex(chain),
+      dailyOffset: getCurrentDayIndex(chain, 0),
+      weeklyOffset: getCurrentWeekIndex(chain, 0),
       dailyId: getDayId(),
       weeklyId: getWeekId(),
     };
