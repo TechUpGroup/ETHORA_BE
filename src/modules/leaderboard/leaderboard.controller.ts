@@ -3,15 +3,16 @@ import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { LeaderboardService } from "./leaderboard.service";
 import { LeaderboardRequest } from "./dto/leaderboard.dto";
-import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
 import { User } from "common/decorators/user.decorator";
 import { UsersDocument } from "modules/users/schemas/users.schema";
 import { AuthOptional } from "common/decorators/http.decorators";
 import { BaseTradesRequest } from "modules/trades/dto/trades.dto";
+import { AuthCacheInterceptor } from "common/interceptors/auth-cache.interceptor";
+import { CacheTTL } from "@nestjs/cache-manager";
 
 @ApiTags("Leaderboard")
 @Controller("leaderboard")
-@UseInterceptors(CacheInterceptor)
+@UseInterceptors(AuthCacheInterceptor)
 export class LeaderboardController {
   constructor(private readonly service: LeaderboardService) {}
 
