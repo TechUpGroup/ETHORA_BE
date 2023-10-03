@@ -15,6 +15,7 @@ import { AuthModule } from "modules/auth/auth.module";
 import { TradesModule } from "modules/trades/trades.module";
 import { HealthModule } from "modules/health/health.module";
 import { TransformInterceptor } from "common/interceptors/transform.interceptor";
+import { LeaderboardModule } from "modules/leaderboard/leaderboard.module";
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { TransformInterceptor } from "common/interceptors/transform.interceptor"
     AuthModule,
     UsersModule,
     TradesModule,
+    LeaderboardModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: I18nAllExceptionFilter },
