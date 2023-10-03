@@ -1,48 +1,30 @@
 import { BaseTradesRequest } from "modules/trades/dto/trades.dto";
 
+export interface UserStatsGql {
+  user: string;
+  totalTrades: any;
+  netPnL: any;
+  volume: any;
+  usdcNetPnL: any;
+  usdcTotalTrades: any;
+  usdcTradesWon: any;
+  usdcVolume: any;
+  usdcWinRate: any;
+  bfrNetPnL: any;
+  bfrTotalTrades: any;
+  bfrTradesWon: any;
+  bfrVolume: any;
+  bfrWinRate: any;
+  arbNetPnL: any;
+  arbTotalTrades: any;
+  arbTradesWon: any;
+  arbVolume: any;
+  arbWinRate: any;
+}
+
 export interface MetricsGql {
-  userStatsDaily: Array<{
-    user: string;
-    totalTrades: any;
-    netPnL: any;
-    volume: any;
-    usdcNetPnL: any;
-    usdcTotalTrades: any;
-    usdcTradesWon: any;
-    usdcVolume: any;
-    usdcWinRate: any;
-    bfrNetPnL: any;
-    bfrTotalTrades: any;
-    bfrTradesWon: any;
-    bfrVolume: any;
-    bfrWinRate: any;
-    arbNetPnL: any;
-    arbTotalTrades: any;
-    arbTradesWon: any;
-    arbVolume: any;
-    arbWinRate: any;
-  }>;
-  userStatsWeekly: Array<{
-    user: any;
-    totalTrades: any;
-    netPnL: any;
-    volume: any;
-    usdcNetPnL: any;
-    usdcTotalTrades: any;
-    usdcTradesWon: any;
-    usdcVolume: any;
-    usdcWinRate: any;
-    bfrNetPnL: any;
-    bfrTotalTrades: any;
-    bfrTradesWon: any;
-    bfrVolume: any;
-    bfrWinRate: any;
-    arbNetPnL: any;
-    arbTotalTrades: any;
-    arbTradesWon: any;
-    arbVolume: any;
-    arbWinRate: any;
-  }>;
+  userStatsDaily: Array<UserStatsGql>;
+  userStatsWeekly: Array<UserStatsGql>;
   userOptionDatas: Array<{
     optionContract: {
       address: any;
