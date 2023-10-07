@@ -1,4 +1,4 @@
-import { BaseTradesRequest } from "modules/trades/dto/trades.dto";
+import { NetworkDto } from "common/dto/network.dto";
 
 export interface UserStatsGql {
   user: string;
@@ -66,7 +66,7 @@ export interface MetricsGql {
   }>;
 }
 
-export class UserStatsRequest extends BaseTradesRequest {}
+export class UserStatsRequest extends NetworkDto {}
 
 export interface UserMetrics {
   contract: string;

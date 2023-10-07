@@ -1,18 +1,25 @@
 import { utils } from "ethers";
 import { UsersService } from "modules/users/users.service";
 import { v4 as uuidv4 } from "uuid";
-
-import { Injectable, UnauthorizedException } from "@nestjs/common";
-
+import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { AuthMessage } from "./constants/auth-message.enum";
 import { TokenTypes } from "./constants/token.constant";
-import { LoginDto } from "./dto/login.dto";
+import { LoginDto, RegisterDto } from "./dto/login.dto";
 import { IVerifySignature } from "./interfaces/token.interface";
 import { TokensService } from "./token.service";
+import { EthersService } from "modules/_shared/services/ethers.service";
+import config from "common/config";
+import { ContractName } from "common/constants/contract";
+import { RegisterAbi__factory } from "common/abis/types";
+import { SignerType } from "common/enums/signer.enum";
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly tokenService: TokensService, private readonly userService: UsersService) {}
+  constructor(
+    private readonly tokenService: TokensService,
+    private readonly userService: UsersService,
+    private readonly ethersService: EthersService,
+  ) {}
 
   async getNonce(address: string) {
     const user = await this.userService.findOrCreateUserByAddress(address);
@@ -40,6 +47,7 @@ export class AuthService {
 
   async logIn(loginDto: LoginDto) {
     const {
+      network,
       address,
       signature,
       message = "Sign this message to prove you have access to this wallet in order to sign in to BO Finance\n\nNonce: ",
@@ -53,6 +61,12 @@ export class AuthService {
     });
     if (!isVerifiedUser) {
       throw new UnauthorizedException(AuthMessage.SIGNATURE_INVALID);
+    }
+
+    // TODO: create wallet oneCT
+    const createWallet = await this.userService.createOrUpdateAccount(network, user.address);
+    if (!createWallet) {
+      throw new Error("Something was wrong!");
     }
 
     const [updatedUser, tokens] = await Promise.all([
@@ -74,6 +88,34 @@ export class AuthService {
     } catch (error) {
       return false;
     }
+  }
+
+  async register(userId: string, dto: RegisterDto) {
+    const { network, signature } = dto;
+    // call contract
+    const user = await this.userService.findUserById(userId);
+    const wallet = await this.userService.findWalletByNetworkAndId(network, user._id);
+    const { oneCT, address } = user;
+
+    if (wallet.isRegistered) {
+      throw new BadRequestException("Already registered");
+    }
+
+    // get nonce from register contract
+    const contract = this.ethersService.getContract(
+      network,
+      config.getContract(network, ContractName.REGISTER).address,
+      RegisterAbi__factory.abi,
+      SignerType.operator,
+    );
+    const result = await contract.functions.registerAccount(oneCT, address, signature);
+    console.log(result);
+
+    wallet.isRegistered = true;
+    await wallet.save();
+
+    //
+    return true;
   }
 
   async logOut(refreshToken: string, isAdmin = false) {

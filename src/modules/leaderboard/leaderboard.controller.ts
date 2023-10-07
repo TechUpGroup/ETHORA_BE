@@ -6,9 +6,9 @@ import { LeaderboardRequest } from "./dto/leaderboard.dto";
 import { User } from "common/decorators/user.decorator";
 import { UsersDocument } from "modules/users/schemas/users.schema";
 import { AuthOptional } from "common/decorators/http.decorators";
-import { BaseTradesRequest } from "modules/trades/dto/trades.dto";
 import { AuthCacheInterceptor } from "common/interceptors/auth-cache.interceptor";
 import { CacheTTL } from "@nestjs/cache-manager";
+import { NetworkDto } from "common/dto/network.dto";
 
 @ApiTags("Leaderboard")
 @Controller("leaderboard")
@@ -19,8 +19,8 @@ export class LeaderboardController {
   @Get("offsets")
   @CacheTTL(60 * 60 * 1000)
   @ApiOperation({ summary: `Get current offset of leaderboard` })
-  getOffsets(@Query() query: BaseTradesRequest) {
-    return this.service.getOffsets(query.chain);
+  getOffsets(@Query() query: NetworkDto) {
+    return this.service.getOffsets(query.network);
   }
 
   @Get()

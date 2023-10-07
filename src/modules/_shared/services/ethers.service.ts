@@ -2,7 +2,7 @@ import config from "common/config";
 import { allNetworks } from "common/constants/network";
 import { Network } from "common/enums/network.enum";
 import { SignerType } from "common/enums/signer.enum";
-import { getContract, getWallet } from "common/utils/ethers";
+import { generateNewWallet, getContract, getWallet } from "common/utils/ethers";
 import configPrivate from "config";
 
 import { Bytes } from "@ethersproject/bytes";
@@ -34,7 +34,7 @@ export class EthersService {
       const signerTypes = new Map<SignerType, Wallet>();
       const prkOperator = configPrivate.get<string>(`blockchain.private_key`);
       if (prkOperator) signerTypes.set(SignerType.operator, getWallet(prkOperator, provider));
-      
+
       this.ethersMap.set(network, { provider, signers: signerTypes });
     }
     this.getCurrentBlockNumber();
@@ -49,11 +49,11 @@ export class EthersService {
           const blockNumber = await this.getLastBlockNumber(network);
           this.currentBlockNumber.set(network, blockNumber);
         } catch {
-          const provider = new JsonRpcBatchProvider(config.listRPC(network)[ Math.floor(Math.random() * 4)]);
+          const provider = new JsonRpcBatchProvider(config.listRPC(network)[Math.floor(Math.random() * 4)]);
           const signerTypes = new Map<SignerType, Wallet>();
           const prkOperator = configPrivate.get<string>(`blockchain.private_key`);
           if (prkOperator) signerTypes.set(SignerType.operator, getWallet(prkOperator, provider));
-          
+
           this.ethersMap.set(network, { provider, signers: signerTypes });
         }
       }),
@@ -66,13 +66,13 @@ export class EthersService {
       allNetworks.map(async (network) => {
         try {
           const gasPrice = await this.getGasPrice(network);
-          this.currentGas.set(network, (formatDecimal(gasPrice) * 1.2).toFixed(0)) ;
+          this.currentGas.set(network, (formatDecimal(gasPrice) * 1.2).toFixed(0));
         } catch {
-          const provider = new JsonRpcBatchProvider(config.listRPC(network)[ Math.floor(Math.random() * 4)]);
+          const provider = new JsonRpcBatchProvider(config.listRPC(network)[Math.floor(Math.random() * 4)]);
           const signerTypes = new Map<SignerType, Wallet>();
           const prkOperator = configPrivate.get<string>(`blockchain.private_key`);
           if (prkOperator) signerTypes.set(SignerType.operator, getWallet(prkOperator, provider));
-          
+
           this.ethersMap.set(network, { provider, signers: signerTypes });
         }
       }),
@@ -136,5 +136,9 @@ export class EthersService {
       console.log("ERROR_BLOCK_TIME ` : ", e);
       return 0;
     }
+  }
+
+  generateNewWallet(mnemonic: string, path?: string) {
+    return generateNewWallet(mnemonic, path);
   }
 }

@@ -32,6 +32,6 @@ export class UsersController {
   @CacheTTL(60 * 1000)
   @ApiOperation({ summary: `Get stats of user in profile` })
   getStats(@User() user: UsersDocument, @Query() query: UserStatsRequest) {
-    return this.service.getStats(user.address, query.chain);
+    return this.service.getStats(user.address, query.network);
   }
 }

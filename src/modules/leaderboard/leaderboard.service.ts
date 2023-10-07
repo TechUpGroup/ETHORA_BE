@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import config from "common/config";
-import { ChainId, Network } from "common/enums/network.enum";
+import { Network } from "common/enums/network.enum";
 import { readFile } from "common/utils/string";
 import { request } from "graphql-request";
 import {
@@ -27,18 +27,18 @@ import BigNumber from "bignumber.js";
 export class LeaderboardService {
   constructor() {}
 
-  async getOffsets(chain: ChainId): Promise<any> {
+  async getOffsets(network: Network): Promise<any> {
     return {
-      dailyOffset: getCurrentDayIndex(chain, 0),
-      weeklyOffset: getCurrentWeekIndex(chain, 0),
+      dailyOffset: getCurrentDayIndex(network, 0),
+      weeklyOffset: getCurrentWeekIndex(network, 0),
       dailyId: getDayId(),
       weeklyId: getWeekId(),
     };
   }
 
-  getSummary(chain: ChainId, type: LeaderboardType, data: LeaderboardGqlDto): LeaderboardSummaryResponse {
+  getSummary(network: Network, type: LeaderboardType, data: LeaderboardGqlDto): LeaderboardSummaryResponse {
     const endDateTime = type === LeaderboardType.DAILY ? getTimeLeftOfDay() : getTimeLeftOfWeek();
-    const configValue = type === LeaderboardType.DAILY ? DailyTournamentConfig[chain] : WeeklyTournamentConfig[chain];
+    const configValue = type === LeaderboardType.DAILY ? DailyTournamentConfig[network] : WeeklyTournamentConfig[network];
     // calc summary
     const summary: LeaderboardSummaryResponse["summary"] = {
       // TODO: calc totalRewardPool
@@ -66,25 +66,25 @@ export class LeaderboardService {
   }
 
   async getLeaderboard(address: string, query: LeaderboardRequest): Promise<LeaderboardResponse> {
-    const { chain, offset, type } = query;
+    const { network, offset, type } = query;
     let data: LeaderboardGqlDto;
     if (type === LeaderboardType.DAILY) {
-      const timestamp = getDayTimestamp(chain, offset);
-      data = await this.getDaily(chain, address, timestamp + "");
+      const timestamp = getDayTimestamp(network, offset);
+      data = await this.getDaily(network, address, timestamp + "");
     } else {
-      const timestamp = getWeekTimestamp(chain, offset);
-      data = await this.getWeekly(chain, address, timestamp + "");
+      const timestamp = getWeekTimestamp(network, offset);
+      data = await this.getWeekly(network, address, timestamp + "");
     }
 
     return {
       winners: data.userStats,
       losers: data.loserStats,
-      ...this.getSummary(chain, type, data),
+      ...this.getSummary(network, type, data),
     };
   }
 
-  private async getDaily(chain: ChainId, address: string, timestamp: string) {
-    const graphql = config.getGraphql(Object.keys(ChainId)[Object.values(ChainId).indexOf(chain)] as Network);
+  private async getDaily(network: Network, address: string, timestamp: string) {
+    const graphql = config.getGraphql(network);
     const metricsGql = readFile("./graphql/daily.gql", __dirname);
     const data: LeaderboardGqlDto = await request<LeaderboardGqlDto>(graphql.uri, metricsGql, {
       timestamp,
@@ -98,8 +98,8 @@ export class LeaderboardService {
     return data;
   }
 
-  private async getWeekly(chain: ChainId, address, timestamp: string) {
-    const graphql = config.getGraphql(Object.keys(ChainId)[Object.values(ChainId).indexOf(chain)] as Network);
+  private async getWeekly(network: Network, address, timestamp: string) {
+    const graphql = config.getGraphql(network);
     const metricsGql = readFile("./graphql/weekly.gql", __dirname);
     const data: LeaderboardGqlDto = await request<LeaderboardGqlDto>(graphql.uri, metricsGql, {
       timestamp,

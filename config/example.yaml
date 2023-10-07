@@ -19,6 +19,9 @@ swagger:
 mongodb:
   uri: mongodb://localhost:27017/bo-be
 
+encrypt:
+  secretKey: 3a91efa0978bb7c90a8aad5020a7d0ab
+
 jwt:
   secret: W53!ns!g&1P4
   access_expiration_minutes: 1440
@@ -27,19 +30,31 @@ jwt:
 i18n:
   fallback_language: en
 
-network_supported: [base, goerli]
+network_supported: [8453, 84531]
 
 blockchain:
   private_key: ""
-  base:
+  8453:
     provider: https://base.publicnode.com
     chain_id: 8453
     graphql:
       uri: https://api.studio.thegraph.com/query/53818/bo-devtest/version/latest
     contract:
-  goerli:
+      router:
+        address: ""
+        blocknumber_creator: 0
+      register:
+        address: ""
+        blocknumber_creator: 0
+  84531:
     provider: https://1rpc.io/base-goerli
     chain_id: 84531
     graphql:
       uri: https://api.studio.thegraph.com/query/53818/bo-devtest/version/latest
     contract:
+      router:
+        address: ""
+        blocknumber_creator: 0
+      register:
+        address: ""
+        blocknumber_creator: 0

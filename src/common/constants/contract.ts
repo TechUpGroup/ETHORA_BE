@@ -1,3 +1,6 @@
-export enum ContractName {}
+export enum ContractName {
+  ROUTER = "router",
+  REGISTER = "register",
+}
 
 export enum Token {}

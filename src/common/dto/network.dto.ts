@@ -5,23 +5,22 @@ import { Network } from "common/enums/network.enum";
 import { ApiProperty } from "@nestjs/swagger";
 
 import { PaginationDto, PaginationDtoAndSortDto } from "./pagination.dto";
+import { Transform } from "class-transformer";
 
 export class NetworkDto {
   @ApiProperty({
-    enum: NetworkAvailable,
-    description: Object.values(NetworkAvailable).join(","),
     default: Network.goerli,
   })
   @IsDefined()
   @IsEnum(NetworkAvailable)
+  @Transform(({ value }) => Number(value))
   readonly network: Network;
 }
 
 export class NetworkOptionalDto {
   @ApiProperty({
-    enum: NetworkAvailable,
     required: false,
-    description: Object.values(NetworkAvailable).join(","),
+    default: Network.goerli,
   })
   @IsOptional()
   @IsEnum(NetworkAvailable)
@@ -30,8 +29,6 @@ export class NetworkOptionalDto {
 
 export class NetworkAndPaginationDto extends PaginationDto {
   @ApiProperty({
-    enum: NetworkAvailable,
-    description: Object.values(NetworkAvailable).join(","),
     default: Network.goerli,
   })
   @IsDefined()
@@ -41,8 +38,6 @@ export class NetworkAndPaginationDto extends PaginationDto {
 
 export class NetworkAndPaginationAndSortDto<T = string> extends PaginationDtoAndSortDto<T> {
   @ApiProperty({
-    enum: NetworkAvailable,
-    description: Object.values(NetworkAvailable).join(","),
     default: Network.goerli,
   })
   @IsDefined()

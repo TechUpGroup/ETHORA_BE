@@ -22,7 +22,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> 
                 docs,
                 meta: others,
               }
-            : others,
+            : data,
         } as Response<T>;
       }),
     );

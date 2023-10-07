@@ -1,10 +1,8 @@
 import { Module } from "@nestjs/common";
-
+import { ContractsModule } from "modules/contracts/contracts.module";
 
 @Module({
-  imports: [
-  ],
-  providers: [
-  ],
+  imports: [ContractsModule],
+  providers: [],
 })
 export class SyncEventModule {}

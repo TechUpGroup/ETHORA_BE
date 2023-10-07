@@ -1,5 +1,5 @@
 import { DailyTournamentConfig, WeeklyTournamentConfig } from "common/constants/leaderboard";
-import { ChainId } from "common/enums/network.enum";
+import { Network } from "common/enums/network.enum";
 
 const MSINWEEK = 604800000;
 
@@ -34,7 +34,7 @@ export function getDayId(offset: number = 0): number {
   return dayTimestamp;
 }
 
-export const useDayOfTournament = (chain: ChainId) => {
+export const useDayOfTournament = (chain: Network) => {
   const { startTimestamp } = DailyTournamentConfig[chain];
   const currentTimeStamp = new Date().getTime();
   return {
@@ -55,7 +55,7 @@ export function getWeekId(offset: number = 0): number {
 }
 3;
 
-export const useWeekOfTournament = (chain: ChainId) => {
+export const useWeekOfTournament = (chain: Network) => {
   const { startTimestamp } = WeeklyTournamentConfig[chain];
   const currentTimeStamp = new Date().getTime();
 
@@ -65,22 +65,22 @@ export const useWeekOfTournament = (chain: ChainId) => {
   };
 };
 
-export const getCurrentDayIndex = (chain: ChainId, offset?: number) => {
+export const getCurrentDayIndex = (chain: Network, offset?: number) => {
   const { day } = useDayOfTournament(chain);
   return Number(day - Number(offset ?? day));
 };
 
-export const getCurrentWeekIndex = (chain: ChainId, offset?: number) => {
+export const getCurrentWeekIndex = (chain: Network, offset?: number) => {
   const { week } = useWeekOfTournament(chain);
   return Number(week - Number(offset ?? week));
 };
 
-export const getDayTimestamp = (chain: ChainId, offset?: number) => {
+export const getDayTimestamp = (chain: Network, offset?: number) => {
   const day = getCurrentDayIndex(chain, offset);
   return getDayId(day);
 };
 
-export const getWeekTimestamp = (chain: ChainId, offset?: number) => {
+export const getWeekTimestamp = (chain: Network, offset?: number) => {
   const week = getCurrentWeekIndex(chain, offset);
   return getWeekId(week);
 };

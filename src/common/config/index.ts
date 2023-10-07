@@ -8,7 +8,7 @@ import mongoosePaginate from "mongoose-paginate-v2";
 
 import { CacheModuleOptions } from "@nestjs/cache-manager";
 import { MongooseModuleOptions } from "@nestjs/mongoose";
-import { ContractName, Token } from "common/constants/contract";
+import { ContractName } from "common/constants/contract";
 
 class Config {
   get nodeEnv(): string {
@@ -70,6 +70,12 @@ class Config {
     };
   }
 
+  get encrypt() {
+    return {
+      secretKey: this.getString("encrypt.secretKey"),
+    };
+  }
+
   get jwt() {
     return {
       secret: this.getString("jwt.secret"),
@@ -96,7 +102,7 @@ class Config {
     const allNetworks = Object.values(Network);
     const networkSupport = networks.filter((network) => allNetworks.includes(network));
     if (networkSupport.length !== networks.length) {
-      throw new Error(`network_supported environment variable: ${networks}  is not Network enum`);
+      throw new Error(`network_supported environment variable: ${networks} is not Network enum`);
     }
     return networkSupport;
   }
@@ -124,9 +130,9 @@ class Config {
       : ["https://base.publicnode.com", "https://base.meowrpc.com", "https://1rpc.io/base", "https://base.drpc.org"];
   }
 
-  getContract(network: Network, key: ContractName, token: Token) {
-    const address = this.getBlockChainInfo(network, `contract.${key}.${token}.address`);
-    const blocknumber_creator = this.getBlockChainInfo(network, `contract.${key}.${token}.blocknumber_creator`);
+  getContract(network: Network, key: ContractName) {
+    const address = this.getBlockChainInfo(network, `contract.${key}.address`);
+    const blocknumber_creator = this.getBlockChainInfo(network, `contract.${key}.blocknumber_creator`);
     return {
       address,
       blocknumber_creator: Number(blocknumber_creator || 0),

@@ -25,6 +25,10 @@ function isAddress(value: any) {
   }
 }
 
+export function generateNewWallet(mnemonic: string, path?: string) {
+  return Wallet.fromMnemonic(mnemonic, path);
+}
+
 export function getWallet(privateKey: string, provider: Provider) {
   return new Wallet(privateKey, provider);
 }
@@ -57,8 +61,8 @@ export const generateParamsSign = (params: string[], values: any[]) => {
 };
 
 export const generateNonce = (address: string) => {
-  const now  = new Date().getTime();
-  return keccak256(address.slice(2) + now.toString());  
+  const now = new Date().getTime();
+  return keccak256(address.slice(2) + now.toString());
 };
 
 export const generateRandomString = (length: number) => {

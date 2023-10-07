@@ -3,8 +3,11 @@ import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { AuthService } from "./auth.service";
 import { GetNonceDto } from "./dto/get-nonce.dto";
-import { LoginDto } from "./dto/login.dto";
+import { LoginDto, RegisterDto } from "./dto/login.dto";
 import { LogOutDto, RefreshTokenDto } from "./dto/refresh-token.dto";
+import { Auth } from "common/decorators/http.decorators";
+import { User } from "common/decorators/user.decorator";
+import { UsersDocument } from "../users/schemas/users.schema";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -21,6 +24,13 @@ export class AuthController {
   @ApiOperation({ summary: "Login by address and signature" })
   async logIn(@Body() logInDto: LoginDto) {
     return this.authService.logIn(logInDto);
+  }
+
+  @Post("register")
+  @Auth()
+  @ApiOperation({ summary: "Register trade account by signature" })
+  async register(@User() user: UsersDocument, @Body() dto: RegisterDto) {
+    return this.authService.register(user._id, dto);
   }
 
   @Post("logout")

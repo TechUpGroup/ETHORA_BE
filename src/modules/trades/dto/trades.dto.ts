@@ -1,38 +1,20 @@
-import { IsDate, IsEnum, IsEthereumAddress, IsMongoId, IsOptional } from "class-validator";
+import { IsDate, IsEthereumAddress, IsMongoId, IsOptional } from "class-validator";
 import { ToLowerCase, Trim } from "common/decorators/transforms.decorator";
-import { PaginationDtoAndSortDto } from "common/dto/pagination.dto";
-
 import { ApiProperty } from "@nestjs/swagger";
-import { ChainId } from "common/enums/network.enum";
 import { Transform, Type } from "class-transformer";
 import { TRADE_STATE, TRADE_TOKEN } from "common/enums/trades.enum";
+import { NetworkAndPaginationAndSortDto, NetworkDto } from "common/dto/network.dto";
 
-export class BaseTradesRequest {
-  @ApiProperty()
-  @ToLowerCase()
-  @Trim()
-  @IsEnum(ChainId)
-  @Transform(({ value }) => Number(value))
-  chain: ChainId;
-}
-
-export class GetTradesUserActiveDto extends PaginationDtoAndSortDto {
+export class GetTradesUserActiveDto extends NetworkAndPaginationAndSortDto {
   @ApiProperty()
   @ToLowerCase()
   @IsOptional()
   @Trim()
   @IsEthereumAddress()
   userAddress?: string;
-
-  @ApiProperty()
-  @ToLowerCase()
-  @Trim()
-  @Transform(({ value }) => Number(value))
-  @IsEnum(ChainId)
-  chain: ChainId;
 }
 
-export class CreateTradeDto extends BaseTradesRequest {
+export class CreateTradeDto extends NetworkDto {
   @ApiProperty()
   time: Date;
 
@@ -104,8 +86,6 @@ export class CreateTradeDto extends BaseTradesRequest {
   limitOrderExpirationDate: Date;
 
   @ApiProperty()
-  chain: ChainId;
-  @ApiProperty()
   expiryPrice: number | null;
 
   @ApiProperty()
@@ -166,19 +146,19 @@ export class CreateTradeDto extends BaseTradesRequest {
   // token=USDC
 }
 
-export class UpdateTradeDto extends BaseTradesRequest {
+export class UpdateTradeDto extends NetworkDto {
   @ApiProperty()
   @IsMongoId()
   _id: string;
 }
 
-export class CancelTradeDto extends BaseTradesRequest {
+export class CancelTradeDto extends NetworkDto {
   @ApiProperty()
   @IsMongoId()
   _id: string;
 }
 
-export class CloseTradeDto extends BaseTradesRequest {
+export class CloseTradeDto extends NetworkDto {
   @ApiProperty()
   @IsMongoId()
   _id: string;

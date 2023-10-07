@@ -1,4 +1,4 @@
-import { ChainId } from "common/enums/network.enum";
+import { Network } from "common/enums/network.enum";
 import { TRADE_STATE, TRADE_TOKEN } from "common/enums/trades.enum";
 import { Trades } from "modules/trades/schemas/trades.schema";
 
@@ -31,7 +31,7 @@ export const tradesDownPayload: [Trades & { _id: any }] = [
     optionId: null,
     isLimitOrder: false,
     limitOrderExpirationDate: new Date(1695294853000),
-    chain: ChainId.goerli,
+    network: Network.goerli,
     expiryPrice: null,
     // payout: null,
     closeDate: null,
@@ -77,7 +77,7 @@ export const tradesHistories: Array<Trades & { _id: any }> = [
     optionId: null,
     isLimitOrder: false,
     limitOrderExpirationDate: new Date(1695294853000),
-    chain: ChainId.goerli,
+    network: Network.goerli,
     expiryPrice: null,
     payout: null,
     closeDate: null,
@@ -119,7 +119,7 @@ export const tradesHistories: Array<Trades & { _id: any }> = [
     optionId: 159,
     isLimitOrder: false,
     limitOrderExpirationDate: new Date(1695835668000),
-    chain: ChainId.goerli,
+    network: Network.goerli,
     expiryPrice: null,
     payout: null,
     closeDate: null,
@@ -163,7 +163,7 @@ export const tradesHistories: Array<Trades & { _id: any }> = [
     optionId: 156,
     isLimitOrder: false,
     limitOrderExpirationDate: new Date(1695829335000),
-    chain: ChainId.goerli,
+    network: Network.goerli,
     expiryPrice: 2624024416232,
     payout: "9500014.0",
     closeDate: new Date(1695829515000),
@@ -206,7 +206,7 @@ export const tradesHistories: Array<Trades & { _id: any }> = [
     optionId: 155,
     isLimitOrder: false,
     limitOrderExpirationDate: new Date(1695828796000),
-    chain: ChainId.goerli,
+    network: Network.goerli,
     expiryPrice: 2627151562024,
     payout: "9500014.0",
     closeDate: new Date(1695828976000),

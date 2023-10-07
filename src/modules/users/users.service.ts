@@ -1,20 +1,43 @@
-import { PaginateModel } from "mongoose";
+import { PaginateModel, Types } from "mongoose";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { USERS_MODEL, UsersDocument } from "./schemas/users.schema";
+import { USERS_MODEL, UsersDocument, WALLETS_MODEL, WalletsDocument } from "./schemas/users.schema";
+import { entropyToMnemonic } from "@ethersproject/hdnode";
 import { ErrorMessages } from "./users.constant";
+import { Wallet } from "@ethersproject/wallet";
 import { request } from "graphql-request";
 import config from "common/config";
 import { readFile } from "common/utils/string";
 import { MetricsGql, UserStatsResponse } from "./dto/stats.dto";
-import { ChainId, Network } from "common/enums/network.enum";
+import { EthersService } from "modules/_shared/services/ethers.service";
+import { randomBytes } from "crypto";
+import { encryptAES } from "common/utils/encrypt";
+import { Network } from "common/enums/network.enum";
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(USERS_MODEL)
     private readonly usersModel: PaginateModel<UsersDocument>,
+    @InjectModel(WALLETS_MODEL)
+    private readonly walletsModel: PaginateModel<WalletsDocument>,
+    private readonly ethersService: EthersService,
   ) {}
+
+  private generateMnemonic() {
+    return entropyToMnemonic(randomBytes(16));
+  }
+
+  generateWallet() {
+    const mnemonic = this.generateMnemonic();
+    const wallet: Wallet = this.ethersService.generateNewWallet(mnemonic, `m/44'/60'/0'/0/0`);
+    return {
+      address: wallet.address,
+      privateKey: wallet.privateKey,
+      balance: new Types.Decimal128("0"),
+      mnemonic,
+    };
+  }
 
   async queryUsers(filter: any, options: any) {
     const users = await this.usersModel.paginate(filter, options);
@@ -34,6 +57,37 @@ export class UsersService {
       throw new BadRequestException(ErrorMessages.ADDRESS_EXISTS);
     }
     return this.usersModel.create({ address });
+  }
+
+  async createOrUpdateAccount(network: Network, address: string) {
+    try {
+      const user = await this.usersModel.findOne({ address });
+      if (user) {
+        if (!user.mnemonic) {
+          const wallet = this.generateWallet();
+          user.mnemonic = encryptAES(wallet.mnemonic);
+          user.oneCT = wallet.address;
+          await user.save();
+          await this.walletsModel.create({
+            userId: user._id,
+            network,
+            address: wallet.address,
+            privateKey: encryptAES(wallet.privateKey),
+          });
+        }
+      } else {
+        const wallet = this.generateWallet();
+        const userCreated = await this.usersModel.create({
+          mnemonic: encryptAES(wallet.mnemonic),
+          oneCT: wallet.address,
+        });
+        await this.walletsModel.create({ userId: userCreated._id, network, ...wallet });
+      }
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
+    return true;
   }
 
   async getUser(id: string) {
@@ -69,6 +123,17 @@ export class UsersService {
       address: address.trim().toLowerCase(),
     });
     return user;
+  }
+
+  async findWalletByNetworkAndId(network: Network, userId: string) {
+    const wallet = await this.walletsModel.findOne({
+      userId: userId,
+      network,
+    });
+    if (!wallet) {
+      throw new NotFoundException(ErrorMessages.WALLET_NOT_FOUND);
+    }
+    return wallet;
   }
 
   async findUserById(id: string) {
@@ -131,9 +196,9 @@ export class UsersService {
     return user;
   }
 
-  async getStats(address: string, chain: ChainId): Promise<UserStatsResponse> {
-    const graphql = config.getGraphql(Object.keys(ChainId)[Object.values(ChainId).indexOf(chain)] as Network);
+  async getStats(address: string, network: Network): Promise<UserStatsResponse> {
     const metricsGql = readFile("./graphql/stats.gql", __dirname);
+    const graphql = config.getGraphql(network);
     const data: MetricsGql = await request<MetricsGql>(graphql.uri, metricsGql, { address }).catch((error) => {
       console.error(error);
       return {} as MetricsGql;
