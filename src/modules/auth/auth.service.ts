@@ -1,5 +1,6 @@
 import { utils } from "ethers";
 import { UsersService } from "modules/users/users.service";
+import { Users } from "modules/users/schemas/users.schema";
 import { v4 as uuidv4 } from "uuid";
 import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { AuthMessage } from "./constants/auth-message.enum";
@@ -12,6 +13,7 @@ import config from "common/config";
 import { ContractName } from "common/constants/contract";
 import { RegisterAbi__factory } from "common/abis/types";
 import { SignerType } from "common/enums/signer.enum";
+import { plainToInstance } from "class-transformer";
 
 @Injectable()
 export class AuthService {
@@ -69,13 +71,15 @@ export class AuthService {
       throw new Error("Something was wrong!");
     }
 
-    const [updatedUser, tokens] = await Promise.all([
+    const [updatedUser, wallet, tokens] = await Promise.all([
       // update a new generated nonce to prevent user uses the current signature another time
       this.userService.updateNonce(user._id, uuidv4()),
+      this.userService.findWalletByNetworkAndId(network, user._id),
       this.tokenService.generateAuthTokens(user),
     ]);
+
     return {
-      user: updatedUser,
+      user: { ...plainToInstance(Users, updatedUser.toObject()), isRegistered: wallet.isRegistered },
       tokens,
     };
   }
