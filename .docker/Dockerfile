@@ -9,7 +9,7 @@ RUN yarn
 
 # Copy source code & build
 COPY . .
-RUN yarn patches && yarn build
+RUN yarn patches && yarn typechain && yarn build
 
 # ===========================
 FROM node:18-alpine
