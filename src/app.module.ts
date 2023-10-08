@@ -16,6 +16,9 @@ import { TradesModule } from "modules/trades/trades.module";
 import { HealthModule } from "modules/health/health.module";
 import { TransformInterceptor } from "common/interceptors/transform.interceptor";
 import { LeaderboardModule } from "modules/leaderboard/leaderboard.module";
+import { BlocksModule } from "modules/blocks/blocks.module";
+import { ContractsModule } from "modules/contracts/contracts.module";
+import { EthPairsModule } from "modules/eth-pair/eth-pair.module";
 
 @Module({
   imports: [
@@ -33,7 +36,10 @@ import { LeaderboardModule } from "modules/leaderboard/leaderboard.module";
       resolvers: [{ use: QueryResolver, options: ["lang"] }, AcceptLanguageResolver],
     }),
     SharedModule,
+    BlocksModule,
     HealthModule,
+    ContractsModule,
+    EthPairsModule,
     // jobs module
     JobModule,
     // app modules

@@ -40,6 +40,12 @@ blockchain:
     graphql:
       uri: https://api.studio.thegraph.com/query/53818/bo-devtest/version/latest
     contract:
+      factory_v2:
+        address: "0xFDa619b6d20975be80A10332cD39b9a4b0FAa8BB"
+        blocknumber_creator: 0
+      factory_v3:
+        address: "0x38015D05f4fEC8AFe15D7cc0386a126574e8077B"
+        blocknumber_creator: 0
       router:
         address: ""
         blocknumber_creator: 0
