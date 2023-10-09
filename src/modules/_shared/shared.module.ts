@@ -5,8 +5,9 @@ import { Global, Module } from "@nestjs/common";
 
 import { CacheService } from "./services/cache.service";
 import { EthersService } from "./services/ethers.service";
+import { CoingeckoService } from "./services/coingecko.service";
 
-const providers = [CacheService, EthersService];
+const providers = [CacheService, EthersService, CoingeckoService];
 const modules = [HttpModule, LogsModule];
 
 @Global()

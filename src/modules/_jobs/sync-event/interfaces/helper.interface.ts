@@ -1,4 +1,5 @@
 import { Event } from "@ethersproject/contracts";
+import { Network } from "common/enums/network.enum";
 
 export interface IEventParams {
   events: Event[];
@@ -8,6 +9,7 @@ export interface IEventParams {
 
 export interface ContractParams {
   contract: any;
+  network: Network;
   ABI: any;
   acceptEvents: string[];
   callback: HandleFunc;

@@ -111,6 +111,10 @@ class Config {
     return {};
   }
 
+  get cacheTime() {
+    return 60 * 60;
+  }
+
   getChainId(network: Network) {
     return this.getNumber(`blockchain.${network}.chain_id`);
   }
