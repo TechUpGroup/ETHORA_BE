@@ -112,8 +112,17 @@ export class AuthService {
       RegisterAbi__factory.abi,
       SignerType.operator,
     );
-    const result = await contract.functions.registerAccount(oneCT, address, signature);
-    console.log(result);
+    try {
+      await contract.estimateGas.registerAccount(oneCT, address, signature, {
+        gasPrice: this.ethersService.getCurrentGas(network)
+      });
+      await contract.registerAccount(oneCT, address, signature, {
+        gasPrice: this.ethersService.getCurrentGas(network)
+      });
+
+    } catch (e) {
+      throw new BadRequestException((e))
+    }
 
     wallet.isRegistered = true;
     await wallet.save();
