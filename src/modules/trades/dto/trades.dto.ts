@@ -16,29 +16,22 @@ export class GetTradesUserActiveDto extends NetworkAndPaginationAndSortDto {
 
 export class CreateTradeDto extends NetworkDto {
   @ApiProperty()
-  time: Date;
-
-  @ApiProperty()
   signatureDate: Date;
 
   @ApiProperty()
-  queuedDate: Date;
-
-  @ApiProperty()
-  queueId: number;
-
-  @ApiProperty()
   strike: number;
+
   @ApiProperty()
   period: number;
+
   @ApiProperty()
   targetContract: string;
 
   @ApiProperty()
-  userPartialSignature: string;
+  partialSignature: string;
 
   @ApiProperty()
-  userFullSignature: string;
+  fullSignature: string;
 
   @ApiProperty()
   userAddress: string;
@@ -53,9 +46,6 @@ export class CreateTradeDto extends NetworkDto {
   referralCode: string;
 
   @ApiProperty()
-  traderNftId: number;
-
-  @ApiProperty()
   slippage: number;
 
   @ApiProperty()
@@ -68,61 +58,16 @@ export class CreateTradeDto extends NetworkDto {
   settlementFeeSignature: string;
 
   @ApiProperty()
-  expirationDate: Date | null;
-
-  @ApiProperty()
   isAbove: boolean;
-
-  @ApiProperty()
-  state: TRADE_STATE;
-
-  @ApiProperty()
-  optionId: number | null;
 
   @ApiProperty()
   isLimitOrder: boolean;
 
   @ApiProperty()
-  limitOrderExpirationDate: Date;
-
-  @ApiProperty()
-  expiryPrice: number | null;
-
-  @ApiProperty()
-  payout: string | null;
-
-  @ApiProperty()
-  closeDate: Date | null;
-
-  @ApiProperty()
   limitOrderDuration: number;
 
   @ApiProperty()
-  lockedAmount: string | null;
-
-  @ApiProperty()
-  isCancelled: boolean;
-
-  @ApiProperty()
-  cancellationReason: string | null;
-
-  @ApiProperty()
-  cancellationDate: Date | null;
-
-  @ApiProperty()
-  earlyCloseSignature: string | null;
-
-  @ApiProperty()
-  userCloseDate: Date | null;
-
-  @ApiProperty()
-  openDate: Date;
-
-  @ApiProperty()
   token: TRADE_TOKEN;
-
-  @ApiProperty()
-  pendingOperation?: string | null;
 
   // signature_timestamp=1696344585
   // strike=2732722631537
@@ -134,7 +79,6 @@ export class CreateTradeDto extends NetworkDto {
   // trade_size=5000000
   // allow_partial_fill=true
   // referral_code=
-  // trader_nft_id=0
   // slippage=3
   // is_above=true
   // is_limit_order=false
@@ -146,26 +90,20 @@ export class CreateTradeDto extends NetworkDto {
   // token=USDC
 }
 
-export class UpdateTradeDto extends NetworkDto {
+export class UpdateTradeDto extends CreateTradeDto {
   @ApiProperty()
   @IsMongoId()
   _id: string;
 }
 
-export class CancelTradeDto extends NetworkDto {
+export class CancelTradeDto {
   @ApiProperty()
   @IsMongoId()
   _id: string;
 }
 
-export class CloseTradeDto extends NetworkDto {
+export class CloseTradeDto {
   @ApiProperty()
   @IsMongoId()
   _id: string;
-
-  @ApiProperty()
-  @Type(() => Date)
-  @Transform(({ value }) => new Date(value))
-  @IsDate()
-  closeDate: Date;
 }
