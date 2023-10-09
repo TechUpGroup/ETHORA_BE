@@ -126,10 +126,10 @@ class Config {
   listRPC(network: Network) {
     return network === Network.goerli
       ? [
-          "https://1rpc.io/base-goerli",
-          "https://base-goerli.publicnode.com",
-          "https://goerli.base.org",
-          "https://rpc.notadegen.com/base/goerli",
+          "https://arbitrum-goerli.publicnode.com",
+          "https://arbitrum-goerli.public.blastapi.io",
+          "https://endpoints.omniatech.io/v1/arbitrum/goerli/public",
+          "https://goerli-rollup.arbitrum.io/rpc",
         ]
       : ["https://base.publicnode.com", "https://base.meowrpc.com", "https://1rpc.io/base", "https://base.drpc.org"];
   }
