@@ -40,7 +40,7 @@ export class TradesController {
   @Auth()
   @ApiOperation({ summary: `Close a trade` })
   closeTrade(@User() user: UsersDocument, @Body() data: CloseTradeDto) {
-    return this.service.cancelTrade(user.address, data);
+    return this.service.closeTrade(user.address, data);
   }
 
   @Post("cancel")

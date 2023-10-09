@@ -24,6 +24,7 @@ export class NetworkOptionalDto {
   })
   @IsOptional()
   @IsEnum(NetworkAvailable)
+  @Transform(({ value }) => Number(value))
   readonly network?: Network;
 }
 
@@ -33,6 +34,7 @@ export class NetworkAndPaginationDto extends PaginationDto {
   })
   @IsDefined()
   @IsEnum(NetworkAvailable)
+  @Transform(({ value }) => Number(value))
   readonly network: Network;
 }
 
@@ -42,5 +44,6 @@ export class NetworkAndPaginationAndSortDto<T = string> extends PaginationDtoAnd
   })
   @IsDefined()
   @IsEnum(NetworkAvailable)
+  @Transform(({ value }) => Number(value))
   readonly network: Network;
 }

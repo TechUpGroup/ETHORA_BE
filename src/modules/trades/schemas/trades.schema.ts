@@ -78,7 +78,7 @@ export class Trades {
   @Prop()
   isAbove: boolean;
 
-  @Prop()
+  @Prop({ required: true, default: TRADE_STATE.QUEUED })
   state: TRADE_STATE;
 
   @Prop({ type: Number, required: false })
