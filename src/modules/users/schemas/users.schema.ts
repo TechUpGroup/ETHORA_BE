@@ -21,6 +21,9 @@ export class Users {
   address: string;
 
   @Prop({ required: false })
+  referralCode: string;
+
+  @Prop({ required: false })
   @Exclude()
   mnemonic: string;
 
