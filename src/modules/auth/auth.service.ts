@@ -95,36 +95,49 @@ export class AuthService {
   }
 
   async register(userId: string, dto: RegisterDto) {
-    const { network, signature } = dto;
+    const { network, signature, isRegister } = dto;
     // call contract
     const user = await this.userService.findUserById(userId);
     const wallet = await this.userService.findWalletByNetworkAndId(network, user._id);
     const { oneCT, address } = user;
 
-    if (wallet.isRegistered) {
+    if (wallet.isRegistered && isRegister) {
       throw new BadRequestException("Already registered");
     }
+    if (!wallet.isRegistered && !isRegister) {
+      throw new BadRequestException("Not yet register");
+    }
 
-    // get nonce from register contract
+    //
     const contract = this.ethersService.getContract(
       network,
       config.getContract(network, ContractName.REGISTER).address,
       RegisterAbi__factory.abi,
       SignerType.operator,
     );
-    try {
-      await contract.estimateGas.registerAccount(oneCT, address, signature, {
-        gasPrice: this.ethersService.getCurrentGas(network)
-      });
-      await contract.registerAccount(oneCT, address, signature, {
-        gasPrice: this.ethersService.getCurrentGas(network)
-      });
 
+    // process action
+    try {
+      if (isRegister) {
+        await contract.estimateGas.registerAccount(oneCT, address, signature, {
+          gasPrice: this.ethersService.getCurrentGas(network),
+        });
+        await contract.registerAccount(oneCT, address, signature, {
+          gasPrice: this.ethersService.getCurrentGas(network),
+        });
+      } else {
+        await contract.estimateGas.deregisterAccount(address, signature, {
+          gasPrice: this.ethersService.getCurrentGas(network),
+        });
+        await contract.deregisterAccount(address, signature, {
+          gasPrice: this.ethersService.getCurrentGas(network),
+        });
+      }
     } catch (e) {
-      throw new BadRequestException((e))
+      throw new BadRequestException(e);
     }
 
-    wallet.isRegistered = true;
+    wallet.isRegistered = isRegister;
     await wallet.save();
 
     //
