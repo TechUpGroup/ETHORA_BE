@@ -28,7 +28,7 @@ export class AuthController {
 
   @Post("register")
   @Auth()
-  @ApiOperation({ summary: "Register trade account by signature" })
+  @ApiOperation({ summary: "Register/Deregister trade account by signature" })
   async register(@User() user: UsersDocument, @Body() dto: RegisterDto) {
     return this.authService.register(user._id, dto);
   }

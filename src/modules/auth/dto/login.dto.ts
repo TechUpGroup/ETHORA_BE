@@ -1,4 +1,4 @@
-import { IsEthereumAddress, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsEthereumAddress, IsOptional, IsString } from "class-validator";
 import { ToLowerCase, Trim } from "common/decorators/transforms.decorator";
 
 import { ApiProperty } from "@nestjs/swagger";
@@ -25,4 +25,8 @@ export class RegisterDto extends NetworkDto {
   @ApiProperty()
   @IsString()
   signature: string;
+
+  @ApiProperty({ default: true })
+  @IsBoolean()
+  isRegister: boolean;
 }
