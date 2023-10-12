@@ -84,3 +84,7 @@ export const getWeekTimestamp = (chain: Network, offset?: number) => {
   const week = getCurrentWeekIndex(chain, offset);
   return getWeekId(week);
 };
+
+export function getLinuxTimestampBefore24Hours() {
+  return Math.floor((Date.now() - 24 * 60 * 60 * 1000) / 1000);
+}
