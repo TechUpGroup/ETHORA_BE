@@ -57,7 +57,7 @@ export function IsTimestamp(validationOptions?: ValidationOptions) {
       },
       validator: {
         validate(value: any) {
-          return typeof value === "number" && value > 0 && Date.now() - value >= 0;
+          return typeof value === "number" && value > 0 && Math.round(Date.now() / 1000) - value >= 0;
         },
       },
     });
