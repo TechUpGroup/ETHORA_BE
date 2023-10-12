@@ -20,6 +20,7 @@ import { BlocksModule } from "modules/blocks/blocks.module";
 import { ContractsModule } from "modules/contracts/contracts.module";
 import { EthPairsModule } from "modules/eth-pair/eth-pair.module";
 import { DashboardModule } from "modules/dashboard/dashboard.module";
+import { StatsModule } from "modules/stats/stats.module";
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { DashboardModule } from "modules/dashboard/dashboard.module";
     TradesModule,
     LeaderboardModule,
     DashboardModule,
+    StatsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: I18nAllExceptionFilter },
