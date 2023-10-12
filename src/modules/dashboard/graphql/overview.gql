@@ -9,12 +9,7 @@ query ($prevDayEpoch: Int!) {
     totalTrades
     totalVolume
   }
-  BFRstats: dashboardStat(id: "BFR") {
-    totalSettlementFees
-    totalTrades
-    totalVolume
-  }
-  ARBstats: dashboardStat(id: "ARB") {
+  ETRstats: dashboardStat(id: "BFR") {
     totalSettlementFees
     totalTrades
     totalVolume
@@ -40,20 +35,11 @@ query ($prevDayEpoch: Int!) {
     amount
     settlementFee
   }
-  BFR24stats: volumePerContracts(
+  ETR24stats: volumePerContracts(
     orderBy: timestamp
     orderDirection: desc
     first: 1000
     where: { optionContract_: { pool: "BFR" }, depositToken_not: "total", timestamp_gt: $prevDayEpoch }
-  ) {
-    amount
-    settlementFee
-  }
-  ARB24stats: volumePerContracts(
-    orderBy: timestamp
-    orderDirection: desc
-    first: 1000
-    where: { optionContract_: { pool: "ARB" }, depositToken_not: "total", timestamp_gt: $prevDayEpoch }
   ) {
     amount
     settlementFee

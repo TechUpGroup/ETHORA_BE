@@ -37,19 +37,6 @@ query ($timestamp_start: Int!, $timestamp_end: Int!, $timestamp_24h: Int!) {
     uniqueCountCumulative
     timestamp
   }
-  tradingStats(
-    orderBy: timestamp
-    orderDirection: desc
-    first: 1000
-    where: { period: daily, timestamp_gte: $timestamp_start, timestamp_lte: $timestamp_end }
-    subgraphError: allow
-  ) {
-    lossBFR
-    profitBFR
-    profitCumulativeBFR
-    timestamp
-    lossCumulativeBFR
-  }
   poolStats(orderBy: timestamp, orderDirection: desc, where: { period: daily }, subgraphError: allow) {
     timestamp
     amount
@@ -58,16 +45,6 @@ query ($timestamp_start: Int!, $timestamp_end: Int!, $timestamp_24h: Int!) {
     rate
     id
   }
-  # burnedBFRs(
-  #   first: 1000
-  #   orderBy: timestamp
-  #   orderDirection: desc
-  #   where: { period: daily, timestamp_gte: $timestamp_start, timestamp_lte: $timestamp_end }
-  #   subgraphError: allow
-  # ) {
-  #   timestamp
-  #   amount
-  # }
   USDC24stats: volumePerContracts(
     orderBy: timestamp
     orderDirection: desc
@@ -76,28 +53,6 @@ query ($timestamp_start: Int!, $timestamp_end: Int!, $timestamp_24h: Int!) {
   ) {
     amount
     settlementFee
-  }
-  BFR24stats: volumePerContracts(
-    orderBy: timestamp
-    orderDirection: desc
-    first: 1000
-    where: { depositToken: "BFR", timestamp_gt: $timestamp_24h }
-  ) {
-    amount
-    settlementFee
-  }
-  tradingStats(
-    orderBy: timestamp
-    orderDirection: desc
-    first: 1000
-    where: { period: daily, timestamp_gte: $timestamp_start, timestamp_lte: $timestamp_end }
-    subgraphError: allow
-  ) {
-    lossARB
-    profitARB
-    profitCumulativeARB
-    timestamp
-    lossCumulativeARB
   }
   tradingStats(orderBy: timestamp, orderDirection: desc, first: 1000, where: { period: daily }, subgraphError: allow) {
     loss
@@ -115,15 +70,6 @@ query ($timestamp_start: Int!, $timestamp_end: Int!, $timestamp_24h: Int!) {
     amount
     settlementFee
   }
-  BFR24stats: volumePerContracts(
-    orderBy: timestamp
-    orderDirection: desc
-    first: 1000
-    where: { depositToken: "BFR", timestamp_gt: $timestamp_24h }
-  ) {
-    amount
-    settlementFee
-  }
   feeStats(
     first: 1000
     orderBy: timestamp
@@ -133,9 +79,7 @@ query ($timestamp_start: Int!, $timestamp_end: Int!, $timestamp_24h: Int!) {
   ) {
     timestamp
     fee
-    feeARB
     feeUSDC
-    feeBFR
   }
   volumeStats(
     first: 1000
@@ -148,8 +92,6 @@ query ($timestamp_start: Int!, $timestamp_end: Int!, $timestamp_24h: Int!) {
     amount
     amount
     VolumeUSDC
-    VolumeARB
-    VolumeBFR
   }
   USDC24stats: volumePerContracts(
     orderBy: timestamp
@@ -160,29 +102,11 @@ query ($timestamp_start: Int!, $timestamp_end: Int!, $timestamp_24h: Int!) {
     amount
     settlementFee
   }
-  BFR24stats: volumePerContracts(
-    orderBy: timestamp
-    orderDirection: desc
-    first: 1000
-    where: { depositToken: "BFR", timestamp_gt: $timestamp_24h }
-  ) {
-    amount
-    settlementFee
-  }
   USDC24stats: volumePerContracts(
     orderBy: timestamp
     orderDirection: desc
     first: 1000
     where: { depositToken: "USDC", timestamp_gt: $timestamp_24h }
-  ) {
-    amount
-    settlementFee
-  }
-  BFR24stats: volumePerContracts(
-    orderBy: timestamp
-    orderDirection: desc
-    first: 1000
-    where: { depositToken: "BFR", timestamp_gt: $timestamp_24h }
   ) {
     amount
     settlementFee
