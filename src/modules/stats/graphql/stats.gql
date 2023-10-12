@@ -54,22 +54,6 @@ query ($timestamp_start: Int!, $timestamp_end: Int!, $timestamp_24h: Int!) {
     amount
     settlementFee
   }
-  tradingStats(orderBy: timestamp, orderDirection: desc, first: 1000, where: { period: daily }, subgraphError: allow) {
-    loss
-    profit
-    profitCumulative
-    timestamp
-    lossCumulative
-  }
-  USDC24stats: volumePerContracts(
-    orderBy: timestamp
-    orderDirection: desc
-    first: 1000
-    where: { depositToken: "USDC", timestamp_gt: $timestamp_24h }
-  ) {
-    amount
-    settlementFee
-  }
   feeStats(
     first: 1000
     orderBy: timestamp
@@ -92,23 +76,5 @@ query ($timestamp_start: Int!, $timestamp_end: Int!, $timestamp_24h: Int!) {
     amount
     amount
     VolumeUSDC
-  }
-  USDC24stats: volumePerContracts(
-    orderBy: timestamp
-    orderDirection: desc
-    first: 1000
-    where: { depositToken: "USDC", timestamp_gt: $timestamp_24h }
-  ) {
-    amount
-    settlementFee
-  }
-  USDC24stats: volumePerContracts(
-    orderBy: timestamp
-    orderDirection: desc
-    first: 1000
-    where: { depositToken: "USDC", timestamp_gt: $timestamp_24h }
-  ) {
-    amount
-    settlementFee
   }
 }
