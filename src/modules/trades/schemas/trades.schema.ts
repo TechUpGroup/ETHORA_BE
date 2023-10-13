@@ -55,10 +55,6 @@ export class Trades {
   referralCode: string;
 
   @Prop()
-  @Exclude()
-  traderNftId: number;
-
-  @Prop()
   slippage: number;
 
   @Prop()

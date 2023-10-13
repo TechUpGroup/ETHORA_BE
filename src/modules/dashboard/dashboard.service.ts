@@ -20,7 +20,21 @@ export class DashboardService {
       return {} as DashboardOverviewGql;
     });
 
-    return data as any;
+    // Open Interest
+    // TODO: fake
+    const openInterest = {
+      OIstats: {
+        totalVolume: "0",
+      },
+      USDCIOstats: {
+        totalVolume: "0",
+      },
+      ETRIOstats: {
+        totalVolume: "0",
+      },
+    };
+
+    return { ...data, ...openInterest } as any;
   }
 
   async getMarkets(network: Network): Promise<DashboardResponse> {
