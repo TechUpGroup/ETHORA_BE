@@ -1,0 +1,47 @@
+query ($prevDayEpoch: Int!) {
+  totalStats: dashboardStat(id: "total") {
+    totalSettlementFees
+    totalTrades
+    totalVolume
+  }
+  USDCstats: dashboardStat(id: "USDC") {
+    totalSettlementFees
+    totalTrades
+    totalVolume
+  }
+  ETRstats: dashboardStat(id: "BFR") {
+    totalSettlementFees
+    totalTrades
+    totalVolume
+  }
+  totalTraders: userStats(where: { period: total }) {
+    uniqueCountCumulative
+  }
+  total24stats: volumePerContracts(
+    orderBy: timestamp
+    orderDirection: desc
+    first: 1000
+    where: { depositToken: "total", timestamp_gt: $prevDayEpoch }
+  ) {
+    amount
+    settlementFee
+  }
+  USDC24stats: volumePerContracts(
+    orderBy: timestamp
+    orderDirection: desc
+    first: 1000
+    where: { optionContract_: { pool: "USDC" }, depositToken_not: "total", timestamp_gt: $prevDayEpoch }
+  ) {
+    amount
+    settlementFee
+  }
+  ETR24stats: volumePerContracts(
+    orderBy: timestamp
+    orderDirection: desc
+    first: 1000
+    where: { optionContract_: { pool: "BFR" }, depositToken_not: "total", timestamp_gt: $prevDayEpoch }
+  ) {
+    amount
+    settlementFee
+  }
+}

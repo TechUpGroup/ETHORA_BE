@@ -1,0 +1,80 @@
+query ($timestamp_start: Int!, $timestamp_end: Int!, $timestamp_24h: Int!) {
+  tradingStats(
+    orderBy: timestamp
+    orderDirection: desc
+    first: 1000
+    where: { period: daily, timestamp_gte: $timestamp_start, timestamp_lte: $timestamp_end }
+    subgraphError: allow
+  ) {
+    lossUSDC
+    profitUSDC
+    profitCumulativeUSDC
+    timestamp
+    lossCumulativeUSDC
+  }
+  USDCstats: dashboardStat(id: "total") {
+    totalSettlementFees
+    totalTrades
+    totalVolume
+  }
+
+  totalTraders: userStats(where: { period: total }) {
+    uniqueCountCumulative
+  }
+
+  dashboardStats(where: { id: "total" }) {
+    openInterest
+  }
+  userStats(
+    first: 1000
+    orderBy: timestamp
+    orderDirection: desc
+    where: { period: daily, timestamp_gte: $timestamp_start, timestamp_lte: $timestamp_end }
+    subgraphError: allow
+  ) {
+    existingCount
+    uniqueCount
+    uniqueCountCumulative
+    timestamp
+  }
+  poolStats(orderBy: timestamp, orderDirection: desc, where: { period: daily }, subgraphError: allow) {
+    timestamp
+    amount
+    period
+    timestamp
+    rate
+    id
+  }
+  USDC24stats: volumePerContracts(
+    orderBy: timestamp
+    orderDirection: desc
+    first: 1000
+    where: { depositToken: "USDC", timestamp_gt: $timestamp_24h }
+  ) {
+    amount
+    settlementFee
+  }
+  feeStats(
+    first: 1000
+    orderBy: timestamp
+    orderDirection: desc
+    where: { period: daily, timestamp_gte: $timestamp_start, timestamp_lte: $timestamp_end }
+    subgraphError: allow
+  ) {
+    timestamp
+    fee
+    feeUSDC
+  }
+  volumeStats(
+    first: 1000
+    orderBy: timestamp
+    orderDirection: desc
+    where: { period: daily, timestamp_gte: $timestamp_start, timestamp_lte: $timestamp_end }
+    subgraphError: allow
+  ) {
+    timestamp
+    amount
+    amount
+    VolumeUSDC
+  }
+}
