@@ -5,8 +5,10 @@ import { Cron, CronExpression } from "@nestjs/schedule";
 import { CacheService } from "./cache.service";
 import config from "common/config";
 import axios from "axios";
+import { POOL } from "common/constants/price";
 
 export const KEY_PRICE_COINGECKO = "all_price_coingecko";
+export const KEY_PRICE_CHANGE_COINGECKO = "all_price_change_coingecko";
 
 export enum Token {
   ETH = "ethereum",
@@ -28,7 +30,10 @@ export class CoingeckoService {
     if (this.isRunning) return;
     try {
       this.isRunning = true;
-      await this.getAllPrice(false);
+      await Promise.all([
+        this.getAllPrice(false),
+        this.getAllPriceChange(false),
+      ])
     } catch (e) {
       console.error(e);
     } finally {
@@ -53,6 +58,34 @@ export class CoingeckoService {
     await this.cacheService.setKey(KEY_PRICE_COINGECKO, JSON.stringify(res), config.cacheTime * 1000);
     console.log("=> Price: ", JSON.stringify(res));
     return res;
+  }
+
+  async getAllPriceChange(isCache = true) {
+    if (isCache) {
+      const cachedPrice = await this.cacheService.getKey(KEY_PRICE_CHANGE_COINGECKO);
+      if (cachedPrice) return JSON.parse(cachedPrice);
+    }
+    const pools = Object.values(POOL);
+    const datas: any[] = await this.getPool(pools);
+
+    if (!datas || !datas.length) return {};
+
+    const res: { [key: string]: any } = {};
+    for (const [key, address] of Object.entries(POOL)) {
+      const find = datas.find(a => a.id.replace("eth_", "") === address.toLowerCase());
+      res[key] = find.attributes.price_change_percentage.h24;
+    }
+    await this.cacheService.setKey(KEY_PRICE_CHANGE_COINGECKO, JSON.stringify(res), config.cacheTime * 1000);
+    console.log("=> Price change percentage : ", JSON.stringify(res));
+    return res;
+  }
+
+  private async getPool(pools: string[], network = "eth") {
+    const res = await axios.get(`https://api.geckoterminal.com/api/v2/networks/${network}/pools/multi/${pools.toString()}`);
+    if (res) {
+      return res.data.data;
+    }
+    return;
   }
 
   private async getPrice(ids: string) {

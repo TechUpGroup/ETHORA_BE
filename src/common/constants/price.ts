@@ -16,3 +16,10 @@ export const FEED_IDS = {
 //   USDCHE: "",
   USDCAD: "0x3112b03a41c910ed446852aacf67118cb1bec67b2cd0b9a214c58cc0eaa2ecca",
 };
+
+export const POOL = {
+  BTCUSD: "0x9a772018fbd77fcd2d25657e5c547baff3fd7d16",
+  ETHUSD: "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640",
+  ETHBTC: "0x4585fe77225b41b697c938b018e2ac67ac5a20c0",
+  LINKUSD: "0xfad57d2039c21811c8f2b5d5b65308aa99d31559",
+}
