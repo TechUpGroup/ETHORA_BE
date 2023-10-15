@@ -22,6 +22,18 @@ query ($timestamp_start: Int!, $timestamp_end: Int!, $timestamp_24h: Int!) {
     uniqueCountCumulative
   }
 
+  burnedBFRs(
+      first: 1000
+      orderBy: timestamp
+      orderDirection: desc
+      where: { period: daily, timestamp_gte: $timestamp_start, timestamp_lte: $timestamp_end }
+      subgraphError: allow
+    ) {
+      timestamp
+      amount
+    }
+  }
+
   dashboardStats(where: { id: "total" }) {
     openInterest
   }

@@ -13,14 +13,14 @@ export function IsOffsetInRange(validationOptions?: ValidationOptions) {
       validator: {
         defaultMessage: ({ value, property, object }: any) => {
           const type = (object as any)["type"];
-          const chain = (object as any)["chain"];
-          const id = type === LeaderboardType.DAILY ? getCurrentDayIndex(chain, 0) : getCurrentWeekIndex(chain, 0);
+          const network = (object as any)["network"];
+          const id = type === LeaderboardType.DAILY ? getCurrentDayIndex(network, 0) : getCurrentWeekIndex(network, 0);
           return `${property} with value ${value} not a number or not in range [1-${id}]`;
         },
         validate(value: any, args: ValidationArguments) {
           const type = (args.object as any)["type"];
-          const chain = (args.object as any)["chain"];
-          const id = type === LeaderboardType.DAILY ? getCurrentDayIndex(chain, 0) : getCurrentWeekIndex(chain, 0);
+          const network = (args.object as any)["network"];
+          const id = type === LeaderboardType.DAILY ? getCurrentDayIndex(network, 0) : getCurrentWeekIndex(network, 0);
           return typeof value === "number" && value <= id && value >= 1;
         },
       },
