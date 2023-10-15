@@ -145,8 +145,12 @@ class Config {
 
   getGraphql(network: Network) {
     const uri = this.getBlockChainInfo(network, `graphql.uri`);
+    const burnedUri = this.getBlockChainInfo(network, `graphql.burnedUri`);
+    const mainnetDummyUri = this.getBlockChainInfo(network, `graphql.mainnetDummyUri`);
     return {
       uri,
+      burnedUri,
+      mainnetDummyUri,
     };
   }
 

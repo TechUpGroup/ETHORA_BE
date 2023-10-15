@@ -29,3 +29,26 @@ export const convertWeiToEther = (value: string): string => {
 export const convertEtherToWei = (value: string): string => {
   return BigNumber(value).multipliedBy(Math.pow(10, 18)).toFixed();
 };
+
+export function fillNa(arr: any) {
+  const prevValues = {};
+  let keys;
+  if (arr.length > 0) {
+    keys = Object.keys(arr[0]);
+    delete keys.timestamp;
+    delete keys.id;
+  }
+
+  for (const el of arr) {
+    for (const key of keys) {
+      if (!el[key]) {
+        if (prevValues[key]) {
+          el[key] = prevValues[key];
+        }
+      } else {
+        prevValues[key] = el[key];
+      }
+    }
+  }
+  return arr;
+}

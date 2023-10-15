@@ -25,9 +25,9 @@ export class SocketPriceService {
       this.client.send(JSON.stringify(request));
     });
 
-    this.client.on('message', (data) => {
-      console.log('Received:', data);
-    });
+    // this.client.on('message', (data) => {
+    //   console.log('Received:', data);
+    // });
 
     this.client.on('close', (code, reason) => {
       console.log(`Connection closed with code ${code} and reason: ${reason}`);

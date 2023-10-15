@@ -38,7 +38,9 @@ blockchain:
     provider: https://base.publicnode.com
     chain_id: 8453
     graphql:
-      uri: https://api.studio.thegraph.com/query/53818/bo-devtest/version/latest
+      uri: ""
+      burnedUri: ""
+      mainnetDummyUri: ""
     contract:
       factory_v2:
         address: "0xFDa619b6d20975be80A10332cD39b9a4b0FAa8BB"
@@ -56,7 +58,9 @@ blockchain:
     provider: https://1rpc.io/base-goerli
     chain_id: 84531
     graphql:
-      uri: https://api.studio.thegraph.com/query/53818/bo-devtest/version/latest
+      uri: ""
+      burnedUri: ""
+      mainnetDummyUri: ""
     contract:
       router:
         address: ""

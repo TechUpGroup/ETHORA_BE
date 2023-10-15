@@ -1,0 +1,10 @@
+{
+  poolStats(orderBy: timestamp, orderDirection: desc, where: { period: daily }, subgraphError: allow) {
+    timestamp
+    amount
+    period
+    timestamp
+    rate
+    id
+  }
+}
