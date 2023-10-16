@@ -91,10 +91,31 @@ export class CreateTradeDto extends NetworkDto {
   // token=USDC
 }
 
-export class UpdateTradeDto extends CreateTradeDto {
+export class UpdateTradeDto extends NetworkDto {
   @ApiProperty()
   @IsMongoId()
   _id: string;
+
+  @ApiProperty()
+  strike: number;
+
+  @ApiProperty({ default: TRADE_DURATION.MIN })
+  @IsNumber()
+  @Min(TRADE_DURATION.MIN)
+  @Max(TRADE_DURATION.MAX)
+  period: number;
+
+  @ApiProperty()
+  slippage: number;
+
+  @ApiProperty()
+  isAbove: boolean;
+
+  @ApiProperty({ default: 0 })
+  @IsNumber()
+  @Min(0)
+  @Max(TRADE_DURATION.MAX)
+  limitOrderDuration: number;
 }
 
 export class CancelTradeDto {

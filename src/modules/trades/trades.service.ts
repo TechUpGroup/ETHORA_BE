@@ -1,6 +1,6 @@
 import { PaginateModel } from "mongoose";
 
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 
 import { TRADES_MODEL, TradesDocument } from "./schemas/trades.schema";
@@ -37,6 +37,7 @@ export class TradesService {
       queuedDate: now,
       limitOrderExpirationDate: new Date(data.limitOrderDuration * 1000 + now.getTime()),
       state: isLimitOrder ? TRADE_STATE.QUEUED : TRADE_STATE.OPENED,
+      settlementFee: 500,
     };
     const result = await this.model.create(_data);
 
@@ -46,6 +47,10 @@ export class TradesService {
 
   async updateTrade(userAddress: string, data: UpdateTradeDto) {
     // validate
+    const trade = await this.model.findById(data._id);
+    if (!trade) {
+      throw new NotFoundException("Trade not found");
+    }
 
     const result = await this.model.updateOne(
       {
@@ -64,6 +69,10 @@ export class TradesService {
 
   async closeTrade(userAddress: string, data: CloseTradeDto) {
     // validate
+    const trade = await this.model.findById(data._id);
+    if (!trade) {
+      throw new NotFoundException("Trade not found");
+    }
 
     const result = await this.model.updateOne(
       {
@@ -73,7 +82,7 @@ export class TradesService {
       {
         $set: {
           userCloseDate: new Date(),
-          state: TRADE_STATE.CANCELLED,
+          state: TRADE_STATE.CLOSED,
         },
       },
     );
@@ -82,6 +91,12 @@ export class TradesService {
   }
 
   async cancelTrade(userAddress: string, data: CancelTradeDto) {
+    // validate
+    const trade = await this.model.findById(data._id);
+    if (!trade) {
+      throw new NotFoundException("Trade not found");
+    }
+
     const result = await this.model.updateOne(
       {
         _id: data._id,
@@ -89,8 +104,9 @@ export class TradesService {
       },
       {
         $set: {
-          userCloseDate: new Date(),
           state: TRADE_STATE.CANCELLED,
+          cancellationDate: new Date(),
+          cancellationReason: "User cancelled",
         },
       },
     );
