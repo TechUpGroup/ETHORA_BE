@@ -241,19 +241,19 @@ export class StatsService {
     }
   }
 
-  private calcPoolStats(data: any) {
+  private calcPoolStats(_data: any) {
     let stats: any = null;
     let cumulativeGlpSupply = 0;
     const timestampProp = "timestamp";
 
-    const glpChartData: any = (() => {
-      if (!data) {
+    const data: any = (() => {
+      if (!_data) {
         return null;
       }
 
       let prevGlpSupply;
       let prevAum;
-      let ret = sortBy(data.poolStats, (item) => item[timestampProp])
+      let ret = sortBy(_data.poolStats, (item) => item[timestampProp])
         .reduce((memo, item) => {
           const last = memo[memo.length - 1];
 
@@ -307,11 +307,11 @@ export class StatsService {
       return ret;
     })();
 
-    if (glpChartData) {
-      const maxGlpAmount = maxBy(glpChartData, (item: any) => item.glpSupply)?.glpSupply;
-      const minGlpAmount = minBy(glpChartData, (item: any) => item.glpSupply)?.glpSupply;
-      const maxRate = maxBy(glpChartData, (item: any) => item.rate)?.rate;
-      const minRate = minBy(glpChartData, (item: any) => item.rate)?.rate;
+    if (data) {
+      const maxGlpAmount = maxBy(data, (item: any) => item.glpSupply)?.glpSupply;
+      const minGlpAmount = minBy(data, (item: any) => item.glpSupply)?.glpSupply;
+      const maxRate = maxBy(data, (item: any) => item.rate)?.rate;
+      const minRate = minBy(data, (item: any) => item.rate)?.rate;
       stats = {
         maxGlpAmount,
         minGlpAmount,
@@ -320,6 +320,6 @@ export class StatsService {
       };
     }
 
-    return { glpChartData, stats };
+    return { data, stats };
   }
 }

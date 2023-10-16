@@ -12,6 +12,7 @@ import {
   UpdateTradeDto,
 } from "./dto/trades.dto";
 import { TRADE_STATE } from "common/enums/trades.enum";
+import { TRADE_EARLY_CLOSE_DURATION } from "common/constants/trades";
 // import { Timeout } from "@nestjs/schedule";
 // import { tradesHistories } from "common/config/data-sample";
 
@@ -37,9 +38,12 @@ export class TradesService {
       queuedDate: now,
       limitOrderExpirationDate: new Date(data.limitOrderDuration * 1000 + now.getTime()),
       state: isLimitOrder ? TRADE_STATE.QUEUED : TRADE_STATE.OPENED,
+      openDate: isLimitOrder ? null : now,
       settlementFee: 500,
     };
     const result = await this.model.create(_data);
+
+    // TODO: contract openTrade()
 
     // return
     return result;
@@ -73,6 +77,12 @@ export class TradesService {
     if (!trade) {
       throw new NotFoundException("Trade not found");
     }
+    if (trade.state !== TRADE_STATE.OPENED) {
+      throw new BadRequestException("Trade not in OPENED state");
+    }
+    if (!trade.openDate || new Date(trade.openDate.getTime() + TRADE_EARLY_CLOSE_DURATION * 1000) < new Date()) {
+      throw new BadRequestException("Close trade too early");
+    }
 
     const result = await this.model.updateOne(
       {
@@ -87,6 +97,8 @@ export class TradesService {
       },
     );
 
+    // TODO: contract closeTrade()
+
     return result;
   }
 
@@ -95,6 +107,9 @@ export class TradesService {
     const trade = await this.model.findById(data._id);
     if (!trade) {
       throw new NotFoundException("Trade not found");
+    }
+    if (trade.state !== TRADE_STATE.QUEUED) {
+      throw new BadRequestException("Trade not in QUEUE state");
     }
 
     const result = await this.model.updateOne(
@@ -105,6 +120,7 @@ export class TradesService {
       {
         $set: {
           state: TRADE_STATE.CANCELLED,
+          isCancelled: true,
           cancellationDate: new Date(),
           cancellationReason: "User cancelled",
         },
