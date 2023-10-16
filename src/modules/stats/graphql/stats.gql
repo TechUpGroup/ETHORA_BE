@@ -1,5 +1,5 @@
 query ($timestamp_start: Int!, $timestamp_end: Int!, $timestamp_24h: Int!) {
-  tradingStatsOverview(orderBy: timestamp, orderDirection: desc, first: 1000, where: { period: daily }, subgraphError: allow) {
+  tradingStatsOverview: tradingStats(orderBy: timestamp, orderDirection: desc, first: 1000, where: { period: daily }, subgraphError: allow) {
     loss
     profit
     profitCumulative
