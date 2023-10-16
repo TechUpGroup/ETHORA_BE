@@ -82,7 +82,7 @@ export class TradesService {
     if (trade.state !== TRADE_STATE.OPENED) {
       throw new BadRequestException("Trade not in OPENED state");
     }
-    if (!trade.openDate || new Date(trade.openDate.getTime() + TRADE_EARLY_CLOSE_DURATION * 1000) < new Date()) {
+    if (!trade.openDate || new Date(trade.openDate.getTime() + TRADE_EARLY_CLOSE_DURATION * 1000) > new Date()) {
       throw new BadRequestException("Close trade too early");
     }
 
