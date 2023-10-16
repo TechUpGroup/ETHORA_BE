@@ -33,6 +33,7 @@ export class JobTradeService {
             update: {
               $set: {
                 state: TRADE_STATE.CANCELLED,
+                isCancelled: true,
                 cancellationReason: "Trade reached overtime",
                 cancellationDate: now,
                 closeDate: now,

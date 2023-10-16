@@ -44,6 +44,8 @@ export class TradesService {
     const result = await this.model.create(_data);
 
     // TODO: contract openTrade()
+    if (!isLimitOrder) {
+    }
 
     // return
     return result;
@@ -93,6 +95,8 @@ export class TradesService {
         $set: {
           userCloseDate: new Date(),
           state: TRADE_STATE.CLOSED,
+          // TODO: update price
+          expiryPrice: 0,
         },
       },
     );
@@ -133,7 +137,6 @@ export class TradesService {
   async getActiveUserTrades(userAddress: string, query: GetTradesUserActiveDto) {
     const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
 
-    // TODO: address remove for data test
     return await this.model.paginate(
       { userAddress, state: TRADE_STATE.OPENED },
       {
@@ -147,7 +150,6 @@ export class TradesService {
   async getLimitOrdersUserTrades(userAddress: string, query: GetTradesUserActiveDto) {
     const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
 
-    // TODO: address remove for data test
     return await this.model.paginate(
       { userAddress, state: TRADE_STATE.QUEUED },
       {
@@ -175,7 +177,7 @@ export class TradesService {
     const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
 
     return await this.model.paginate(
-      { userAddress, state: { $nin: [TRADE_STATE.OPENED, TRADE_STATE.QUEUED, TRADE_STATE.CANCELLED] } },
+      { userAddress, state: { $nin: [TRADE_STATE.OPENED, TRADE_STATE.QUEUED, TRADE_STATE.CREATED] } },
       {
         page,
         limit,
