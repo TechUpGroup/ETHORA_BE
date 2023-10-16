@@ -1,6 +1,6 @@
 import { PaginateModel } from "mongoose";
 
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 
 import { TRADES_MODEL, TradesDocument } from "./schemas/trades.schema";
@@ -23,8 +23,22 @@ export class TradesService {
   ) {}
 
   async createTrade(userAddress: string, data: CreateTradeDto) {
+    const { isLimitOrder } = data;
     // TODO: validate
-    const result = await this.model.create({ ...data, userAddress });
+    if (isLimitOrder && (data.limitOrderDuration < 60 || data.limitOrderDuration > 86400)) {
+      throw new BadRequestException("limitOrderDuration must >= 60 AND <= 86400.");
+    }
+
+    const now = new Date();
+    const _data: TradesDocument | any = {
+      ...data,
+      userAddress,
+      queueId: now.getTime(),
+      queuedDate: now,
+      limitOrderExpirationDate: new Date(data.limitOrderDuration * 1000 + now.getTime()),
+      state: isLimitOrder ? TRADE_STATE.QUEUED : TRADE_STATE.OPENED,
+    };
+    const result = await this.model.create(_data);
 
     // return
     return result;

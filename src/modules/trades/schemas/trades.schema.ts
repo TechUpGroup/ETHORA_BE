@@ -19,13 +19,16 @@ export class Trades {
   @Prop()
   queueId: number;
 
-  @Prop()
+  @Prop({ required: true })
   strike: number;
 
-  @Prop()
+  @Prop({ required: true })
+  strikeDate: Date;
+
+  @Prop({ required: true })
   period: number;
 
-  @Prop()
+  @Prop({ required: true })
   targetContract: string;
 
   @Prop()
@@ -68,7 +71,7 @@ export class Trades {
   @Exclude()
   settlementFeeSignature: string;
 
-  @Prop({ type: Date, required: false })
+  @Prop({ type: Date, required: false, default: null })
   expirationDate: Date | null;
 
   @Prop()
@@ -77,7 +80,7 @@ export class Trades {
   @Prop({ required: true, default: TRADE_STATE.QUEUED })
   state: TRADE_STATE;
 
-  @Prop({ type: Number, required: false })
+  @Prop({ type: Number, required: false, default: null })
   optionId: number | null;
 
   @Prop()
@@ -89,34 +92,35 @@ export class Trades {
   @Prop({ require: true })
   network: Network;
 
-  @Prop({ type: Number, required: false })
+  @Prop({ type: Number, required: false, default: null })
   expiryPrice: number | null;
 
-  @Prop({ type: String, required: false })
+  @Prop({ type: String, required: false, default: null })
   payout: string | null;
 
-  @Prop({ type: Date, required: false })
+  // close time pre-defined
+  @Prop({ type: Date, required: false, default: null })
   closeDate: Date | null;
 
   @Prop()
   limitOrderDuration: number;
 
-  @Prop({ type: String, required: false })
+  @Prop({ type: String, required: false, default: null })
   lockedAmount: string | null;
 
   @Prop()
   isCancelled: boolean;
 
-  @Prop({ type: String, required: false })
+  @Prop({ type: String, required: false, default: null })
   cancellationReason: string | null;
 
-  @Prop({ type: Date, required: false })
+  @Prop({ type: Date, required: false, default: null })
   cancellationDate: Date | null;
 
-  @Prop({ type: String, required: false })
+  @Prop({ type: String, required: false, default: null })
   earlyCloseSignature: string | null;
 
-  @Prop({ type: Date, required: false })
+  @Prop({ type: Date, required: false, default: null })
   userCloseDate: Date | null;
 
   @Prop()
@@ -128,7 +132,7 @@ export class Trades {
   @Prop()
   router?: string;
 
-  @Prop({ type: String, required: false })
+  @Prop({ type: String, required: false, default: null })
   pendingOperation?: string | null;
 }
 

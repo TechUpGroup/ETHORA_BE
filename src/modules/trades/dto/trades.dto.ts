@@ -3,6 +3,7 @@ import { ToLowerCase, Trim } from "common/decorators/transforms.decorator";
 import { ApiProperty } from "@nestjs/swagger";
 import { TRADE_TOKEN } from "common/enums/trades.enum";
 import { NetworkAndPaginationAndSortDto, NetworkDto } from "common/dto/network.dto";
+import { TRADE_DURATION } from "common/constants/trades";
 
 export class GetTradesUserActiveDto extends NetworkAndPaginationAndSortDto {
   @ApiProperty()
@@ -14,45 +15,45 @@ export class GetTradesUserActiveDto extends NetworkAndPaginationAndSortDto {
 }
 
 export class CreateTradeDto extends NetworkDto {
-  @ApiProperty()
-  signatureDate: Date;
+  // @ApiProperty()
+  // signatureDate: Date;
 
   @ApiProperty()
   strike: number;
 
-  @ApiProperty({ default: 60 })
+  @ApiProperty({ default: TRADE_DURATION.MIN })
   @IsNumber()
-  @Min(60)
-  @Max(86400)
+  @Min(TRADE_DURATION.MIN)
+  @Max(TRADE_DURATION.MAX)
   period: number;
 
   @ApiProperty()
   @IsEthereumAddress()
   targetContract: string;
 
-  @ApiProperty()
-  partialSignature: string;
+  // @ApiProperty()
+  // partialSignature: string;
 
-  @ApiProperty()
-  fullSignature: string;
+  // @ApiProperty()
+  // fullSignature: string;
 
   @ApiProperty()
   tradeSize: string;
 
-  @ApiProperty()
-  allowPartialFill: boolean;
+  // @ApiProperty()
+  // allowPartialFill: boolean;
 
   @ApiProperty()
   slippage: number;
 
-  @ApiProperty()
-  settlementFee: number;
+  // @ApiProperty()
+  // settlementFee: number;
 
-  @ApiProperty()
-  settlementFeeSignExpiration: number;
+  // @ApiProperty()
+  // settlementFeeSignExpiration: number;
 
-  @ApiProperty()
-  settlementFeeSignature: string;
+  // @ApiProperty()
+  // settlementFeeSignature: string;
 
   @ApiProperty()
   isAbove: boolean;
@@ -60,10 +61,10 @@ export class CreateTradeDto extends NetworkDto {
   @ApiProperty({ default: false })
   isLimitOrder: boolean;
 
-  @ApiProperty({ default: 60 })
+  @ApiProperty({ default: 0 })
   @IsNumber()
-  @Min(60)
-  @Max(86400)
+  @Min(0)
+  @Max(TRADE_DURATION.MAX)
   limitOrderDuration: number;
 
   @ApiProperty()
