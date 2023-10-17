@@ -141,7 +141,20 @@ export class TradesService {
     const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
 
     return await this.model.paginate(
-      { userAddress, state: TRADE_STATE.OPENED },
+      { userAddress, state: { $in: [TRADE_STATE.OPENED, TRADE_STATE.QUEUED] }, isLimitOrder: false },
+      {
+        page,
+        limit,
+        sort: { [sortBy]: sortType },
+      },
+    );
+  }
+
+  async getActivesUserTrades(userAddress: string, query: GetTradesUserActiveDto) {
+    const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
+
+    return await this.model.paginate(
+      { userAddress, state: { $in: [TRADE_STATE.OPENED, TRADE_STATE.QUEUED] } },
       {
         page,
         limit,
@@ -154,7 +167,7 @@ export class TradesService {
     const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
 
     return await this.model.paginate(
-      { userAddress, state: TRADE_STATE.QUEUED },
+      { userAddress, state: { $in: [TRADE_STATE.OPENED, TRADE_STATE.QUEUED] }, isLimitOrder: true },
       {
         page,
         limit,
