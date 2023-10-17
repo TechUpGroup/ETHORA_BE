@@ -21,6 +21,9 @@ export class CreateTradeDto extends NetworkDto {
   @ApiProperty()
   strike: number;
 
+  @ApiProperty({ default: new Date() })
+  strikeDate: Date;
+
   @ApiProperty({ default: TRADE_DURATION.MIN })
   @IsNumber()
   @Min(TRADE_DURATION.MIN)

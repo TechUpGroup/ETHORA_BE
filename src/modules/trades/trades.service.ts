@@ -29,6 +29,9 @@ export class TradesService {
     if (isLimitOrder && (data.limitOrderDuration < 60 || data.limitOrderDuration > 86400)) {
       throw new BadRequestException("limitOrderDuration must >= 60 AND <= 86400.");
     }
+    if (new Date(data.strikeDate.getTime() + data.period * 1000) < new Date()) {
+      throw new BadRequestException("strikeDate too old");
+    }
 
     const now = new Date();
     const _data: TradesDocument | any = {
