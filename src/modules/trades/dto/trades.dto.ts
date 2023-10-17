@@ -1,9 +1,10 @@
-import { IsEthereumAddress, IsMongoId, IsNumber, IsOptional, Max, Min } from "class-validator";
+import { IsDate, IsEthereumAddress, IsMongoId, IsNumber, IsNumberString, IsOptional, Max, Min } from "class-validator";
 import { ToLowerCase, Trim } from "common/decorators/transforms.decorator";
 import { ApiProperty } from "@nestjs/swagger";
 import { TRADE_TOKEN } from "common/enums/trades.enum";
 import { NetworkAndPaginationAndSortDto, NetworkDto } from "common/dto/network.dto";
 import { TRADE_DURATION } from "common/constants/trades";
+import { Transform } from "class-transformer";
 
 export class GetTradesUserActiveDto extends NetworkAndPaginationAndSortDto {
   @ApiProperty()
@@ -22,6 +23,8 @@ export class CreateTradeDto extends NetworkDto {
   strike: number;
 
   @ApiProperty({ default: new Date() })
+  @Transform(({ value }) => new Date(value))
+  @IsDate()
   strikeDate: Date;
 
   @ApiProperty({ default: TRADE_DURATION.MIN })
@@ -41,6 +44,7 @@ export class CreateTradeDto extends NetworkDto {
   // fullSignature: string;
 
   @ApiProperty()
+  @IsNumberString()
   tradeSize: string;
 
   // @ApiProperty()
