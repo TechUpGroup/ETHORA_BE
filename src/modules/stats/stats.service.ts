@@ -4,8 +4,11 @@ import config from "common/config";
 import { readFile } from "common/utils/string";
 import request from "graphql-request";
 import { getLinuxTimestampBefore24Hours } from "common/utils/date";
-import { maxBy, minBy, sortBy } from "lodash";
+import { chain, maxBy, minBy, sortBy, sumBy } from "lodash";
 import { fillNa } from "common/utils";
+
+const MOVING_AVERAGE_DAYS = 7;
+const MOVING_AVERAGE_PERIOD = 86400 * MOVING_AVERAGE_DAYS;
 
 @Injectable()
 export class StatsService {
@@ -17,7 +20,7 @@ export class StatsService {
 
     // stats data
     const statsGql = readFile("./graphql/stats.gql", __dirname);
-    const { userStats, USDCstats, USDC24stats, tradingStatsOverview, tradingStats, volumeStats }: any =
+    const { userStats, USDCstats, USDC24stats, tradingStatsOverview, tradingStats, volumeStats, feeStats }: any =
       await request<any>(graphql.uri, statsGql, {
         timestamp_start: start,
         timestamp_end: end,
@@ -115,13 +118,67 @@ export class StatsService {
       burnedBFRs: dataBurned?.burnedBFRs || [],
       overviewStats: dataOverview,
       poolStats,
+      feeStats: this.calcFeesData(start, feeStats),
       tradingStats: this.calcTradersData(tradingStats),
     } as any;
   }
 
+  private calcFeesData(from: any, _data: any) {
+    const PROPS = "fee".split(" ");
+
+    const feesChartData = (() => {
+      if (!_data) {
+        return null;
+      }
+
+      const chartData = sortBy(_data, "timestamp").map((item) => {
+        const ret: any = { timestamp: item.timestamp };
+
+        PROPS.forEach((prop) => {
+          if (item[prop]) {
+            ret[prop] = +item[prop];
+          }
+        });
+
+        ret.liquidation = item.marginAndLiquidation - item.margin;
+        ret.all = PROPS.reduce((memo, prop) => memo + ret[prop], 0);
+        return ret;
+      });
+
+      let cumulative = 0;
+      const cumulativeByTs = {};
+      return chain(chartData)
+        .groupBy((item) => item.timestamp)
+        .map((values, timestamp: any) => {
+          const all = sumBy(values, "all");
+          cumulative += all;
+
+          let movingAverageAll;
+          const movingAverageTs = timestamp - MOVING_AVERAGE_PERIOD;
+          if (movingAverageTs in cumulativeByTs) {
+            movingAverageAll = (cumulative - cumulativeByTs[movingAverageTs]) / MOVING_AVERAGE_DAYS;
+          }
+
+          const ret = {
+            timestamp: Number(timestamp),
+            all: all / 1e6,
+            cumulative: cumulative / 1e6,
+            movingAverageAll,
+          };
+          PROPS.forEach((prop) => {
+            ret[prop] = sumBy(values, prop) / 1e6;
+          });
+          cumulativeByTs[timestamp] = cumulative;
+          return ret;
+        })
+        .value()
+        .filter((item) => item.timestamp >= from);
+    })();
+
+    return feesChartData;
+  }
+
   private calcVolumesData(_data: any) {
-    const MOVING_AVERAGE_DAYS = 7;
-    const MOVING_AVERAGE_PERIOD = 86400 * MOVING_AVERAGE_DAYS;
     const PROPS = "amount VolumeUSDC".split(" ");
     const timestampProp = "timestamp";
 
