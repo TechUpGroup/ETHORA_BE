@@ -111,12 +111,56 @@ export class StatsService {
 
     return {
       USDC24stats,
-      volumeStats,
+      volumeStats: this.calcVolumesData(volumeStats),
       burnedBFRs: dataBurned?.burnedBFRs || [],
       overviewStats: dataOverview,
       poolStats,
       tradingStats: this.calcTradersData(tradingStats),
     } as any;
+  }
+
+  private calcVolumesData(_data: any) {
+    const MOVING_AVERAGE_DAYS = 7;
+    const MOVING_AVERAGE_PERIOD = 86400 * MOVING_AVERAGE_DAYS;
+    const PROPS = "amount VolumeUSDC".split(" ");
+    const timestampProp = "timestamp";
+
+    const data = (() => {
+      if (!_data) {
+        return null;
+      }
+
+      const ret: any = sortBy(_data, timestampProp).map((item) => {
+        const ret: any = { timestamp: item[timestampProp] };
+        let all = 0;
+        PROPS.forEach((prop) => {
+          ret[prop] = +item[prop] / 1e6;
+          if (prop === "amount") all += ret[prop];
+        });
+        ret.all = all;
+        return ret;
+      });
+
+      let cumulative = 0;
+      const cumulativeByTs = {};
+      return ret.map((item) => {
+        cumulative += item.all;
+
+        let movingAverageAll;
+        const movingAverageTs = item.timestamp - MOVING_AVERAGE_PERIOD;
+        if (movingAverageTs in cumulativeByTs) {
+          movingAverageAll = (cumulative - cumulativeByTs[movingAverageTs]) / MOVING_AVERAGE_DAYS;
+        }
+
+        return {
+          movingAverageAll,
+          cumulative,
+          ...item,
+        };
+      });
+    })();
+
+    return data;
   }
 
   private calcTradersData(_data: any) {
