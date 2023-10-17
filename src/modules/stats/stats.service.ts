@@ -69,19 +69,6 @@ export class StatsService {
     const payout = dataPayoutCalc?.data[dataPayoutCalc?.data.length - 1]?.pnlCumulative || 0;
     const payoutDelta = payout - (dataPayoutCalc?.data[dataPayoutCalc?.data.length - 2]?.pnlCumulative || 0);
 
-    // res overview
-    const dataOverview = {
-      totalVolume: USDCstats?.totalVolume / 1e6,
-      totalVolumeDelta: USDC24hrsStats?.amount,
-      totalFees: USDCstats?.totalSettlementFees / 1e6,
-      totalFeesDelta: USDC24hrsStats?.settlementFee,
-      totalUsers,
-      totalUsersDelta,
-      // openInterest: data.dashboardStats?.[0].openInterest / 1e6,
-      payout,
-      payoutDelta,
-    };
-
     // burned
     const burnedGql = readFile("./graphql/burned.gql", __dirname);
     const dataBurned: any = await request<any>(graphql.burnedUri, burnedGql, {
@@ -92,7 +79,7 @@ export class StatsService {
       return {} as any;
     });
 
-    // pool
+    // calc pool
     const poolGql = readFile("./graphql/pool.gql", __dirname);
     const dataPool: any = await request<any>(graphql.mainnetDummyUri, poolGql, {
       timestamp_start: start,
@@ -101,14 +88,33 @@ export class StatsService {
       console.error(error);
       return {} as any;
     });
+    const poolStats = this.calcPoolStats(dataPool || { poolStats: [] });
     // calc pool
+    const totalPool = poolStats.data?.[poolStats.data?.length - 1]?.glpSupply || 0;
+    const totalPoolDelta = poolStats.data?.[poolStats.data?.length - 1]?.glpSupplyChange || 0;
+
+    // res overview
+
+    const dataOverview = {
+      totalVolume: USDCstats?.totalVolume / 1e6,
+      totalVolumeDelta: USDC24hrsStats?.amount,
+      totalFees: USDCstats?.totalSettlementFees / 1e6,
+      totalFeesDelta: USDC24hrsStats?.settlementFee,
+      totalPool,
+      totalPoolDelta,
+      totalUsers,
+      totalUsersDelta,
+      // openInterest: data.dashboardStats?.[0].openInterest / 1e6,
+      payout,
+      payoutDelta,
+    };
 
     return {
       USDC24stats,
       volumeStats,
       burnedBFRs: dataBurned?.burnedBFRs || [],
       overviewStats: dataOverview,
-      poolStats: this.calcPoolStats(dataPool || { poolStats: [] }),
+      poolStats,
       tradingStats: this.calcTradersData(tradingStats),
     } as any;
   }
