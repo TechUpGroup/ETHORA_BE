@@ -28,6 +28,7 @@ export class SummaryGqlDto {
 
 export class LeaderboardGqlDto extends SummaryGqlDto {
   userStats: UserStatsGql[];
+  winnerWinrate: UserStatsGql[];
   loserStats: UserStatsGql[];
 }
 
@@ -49,5 +50,6 @@ export class LeaderboardSummaryResponse {
 
 export class LeaderboardResponse extends LeaderboardSummaryResponse {
   winners: UserStatsGql[];
+  winnersWinrate: UserStatsGql[];
   losers: UserStatsGql[];
 }

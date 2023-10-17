@@ -78,6 +78,7 @@ export class LeaderboardService {
 
     return {
       winners: data.userStats,
+      winnersWinrate: data.winnerWinrate,
       losers: data.loserStats,
       ...this.getSummary(network, type, data),
     };
