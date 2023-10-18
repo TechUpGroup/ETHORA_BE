@@ -15,6 +15,7 @@ import { RegisterAbi__factory, RouterAbi__factory } from "common/abis/types";
 import { SignerType } from "common/enums/signer.enum";
 import { plainToInstance } from "class-transformer";
 import { ContractsService } from "modules/contracts/contracts.service";
+import BigNumber from "bignumber.js";
 
 @Injectable()
 export class AuthService {
@@ -81,7 +82,11 @@ export class AuthService {
     ]);
 
     return {
-      user: { ...plainToInstance(Users, updatedUser.toObject()), isRegistered: wallet.isRegistered },
+      user: {
+        ...plainToInstance(Users, updatedUser.toObject()),
+        isRegistered: wallet.isRegistered,
+        isApproved: wallet.isApproved,
+      },
       tokens,
     };
   }
@@ -175,7 +180,7 @@ export class AuthService {
         ctr.contract_address,
         address,
         new Date().getTime(),
-        [2e256 - 1, permit.deadline, permit.v, permit.r, permit.s, true], // permit.shouldApprove = true
+        [new BigNumber("2e256").minus(1), permit.deadline, permit.v, permit.r, permit.s, true], // permit.shouldApprove = true
         {
           gasPrice: this.ethersService.getCurrentGas(network),
         },
@@ -184,7 +189,7 @@ export class AuthService {
         ctr.contract_address,
         address,
         new Date().getTime(),
-        [2e256 - 1, permit.deadline, permit.v, permit.r, permit.s, true],
+        [new BigNumber("2e256").minus(1), permit.deadline, permit.v, permit.r, permit.s, true],
         {
           gasPrice: this.ethersService.getCurrentGas(network),
         },
