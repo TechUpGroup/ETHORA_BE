@@ -11,11 +11,14 @@ import { AuthService } from "./auth.service";
 import { TOKENS_MODEL, TokensSchema } from "./schemas/tokens.schema";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { TokensService } from "./token.service";
+import { CONTRACTS_MODEL, ContractsSchema } from "modules/contracts/schemas/contracts.schema";
+import { ContractsService } from "modules/contracts/contracts.service";
 
 @Module({
   imports: [
     forwardRef(() => UsersModule),
     MongooseModule.forFeature([{ name: TOKENS_MODEL, schema: TokensSchema }]),
+    MongooseModule.forFeature([{ name: CONTRACTS_MODEL, schema: ContractsSchema }]),
     PassportModule.register({ defaultStrategy: "jwt" }),
     JwtModule.register({
       secret: config.jwt.secret,
@@ -23,7 +26,7 @@ import { TokensService } from "./token.service";
   ],
 
   controllers: [AuthController],
-  providers: [JwtStrategy, AuthService, TokensService],
+  providers: [JwtStrategy, AuthService, TokensService, ContractsService],
   exports: [JwtModule, AuthService, TokensService],
 })
 export class AuthModule {}

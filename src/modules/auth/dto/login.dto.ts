@@ -1,4 +1,4 @@
-import { IsBoolean, IsEthereumAddress, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsEthereumAddress, IsNumber, IsOptional, IsString } from "class-validator";
 import { ToLowerCase, Trim } from "common/decorators/transforms.decorator";
 
 import { ApiProperty } from "@nestjs/swagger";
@@ -29,4 +29,27 @@ export class RegisterDto extends NetworkDto {
   @ApiProperty({ default: true })
   @IsBoolean()
   isRegister: boolean;
+}
+
+export class Permit {
+  @ApiProperty()
+  @IsNumber()
+  deadline: number;
+
+  @ApiProperty()
+  @IsNumber()
+  v: number;
+
+  @ApiProperty()
+  @IsString()
+  r: string;
+
+  @ApiProperty()
+  @IsString()
+  s: string;
+}
+
+export class ApproveDto extends NetworkDto {
+  @ApiProperty()
+  permit: Permit;
 }

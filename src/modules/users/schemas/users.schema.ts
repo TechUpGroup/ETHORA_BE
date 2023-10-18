@@ -63,6 +63,9 @@ export class Wallets {
 
   @Prop({ required: false, default: false })
   isRegistered: boolean;
+
+  @Prop({ required: false, default: false })
+  isApproved: boolean;
 }
 
 export type WalletsDocument = Wallets & Document;

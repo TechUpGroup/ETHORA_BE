@@ -54,6 +54,9 @@ blockchain:
       register:
         address: ""
         blocknumber_creator: 0
+      usdc:
+        address: ""
+        blocknumber_creator: 0
   84531:
     provider: https://1rpc.io/base-goerli
     chain_id: 84531
@@ -66,5 +69,8 @@ blockchain:
         address: ""
         blocknumber_creator: 0
       register:
+        address: ""
+        blocknumber_creator: 0
+      usdc:
         address: ""
         blocknumber_creator: 0

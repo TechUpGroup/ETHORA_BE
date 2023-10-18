@@ -2,18 +2,19 @@ import { utils } from "ethers";
 import { UsersService } from "modules/users/users.service";
 import { Users } from "modules/users/schemas/users.schema";
 import { v4 as uuidv4 } from "uuid";
-import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { AuthMessage } from "./constants/auth-message.enum";
 import { TokenTypes } from "./constants/token.constant";
-import { LoginDto, RegisterDto } from "./dto/login.dto";
+import { ApproveDto, LoginDto, RegisterDto } from "./dto/login.dto";
 import { IVerifySignature } from "./interfaces/token.interface";
 import { TokensService } from "./token.service";
 import { EthersService } from "modules/_shared/services/ethers.service";
 import config from "common/config";
 import { ContractName } from "common/constants/contract";
-import { RegisterAbi__factory } from "common/abis/types";
+import { RegisterAbi__factory, RouterAbi__factory } from "common/abis/types";
 import { SignerType } from "common/enums/signer.enum";
 import { plainToInstance } from "class-transformer";
+import { ContractsService } from "modules/contracts/contracts.service";
 
 @Injectable()
 export class AuthService {
@@ -21,6 +22,7 @@ export class AuthService {
     private readonly tokenService: TokensService,
     private readonly userService: UsersService,
     private readonly ethersService: EthersService,
+    private readonly contractService: ContractsService,
   ) {}
 
   async getNonce(address: string) {
@@ -138,6 +140,60 @@ export class AuthService {
     }
 
     wallet.isRegistered = isRegister;
+    await wallet.save();
+
+    //
+    return true;
+  }
+
+  async approve(userId: string, dto: ApproveDto) {
+    const { network, permit } = dto;
+    // call contract
+    const user = await this.userService.findUserById(userId);
+    const wallet = await this.userService.findWalletByNetworkAndId(network, user._id);
+    const ctr = await this.contractService.getContractByName(ContractName.USDC, network);
+    if (!ctr) {
+      throw new NotFoundException("Token address not found");
+    }
+    const { address } = user;
+
+    if (wallet.isApproved) {
+      throw new BadRequestException("Already approved");
+    }
+
+    //
+    const contract = this.ethersService.getContract(
+      network,
+      config.getContract(network, ContractName.ROUTER).address,
+      RouterAbi__factory.abi,
+      SignerType.operator,
+    );
+
+    // process action
+    try {
+      await contract.estimateGas.approveViaSignature(
+        ctr.contract_address,
+        address,
+        new Date().getTime(),
+        [2e256 - 1, permit.deadline, permit.v, permit.r, permit.s, true], // permit.shouldApprove = true
+        {
+          gasPrice: this.ethersService.getCurrentGas(network),
+        },
+      );
+      await contract.approveViaSignature(
+        ctr.contract_address,
+        address,
+        new Date().getTime(),
+        [2e256 - 1, permit.deadline, permit.v, permit.r, permit.s, true],
+        {
+          gasPrice: this.ethersService.getCurrentGas(network),
+        },
+      );
+    } catch (e) {
+      throw new BadRequestException(e);
+    }
+
+    wallet.isApproved = true;
     await wallet.save();
 
     //
