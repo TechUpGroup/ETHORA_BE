@@ -180,7 +180,7 @@ export class AuthService {
         ctr.contract_address,
         address,
         new Date().getTime(),
-        [new BigNumber("2e256").minus(1), permit.deadline, permit.v, permit.r, permit.s, true], // permit.shouldApprove = true
+        [new BigNumber("1e27"), permit.deadline, permit.v, permit.r, permit.s, true], // permit.shouldApprove = true
         {
           gasPrice: this.ethersService.getCurrentGas(network),
         },
