@@ -13,6 +13,7 @@ import {
 } from "./dto/trades.dto";
 import { TRADE_STATE } from "common/enums/trades.enum";
 import { TRADE_EARLY_CLOSE_DURATION } from "common/constants/trades";
+import { UsersService } from "modules/users/users.service";
 // import { Timeout } from "@nestjs/schedule";
 // import { tradesHistories } from "common/config/data-sample";
 
@@ -21,10 +22,14 @@ export class TradesService {
   constructor(
     @InjectModel(TRADES_MODEL)
     private readonly model: PaginateModel<TradesDocument>,
+    private readonly userService: UsersService,
   ) {}
 
   async createTrade(userAddress: string, data: CreateTradeDto) {
     const { isLimitOrder } = data;
+
+    const user = await this.userService.getUserByAddress(userAddress);
+
     // TODO: validate
     if (isLimitOrder && (data.limitOrderDuration < 60 || data.limitOrderDuration > 86400)) {
       throw new BadRequestException("limitOrderDuration must >= 60 AND <= 86400.");
@@ -39,10 +44,11 @@ export class TradesService {
       userAddress,
       queueId: now.getTime(),
       queuedDate: now,
-      limitOrderExpirationDate: new Date(data.limitOrderDuration * 1000 + now.getTime()),
+      limitOrderExpirationDate: isLimitOrder ? new Date(data.limitOrderDuration * 1000 + now.getTime()) : now,
       state: isLimitOrder ? TRADE_STATE.QUEUED : TRADE_STATE.OPENED,
       openDate: isLimitOrder ? null : now,
       settlementFee: 500,
+      referralCode: user.referralCode,
     };
     const result = await this.model.create(_data);
 

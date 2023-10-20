@@ -45,6 +45,8 @@ export const tradesDownPayload: [Trades & { _id: any }] = [
     openDate: new Date(1695294853000),
     token: TRADE_TOKEN.USDC,
     payout: null,
+    router: "0xB52b89281Bff5D1d79Bc4F4181d08A6989201531",
+    pair: "BTC-USD",
   },
 ];
 
@@ -90,6 +92,8 @@ export const tradesHistories: Array<Trades & { _id: any }> = [
     userCloseDate: null,
     openDate: new Date(1695294853000),
     token: TRADE_TOKEN.USDC,
+    router: "0xB52b89281Bff5D1d79Bc4F4181d08A6989201531",
+    pair: "BTC-USD",
   },
   {
     _id: "507f191e810c19729de861ea",
@@ -134,6 +138,7 @@ export const tradesHistories: Array<Trades & { _id: any }> = [
     token: TRADE_TOKEN.USDC,
     router: "0xB52b89281Bff5D1d79Bc4F4181d08A6989201531",
     pendingOperation: null,
+    pair: "BTC-USD",
   },
   {
     _id: "507f191e810c19729de862ea",
@@ -177,6 +182,7 @@ export const tradesHistories: Array<Trades & { _id: any }> = [
     openDate: new Date(1695829335000),
     token: TRADE_TOKEN.USDC,
     router: "0xB52b89281Bff5D1d79Bc4F4181d08A6989201531",
+    pair: "BTC-USD",
   },
   {
     _id: "507f191e810c19729de863ea",
@@ -220,5 +226,6 @@ export const tradesHistories: Array<Trades & { _id: any }> = [
     openDate: new Date(1695828796000),
     token: TRADE_TOKEN.USDC,
     router: "0xB52b89281Bff5D1d79Bc4F4181d08A6989201531",
+    pair: "BTC-USD",
   },
 ];

@@ -31,6 +31,9 @@ export class Trades {
   @Prop({ required: true })
   targetContract: string;
 
+  @Prop({ required: true })
+  pair: string;
+
   @Prop()
   @Exclude()
   userPartialSignature: string;
@@ -45,7 +48,6 @@ export class Trades {
     lowercase: true,
     validate: validateAddress,
   })
-  @Exclude()
   userAddress: string;
 
   @Prop()
@@ -130,7 +132,7 @@ export class Trades {
   token: TRADE_TOKEN;
 
   @Prop()
-  router?: string;
+  router: string;
 
   @Prop({ type: String, required: false, default: null })
   pendingOperation?: string | null;

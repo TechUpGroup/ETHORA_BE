@@ -1,4 +1,14 @@
-import { IsDate, IsEthereumAddress, IsMongoId, IsNumber, IsNumberString, IsOptional, Max, Min } from "class-validator";
+import {
+  IsDate,
+  IsEthereumAddress,
+  IsMongoId,
+  IsNumber,
+  IsNumberString,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from "class-validator";
 import { ToLowerCase, Trim } from "common/decorators/transforms.decorator";
 import { ApiProperty } from "@nestjs/swagger";
 import { TRADE_TOKEN } from "common/enums/trades.enum";
@@ -36,6 +46,10 @@ export class CreateTradeDto extends NetworkDto {
   @ApiProperty()
   @IsEthereumAddress()
   targetContract: string;
+
+  @ApiProperty()
+  @IsString()
+  pair: string;
 
   // @ApiProperty()
   // partialSignature: string;

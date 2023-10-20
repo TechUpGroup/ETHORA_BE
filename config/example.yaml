@@ -30,6 +30,10 @@ jwt:
 i18n:
   fallback_language: en
 
+ws:
+  priceUpdate:
+    url: wss://hermes.pyth.network/ws
+
 network_supported: [8453, 84531]
 
 blockchain:

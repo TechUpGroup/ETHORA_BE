@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { TRADE_STATE } from "common/enums/trades.enum";
+import { SocketPriceService } from "modules/_shared/services/socket-price.service";
 import { TRADES_MODEL, TradesDocument } from "modules/trades/schemas/trades.schema";
 import { PaginateModel } from "mongoose";
 
@@ -10,6 +11,7 @@ export class JobTradeService {
   constructor(
     @InjectModel(TRADES_MODEL)
     private readonly tradesModel: PaginateModel<TradesDocument>,
+    private readonly socketPriceService: SocketPriceService,
   ) {}
 
   @Cron(CronExpression.EVERY_10_SECONDS)
@@ -49,5 +51,16 @@ export class JobTradeService {
       console.log(">>> Trades change to CANCELED: " + tradesExpired.length);
       this.tradesModel.bulkWrite(tradesExpired);
     }
+  }
+
+  @Cron(CronExpression.EVERY_10_SECONDS)
+  private async test() {
+    // const pairPrice = this.socketPriceService.pairPrice;
+    // console.log(">>>>>", pairPrice);
+  }
+
+  @Cron(CronExpression.EVERY_SECOND)
+  private async tradeMarket() {
+
   }
 }

@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import { FEED_IDS } from 'common/constants/price';
-import WebSocket from 'ws';
+import { Injectable } from "@nestjs/common";
+import config from "common/config";
+import { FEED_IDS } from "common/constants/price";
+import WebSocket from "ws";
 
 @Injectable()
 export class SocketPriceService {
+  public pairPrice: any = {};
   private client: WebSocket;
 
   constructor() {
@@ -11,27 +13,51 @@ export class SocketPriceService {
   }
 
   private connectToWSS() {
-    const wssUrl = 'wss://hermes.pyth.network/ws';
+    const wssUrl = config.ws.priceUpdate.url;
 
     this.client = new WebSocket(wssUrl);
 
-    this.client.on('open', () => {
-      console.log('Connected to WSS server');
+    this.client.on("open", () => {
+      console.log("Connected to WSS server");
 
       const request = {
-        type: 'subscribe',
-        ids: Object.values(FEED_IDS)
-    };
+        type: "subscribe",
+        ids: Object.values(FEED_IDS),
+      };
       this.client.send(JSON.stringify(request));
     });
 
-    // this.client.on('message', (data) => {
-    //   console.log('Received:', data);
-    // });
-
-    this.client.on('close', (code, reason) => {
-      console.log(`Connection closed with code ${code} and reason: ${reason}`);
+    this.client.on("message", (data) => {
+      try {
+        const json = JSON.parse(data.toString());
+        if (json.type === "price_update") {
+          this.updatePairPriceToMem(json);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+      // console.log('Received:', data);
     });
+
+    this.client.on("close", (code, reason) => {
+      console.log(`Connection closed with code ${code} and reason: ${reason}`);
+      // reconnect
+      this.connectToWSS();
+    });
+  }
+
+  private updatePairPriceToMem(json: any) {
+    const {
+      id,
+      price: { price, publish_time },
+    } = json.price_feed;
+
+    if (!this.pairPrice[id]) {
+      this.pairPrice[id] = [];
+    }
+
+    this.pairPrice[id].unshift({ price, publish_time });
+    this.pairPrice[id].splice(10);
   }
 
   public send(data: string) {

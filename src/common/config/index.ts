@@ -76,6 +76,14 @@ class Config {
     };
   }
 
+  get ws() {
+    return {
+      priceUpdate: {
+        url: this.getString("ws.priceUpdate.url"),
+      },
+    };
+  }
+
   get jwt() {
     return {
       secret: this.getString("jwt.secret"),
