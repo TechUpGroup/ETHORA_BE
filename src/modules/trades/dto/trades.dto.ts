@@ -61,6 +61,10 @@ export class CreateTradeDto extends NetworkDto {
   @IsNumberString()
   tradeSize: string;
 
+  @ApiProperty({ default: "" })
+  @IsOptional()
+  referralCode: string;
+
   // @ApiProperty()
   // allowPartialFill: boolean;
 
@@ -149,4 +153,8 @@ export class CloseTradeDto {
   @ApiProperty()
   @IsMongoId()
   _id: string;
+}
+
+export class OpenTradeDto {
+  
 }

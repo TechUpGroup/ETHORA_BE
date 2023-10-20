@@ -1,9 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { PairContractName } from "common/constants/contract";
+import { RouterAbi__factory } from "common/abis/types";
+import config from "common/config";
+import { ContractName, PairContractName } from "common/constants/contract";
 import { FEED_IDS } from "common/constants/price";
+import { Network } from "common/enums/network.enum";
+import { SignerType } from "common/enums/signer.enum";
 import { TRADE_STATE } from "common/enums/trades.enum";
+import { EthersService } from "modules/_shared/services/ethers.service";
 import { SocketPriceService } from "modules/_shared/services/socket-price.service";
 import { TRADES_MODEL, TradesDocument } from "modules/trades/schemas/trades.schema";
 import { PaginateModel } from "mongoose";
@@ -18,6 +23,7 @@ export class JobTradeService {
     @InjectModel(TRADES_MODEL)
     private readonly tradesModel: PaginateModel<TradesDocument>,
     private readonly socketPriceService: SocketPriceService,
+    private readonly ethersService: EthersService,
   ) {
     this.loadTradesMarket();
     this.loadTradesLimitOrder();
@@ -29,7 +35,7 @@ export class JobTradeService {
       isLimitOrder: false,
     });
     if (trades.length) {
-      console.log('[TradeMarket] Loaded', trades.length, 'tradesMarket to queues')
+      console.log("[TradeMarket] Loaded", trades.length, "tradesMarket to queues");
       this.queuesMarket.push(...trades);
     }
   }
@@ -121,5 +127,35 @@ export class JobTradeService {
     }
 
     this.isProcessingTradeMarket = false;
+  }
+
+  private async openTradeContract({ network }: { network: Network }) {
+    // get contract
+    const contract = this.ethersService.getContract(
+      network,
+      config.getContract(network, ContractName.ROUTER).address,
+      RouterAbi__factory.abi,
+      SignerType.operator,
+    );
+    // gas estimate
+    await contract.estimateGas.openTrades(
+      ctr.contract_address,
+      address,
+      new Date().getTime(),
+      [maxApprove, permit.deadline, permit.v, permit.r, permit.s, true], // permit.shouldApprove = true
+      {
+        gasPrice: this.ethersService.getCurrentGas(network),
+      },
+    );
+    // write contract
+    await contract.openTrades(
+      ctr.contract_address,
+      address,
+      new Date().getTime(),
+      [maxApprove, permit.deadline, permit.v, permit.r, permit.s, true],
+      {
+        gasPrice: this.ethersService.getCurrentGas(network),
+      },
+    );
   }
 }

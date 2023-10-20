@@ -49,11 +49,11 @@ export class TradesService {
       userAddress,
       queueId: now.getTime(),
       queuedDate: now,
+      limitOrderDuration: isLimitOrder ? data.limitOrderDuration : 0,
       limitOrderExpirationDate: isLimitOrder ? new Date(data.limitOrderDuration * 1000 + now.getTime()) : now,
       state: isLimitOrder ? TRADE_STATE.QUEUED : TRADE_STATE.OPENED,
       openDate: now,
       settlementFee: 500,
-      referralCode: user.referralCode,
     };
     const result = await this.model.create(_data);
 
