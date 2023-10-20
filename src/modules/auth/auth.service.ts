@@ -86,6 +86,8 @@ export class AuthService {
         ...plainToInstance(Users, updatedUser.toObject()),
         isRegistered: wallet.isRegistered,
         isApproved: wallet.isApproved,
+        isShouldApproved: wallet.isShouldApproved,
+        lastApprovedDate: wallet.lastApproveDate,
       },
       tokens,
     };
@@ -199,7 +201,9 @@ export class AuthService {
       throw new BadRequestException(e);
     }
 
+    // TODO: approve before trade
     wallet.isApproved = true;
+    wallet.lastApproveDate = new Date();
     await wallet.save();
 
     //

@@ -100,7 +100,6 @@ export class Trades {
   @Prop({ type: String, required: false, default: null })
   payout: string | null;
 
-  // close time pre-defined
   @Prop({ type: Date, required: false, default: null })
   closeDate: Date | null;
 

@@ -151,6 +151,15 @@ class Config {
     };
   }
 
+  getPairContract(network: Network, key: ContractName) {
+    const address = this.getBlockChainInfo(network, `contract.${key}.address`);
+    const blocknumber_creator = this.getBlockChainInfo(network, `contract.${key}.blocknumber_creator`);
+    return {
+      address,
+      blocknumber_creator: Number(blocknumber_creator || 0),
+    };
+  }
+
   getGraphql(network: Network) {
     const uri = this.getBlockChainInfo(network, `graphql.uri`);
     const burnedUri = this.getBlockChainInfo(network, `graphql.burnedUri`);

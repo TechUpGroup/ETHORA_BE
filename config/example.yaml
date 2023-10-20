@@ -61,6 +61,10 @@ blockchain:
       usdc:
         address: ""
         blocknumber_creator: 0
+    pairContract:
+      BTCUSD:
+        address: ""
+        blocknumber_creator: 0
   84531:
     provider: https://1rpc.io/base-goerli
     chain_id: 84531
@@ -76,5 +80,9 @@ blockchain:
         address: ""
         blocknumber_creator: 0
       usdc:
+        address: ""
+        blocknumber_creator: 0
+    pairContract:
+      BTCUSD:
         address: ""
         blocknumber_creator: 0

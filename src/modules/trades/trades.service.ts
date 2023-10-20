@@ -12,7 +12,7 @@ import {
   UpdateTradeDto,
 } from "./dto/trades.dto";
 import { TRADE_STATE } from "common/enums/trades.enum";
-import { TRADE_EARLY_CLOSE_DURATION } from "common/constants/trades";
+import { TRADE_DURATION, TRADE_EARLY_CLOSE_DURATION } from "common/constants/trades";
 import { UsersService } from "modules/users/users.service";
 // import { Timeout } from "@nestjs/schedule";
 // import { tradesHistories } from "common/config/data-sample";
@@ -29,12 +29,17 @@ export class TradesService {
     const { isLimitOrder } = data;
 
     const user = await this.userService.getUserByAddress(userAddress);
+    const wallet = await this.userService.findWalletByNetworkAndId(data.network, user._id);
+
+    if (!wallet.isApproved) {
+      // TODO: merge approve and first trade
+    }
 
     // TODO: validate
     if (isLimitOrder && (data.limitOrderDuration < 60 || data.limitOrderDuration > 86400)) {
       throw new BadRequestException("limitOrderDuration must >= 60 AND <= 86400.");
     }
-    if (new Date(data.strikeDate.getTime() + data.period * 1000) < new Date()) {
+    if (new Date(data.strikeDate.getTime() + TRADE_DURATION.BUFFER * 1000) < new Date()) {
       throw new BadRequestException("strikeDate too old");
     }
 
@@ -46,7 +51,7 @@ export class TradesService {
       queuedDate: now,
       limitOrderExpirationDate: isLimitOrder ? new Date(data.limitOrderDuration * 1000 + now.getTime()) : now,
       state: isLimitOrder ? TRADE_STATE.QUEUED : TRADE_STATE.OPENED,
-      openDate: isLimitOrder ? null : now,
+      openDate: now,
       settlementFee: 500,
       referralCode: user.referralCode,
     };
@@ -66,7 +71,14 @@ export class TradesService {
     if (!trade) {
       throw new NotFoundException("Trade not found");
     }
+    if (!trade.isLimitOrder) {
+      throw new NotFoundException("Trade not isLimitOrder");
+    }
+    if (trade.state !== TRADE_STATE.QUEUED) {
+      throw new NotFoundException("Trade not in QUEUED");
+    }
 
+    const now = new Date();
     const result = await this.model.updateOne(
       {
         _id: data._id,
@@ -75,6 +87,7 @@ export class TradesService {
       {
         $set: {
           ...data,
+          limitOrderExpirationDate: new Date(data.limitOrderDuration * 1000 + now.getTime()),
         },
       },
     );
