@@ -32,8 +32,10 @@ export class EthersService {
       const provider = new JsonRpcBatchProvider(config.getEthereumProvider(network));
 
       const signerTypes = new Map<SignerType, Wallet>();
-      const prkOperator = configPrivate.get<string>(`blockchain.private_key`);
+      const prkOperator = configPrivate.get<string>(`blockchain.private_key.operator`);
+      const prkSfPublisher = configPrivate.get<string>(`blockchain.private_key.sfPublisher`);
       if (prkOperator) signerTypes.set(SignerType.operator, getWallet(prkOperator, provider));
+      if (prkSfPublisher) signerTypes.set(SignerType.sfPublisher, getWallet(prkSfPublisher, provider));
 
       this.ethersMap.set(network, { provider, signers: signerTypes });
     }
@@ -51,8 +53,10 @@ export class EthersService {
         } catch {
           const provider = new JsonRpcBatchProvider(config.listRPC(network)[Math.floor(Math.random() * 4)]);
           const signerTypes = new Map<SignerType, Wallet>();
-          const prkOperator = configPrivate.get<string>(`blockchain.private_key`);
+          const prkOperator = configPrivate.get<string>(`blockchain.private_key.operator`);
+          const prkSfPublisher = configPrivate.get<string>(`blockchain.private_key.sfPublisher`);
           if (prkOperator) signerTypes.set(SignerType.operator, getWallet(prkOperator, provider));
+          if (prkSfPublisher) signerTypes.set(SignerType.sfPublisher, getWallet(prkSfPublisher, provider));
 
           this.ethersMap.set(network, { provider, signers: signerTypes });
         }
