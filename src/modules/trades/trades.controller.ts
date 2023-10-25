@@ -15,6 +15,7 @@ import {
 import { UsersDocument } from "modules/users/schemas/users.schema";
 import MongooseClassSerializerInterceptor from "common/interceptors/mongodb.interceptor";
 import { Trades } from "./schemas/trades.schema";
+import { NetworkAndPaginationAndSortDto } from "common/dto/network.dto";
 
 @ApiTags("Trades")
 @Controller("trades")
@@ -48,6 +49,18 @@ export class TradesController {
   @ApiOperation({ summary: `Cancel a trade` })
   cancelTrade(@User() user: UsersDocument, @Body() data: CancelTradeDto) {
     return this.service.cancelTrade(user.address, data);
+  }
+
+  @Get("all_active")
+  @ApiOperation({ summary: `Get All Active Trades of Platform` })
+  getAllActiveTrades(@Query() query: NetworkAndPaginationAndSortDto) {
+    return this.service.getAllActiveTrades(query);
+  }
+
+  @Get("all_history")
+  @ApiOperation({ summary: `Get All History Trades of Platform` })
+  getAllHistoryTrades(@Query() query: NetworkAndPaginationAndSortDto) {
+    return this.service.getAllHistoryTrades(query);
   }
 
   @Get("user/active")

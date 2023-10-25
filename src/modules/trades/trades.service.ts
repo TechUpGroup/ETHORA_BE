@@ -14,6 +14,8 @@ import {
 import { TRADE_STATE } from "common/enums/trades.enum";
 import { TRADE_DURATION, TRADE_EARLY_CLOSE_DURATION } from "common/constants/trades";
 import { UsersService } from "modules/users/users.service";
+import { NetworkAndPaginationAndSortDto } from "common/dto/network.dto";
+import { JobTradeService } from "modules/_jobs/trades/job-trade.service";
 // import { Timeout } from "@nestjs/schedule";
 // import { tradesHistories } from "common/config/data-sample";
 
@@ -23,6 +25,7 @@ export class TradesService {
     @InjectModel(TRADES_MODEL)
     private readonly model: PaginateModel<TradesDocument>,
     private readonly userService: UsersService,
+    private readonly jobTradeService: JobTradeService,
   ) {}
 
   async createTrade(userAddress: string, data: CreateTradeDto) {
@@ -57,8 +60,10 @@ export class TradesService {
     };
     const result = await this.model.create(_data);
 
-    // TODO: contract openTrade()
     if (!isLimitOrder) {
+      this.jobTradeService.queuesMarket.push(result);
+    } else {
+      this.jobTradeService.queuesLimitOrder.push(result);
     }
 
     // return
@@ -154,6 +159,32 @@ export class TradesService {
     );
 
     return result;
+  }
+
+  async getAllActiveTrades(query: NetworkAndPaginationAndSortDto) {
+    const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
+
+    return await this.model.paginate(
+      { state: { $in: [TRADE_STATE.OPENED, TRADE_STATE.QUEUED] } },
+      {
+        page,
+        limit,
+        sort: { [sortBy]: sortType },
+      },
+    );
+  }
+
+  async getAllHistoryTrades(query: NetworkAndPaginationAndSortDto) {
+    const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
+
+    return await this.model.paginate(
+      { state: { $nin: [TRADE_STATE.OPENED, TRADE_STATE.QUEUED, TRADE_STATE.CREATED] } },
+      {
+        page,
+        limit,
+        sort: { [sortBy]: sortType },
+      },
+    );
   }
 
   async getActiveUserTrades(userAddress: string, query: GetTradesUserActiveDto) {

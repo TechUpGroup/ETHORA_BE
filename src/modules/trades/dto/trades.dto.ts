@@ -65,8 +65,8 @@ export class CreateTradeDto extends NetworkDto {
   @IsOptional()
   referralCode: string;
 
-  // @ApiProperty()
-  // allowPartialFill: boolean;
+  @ApiProperty({ default: false })
+  allowPartialFill: boolean;
 
   @ApiProperty()
   slippage: number;
@@ -155,6 +155,4 @@ export class CloseTradeDto {
   _id: string;
 }
 
-export class OpenTradeDto {
-  
-}
+export class OpenTradeDto {}

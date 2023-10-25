@@ -5,7 +5,6 @@ import { RouterAbi__factory } from "common/abis/types";
 import config from "common/config";
 import { ContractName, PairContractName } from "common/constants/contract";
 import { FEED_IDS } from "common/constants/price";
-import { Network } from "common/enums/network.enum";
 import { SignerType } from "common/enums/signer.enum";
 import { TRADE_STATE } from "common/enums/trades.enum";
 import { EthersService } from "modules/_shared/services/ethers.service";
@@ -129,32 +128,50 @@ export class JobTradeService {
     this.isProcessingTradeMarket = false;
   }
 
-  private async openTradeContract({ network }: { network: Network }) {
+  private async openTradeContract(trade: TradesDocument) {
     // get contract
     const contract = this.ethersService.getContract(
-      network,
-      config.getContract(network, ContractName.ROUTER).address,
+      trade.network,
+      config.getContract(trade.network, ContractName.ROUTER).address,
       RouterAbi__factory.abi,
       SignerType.operator,
     );
     // gas estimate
     await contract.estimateGas.openTrades(
-      ctr.contract_address,
-      address,
-      new Date().getTime(),
-      [maxApprove, permit.deadline, permit.v, permit.r, permit.s, true], // permit.shouldApprove = true
+      trade.queueId,
+      trade.settlementFee,
+      trade.period,
+      trade.targetContract,
+      trade.strike,
+      trade.slippage,
+      trade.allowPartialFill || false,
+      trade.referralCode,
+      trade.isAbove,
+      trade.settlementFee,
+      trade.isLimitOrder,
+      0, // limitOrderExpiry
+      500, // userSignedSettlementFee
       {
-        gasPrice: this.ethersService.getCurrentGas(network),
+        gasPrice: this.ethersService.getCurrentGas(trade.network),
       },
     );
     // write contract
     await contract.openTrades(
-      ctr.contract_address,
-      address,
-      new Date().getTime(),
-      [maxApprove, permit.deadline, permit.v, permit.r, permit.s, true],
+      trade.queueId,
+      trade.settlementFee,
+      trade.period,
+      trade.targetContract,
+      trade.strike,
+      trade.slippage,
+      trade.allowPartialFill || false,
+      trade.referralCode,
+      trade.isAbove,
+      trade.settlementFee,
+      trade.isLimitOrder,
+      0, // limitOrderExpiry
+      500, // userSignedSettlementFee
       {
-        gasPrice: this.ethersService.getCurrentGas(network),
+        gasPrice: this.ethersService.getCurrentGas(trade.network),
       },
     );
   }

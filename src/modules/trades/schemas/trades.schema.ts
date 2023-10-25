@@ -115,6 +115,10 @@ export class Trades {
   @Prop({ type: String, required: false, default: null })
   cancellationReason: string | null;
 
+  @Prop({ type: String, required: false, default: null })
+  @Exclude()
+  errorLogs?: string | null;
+
   @Prop({ type: Date, required: false, default: null })
   cancellationDate: Date | null;
 

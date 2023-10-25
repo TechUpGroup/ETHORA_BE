@@ -37,7 +37,9 @@ ws:
 network_supported: [8453, 84531]
 
 blockchain:
-  private_key: ""
+  private_key:
+    operator: ""
+    sfPublisher: ""
   8453:
     provider: https://base.publicnode.com
     chain_id: 8453
