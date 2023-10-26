@@ -69,3 +69,12 @@ export const getProbabilityByTime = (
 
   return probability;
 };
+
+export const calcLockedAmount = async (contract, userAddress: string, data: TradesDocument | any) => {
+  const [amount] = await contract.evaluateParams(
+    [data.strike, 0, data.period, data.allowPartialFill, data.tradeSize, userAddress, data.referralCode, 1250],
+    data.slippage,
+  );
+  const lockedAmount = Number(amount.toString()) / 1e6 + Number(data.tradeSize) / 1e6;
+  return `${Number(lockedAmount.toFixed(2)) * 1e6}`;
+};

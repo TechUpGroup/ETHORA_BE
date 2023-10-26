@@ -16,6 +16,11 @@ import { TRADE_DURATION, TRADE_EARLY_CLOSE_DURATION } from "common/constants/tra
 import { UsersService } from "modules/users/users.service";
 import { NetworkAndPaginationAndSortDto } from "common/dto/network.dto";
 import { JobTradeService } from "modules/_jobs/trades/job-trade.service";
+import { EthersService } from "modules/_shared/services/ethers.service";
+import config from "common/config";
+import { PairContractName, PairContractType } from "common/constants/contract";
+import { PAIR_CONTRACT_ABIS } from "common/constants/abis";
+import { calcLockedAmount } from "common/utils/trades";
 // import { Timeout } from "@nestjs/schedule";
 // import { tradesHistories } from "common/config/data-sample";
 
@@ -26,6 +31,7 @@ export class TradesService {
     private readonly model: PaginateModel<TradesDocument>,
     private readonly userService: UsersService,
     private readonly jobTradeService: JobTradeService,
+    private readonly ethersService: EthersService,
   ) {}
 
   async createTrade(userAddress: string, data: CreateTradeDto) {
@@ -58,6 +64,18 @@ export class TradesService {
       openDate: now,
       settlementFee: 500,
     };
+
+    // calc lockedAmount
+    const pairContractName = data.pair.replace(/[^a-zA-Z]/, "").toUpperCase() as PairContractName;
+    const contractInfo = config.getPairContract(data.network, pairContractName, PairContractType.BINARY_OPTION);
+    const contract = this.ethersService.getContract(
+      data.network,
+      contractInfo.address,
+      PAIR_CONTRACT_ABIS[pairContractName]?.abi,
+    );
+    _data["lockedAmount"] = calcLockedAmount(contract, userAddress, data);
+
+    // save
     const result = await this.model.create(_data);
 
     if (!isLimitOrder) {

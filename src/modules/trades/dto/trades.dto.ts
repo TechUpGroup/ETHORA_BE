@@ -29,7 +29,7 @@ export class CreateTradeDto extends NetworkDto {
   // @ApiProperty()
   // signatureDate: Date;
 
-  @ApiProperty()
+  @ApiProperty({ default: 2809371560803 })
   strike: number;
 
   @ApiProperty({ default: new Date() })
@@ -43,11 +43,11 @@ export class CreateTradeDto extends NetworkDto {
   @Max(TRADE_DURATION.MAX)
   period: number;
 
-  @ApiProperty()
+  @ApiProperty({ default: "0xBf41098CD4a6a405e6E33647B983d1A63334bc1B" })
   @IsEthereumAddress()
   targetContract: string;
 
-  @ApiProperty()
+  @ApiProperty({ default: "BTC-USD" })
   @IsString()
   pair: string;
 
@@ -57,7 +57,7 @@ export class CreateTradeDto extends NetworkDto {
   // @ApiProperty()
   // fullSignature: string;
 
-  @ApiProperty()
+  @ApiProperty({ default: "5000000" })
   @IsNumberString()
   tradeSize: string;
 
@@ -68,7 +68,7 @@ export class CreateTradeDto extends NetworkDto {
   @ApiProperty({ default: false })
   allowPartialFill: boolean;
 
-  @ApiProperty()
+  @ApiProperty({ default: 5 })
   slippage: number;
 
   // @ApiProperty()
@@ -80,7 +80,7 @@ export class CreateTradeDto extends NetworkDto {
   // @ApiProperty()
   // settlementFeeSignature: string;
 
-  @ApiProperty()
+  @ApiProperty({ default: true })
   isAbove: boolean;
 
   @ApiProperty({ default: false })
@@ -92,7 +92,7 @@ export class CreateTradeDto extends NetworkDto {
   @Max(TRADE_DURATION.MAX)
   limitOrderDuration: number;
 
-  @ApiProperty()
+  @ApiProperty({ default: TRADE_TOKEN.USDC })
   token: TRADE_TOKEN;
 
   // signature_timestamp=1696344585
