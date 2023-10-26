@@ -73,7 +73,7 @@ export class TradesService {
       contractInfo.address,
       PAIR_CONTRACT_ABIS[pairContractName]?.abi,
     );
-    _data["lockedAmount"] = calcLockedAmount(contract, userAddress, data);
+    _data["lockedAmount"] = await calcLockedAmount(contract, userAddress, data);
 
     // save
     const result = await this.model.create(_data);
