@@ -8,7 +8,7 @@ import mongoosePaginate from "mongoose-paginate-v2";
 
 import { CacheModuleOptions } from "@nestjs/cache-manager";
 import { MongooseModuleOptions } from "@nestjs/mongoose";
-import { ContractName } from "common/constants/contract";
+import { ContractName, PairContractName, PairContractType } from "common/constants/contract";
 
 class Config {
   get nodeEnv(): string {
@@ -151,9 +151,9 @@ class Config {
     };
   }
 
-  getPairContract(network: Network, key: ContractName) {
-    const address = this.getBlockChainInfo(network, `contract.${key}.address`);
-    const blocknumber_creator = this.getBlockChainInfo(network, `contract.${key}.blocknumber_creator`);
+  getPairContract(network: Network, key: PairContractName, type: PairContractType) {
+    const address = this.getBlockChainInfo(network, `pairContract.${key}.${type}.address`);
+    const blocknumber_creator = this.getBlockChainInfo(network, `pairContract.${key}.${type}.blocknumber_creator`);
     return {
       address,
       blocknumber_creator: Number(blocknumber_creator || 0),

@@ -25,4 +25,8 @@ export enum PairContractName {
   LINKUSD = "LINKUSD",
 }
 
+export enum PairContractType {
+  BINARY_OPTION = "binaryOptions",
+}
+
 export enum Token {}
