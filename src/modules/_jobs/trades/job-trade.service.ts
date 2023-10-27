@@ -186,12 +186,6 @@ export class JobTradeService {
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
-  private async test() {
-    // const pairPrice = this.socketPriceService.pairPrice;
-    // console.log(">>>>>", pairPrice);
-  }
-
   @Cron(CronExpression.EVERY_SECOND)
   private async processTradeMarket() {
     if (this.isProcessingTradeMarket) {
@@ -331,7 +325,6 @@ export class JobTradeService {
             messageUserPartialSignature = {
               ...messageUserPartialSignature,
               settlementFee: trade.settlementFee,
-              timestamp: Math.floor(now.getTime() / 1000),
             };
           }
 
@@ -362,14 +355,14 @@ export class JobTradeService {
               strike: convertPriceTrade(trade.strike),
               slippage: trade.slippage,
               allowPartialFill: trade.allowPartialFill || false,
-              referralCode: trade.referralCode,
+              referralCode: trade.referralCode || "",
               isAbove: trade.isAbove,
               price: trade.price,
               settlementFee: trade.settlementFee,
               isLimitOrder: trade.isLimitOrder,
               limitOrderExpiry: trade.isLimitOrder ? Math.floor(now.getTime() / 1000 + 86400) : 0,
               userSignedSettlementFee: 500,
-              settlementFeeSignInfo: trade.settlementFeeSignature,
+              settlementFeeSignInfo: trade.settlementFeeSignature || "0x",
               userSignInfo: userPartialSignature,
               publisherSignInfo: userFullSignature,
             },
