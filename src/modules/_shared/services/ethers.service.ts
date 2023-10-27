@@ -12,6 +12,9 @@ import { Wallet } from "@ethersproject/wallet";
 import { Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { formatDecimal } from "common/utils/mongoose";
+import type { Provider } from "@ethersproject/providers";
+import type { Signer } from "@ethersproject/abstract-signer";
+import { DOMAIN } from "common/utils/signature";
 
 interface EtherProvider {
   provider: JsonRpcBatchProvider;
@@ -34,8 +37,10 @@ export class EthersService {
       const signerTypes = new Map<SignerType, Wallet>();
       const prkOperator = configPrivate.get<string>(`blockchain.private_key.operator`);
       const prkSfPublisher = configPrivate.get<string>(`blockchain.private_key.sfPublisher`);
+      const prkPublisher = configPrivate.get<string>(`blockchain.private_key.publisher`);
       if (prkOperator) signerTypes.set(SignerType.operator, getWallet(prkOperator, provider));
       if (prkSfPublisher) signerTypes.set(SignerType.sfPublisher, getWallet(prkSfPublisher, provider));
+      if (prkPublisher) signerTypes.set(SignerType.publisher, getWallet(prkPublisher, provider));
 
       this.ethersMap.set(network, { provider, signers: signerTypes });
     }
@@ -55,8 +60,10 @@ export class EthersService {
           const signerTypes = new Map<SignerType, Wallet>();
           const prkOperator = configPrivate.get<string>(`blockchain.private_key.operator`);
           const prkSfPublisher = configPrivate.get<string>(`blockchain.private_key.sfPublisher`);
+          const prkPublisher = configPrivate.get<string>(`blockchain.private_key.publisher`);
           if (prkOperator) signerTypes.set(SignerType.operator, getWallet(prkOperator, provider));
           if (prkSfPublisher) signerTypes.set(SignerType.sfPublisher, getWallet(prkSfPublisher, provider));
+          if (prkPublisher) signerTypes.set(SignerType.publisher, getWallet(prkPublisher, provider));
 
           this.ethersMap.set(network, { provider, signers: signerTypes });
         }
@@ -76,8 +83,10 @@ export class EthersService {
           const signerTypes = new Map<SignerType, Wallet>();
           const prkOperator = configPrivate.get<string>(`blockchain.private_key.operator`);
           const prkSfPublisher = configPrivate.get<string>(`blockchain.private_key.sfPublisher`);
+          const prkPublisher = configPrivate.get<string>(`blockchain.private_key.publisher`);
           if (prkOperator) signerTypes.set(SignerType.operator, getWallet(prkOperator, provider));
           if (prkSfPublisher) signerTypes.set(SignerType.sfPublisher, getWallet(prkSfPublisher, provider));
+          if (prkPublisher) signerTypes.set(SignerType.publisher, getWallet(prkPublisher, provider));
 
           this.ethersMap.set(network, { provider, signers: signerTypes });
         }
@@ -99,6 +108,11 @@ export class EthersService {
     return networkInfo;
   }
 
+  getWallet(privateKey: string, network: Network) {
+    const provider = this.getProvider(network);
+    return getWallet(privateKey, provider);
+  }
+
   getProvider(network: Network) {
     return this.getNetwork(network).provider;
   }
@@ -117,8 +131,31 @@ export class EthersService {
     return signer.signMessage(message);
   }
 
+  signTypeData(network: Network, type: SignerType, verifyingContract: string, types: any, values: any) {
+    const signer = this.getSigner(network, type);
+    const domain = {
+      ...DOMAIN,
+      chainId: network,
+      verifyingContract,
+    }
+    return signer._signTypedData(domain, types, values);
+  }
+
+  signTypeDataWithSinger(network: Network, signer: Wallet, verifyingContract: string, types: any, values: any) {
+    const domain = {
+      ...DOMAIN,
+      chainId: network,
+      verifyingContract
+    }
+    return signer._signTypedData(domain, types, values);
+  }
+
   getContract<T extends Contract = Contract>(network: Network, address: string, ABI: any, type?: SignerType) {
     const provider = type ? this.getSigner(network, type) : this.getProvider(network);
+    return getContract<T>(address, ABI, provider);
+  }
+
+  getContractWithProvider<T extends Contract = Contract>(network: Network, address: string, ABI: any, provider: Provider | Signer ) {
     return getContract<T>(address, ABI, provider);
   }
 

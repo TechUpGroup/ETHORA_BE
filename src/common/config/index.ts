@@ -105,6 +105,10 @@ class Config {
     };
   }
 
+  get quantityTxTrade() {
+    return 3;
+  }
+
   get network_supported() {
     const networks = this.getArray<Network>("network_supported");
     const allNetworks = Object.values(Network);
@@ -140,6 +144,36 @@ class Config {
           "https://goerli-rollup.arbitrum.io/rpc",
         ]
       : ["https://base.publicnode.com", "https://base.meowrpc.com", "https://1rpc.io/base", "https://base.drpc.org"];
+  }
+
+  get listOperater() {
+    return [
+          "0160380f3fb369ba4fa9172b1a716a98d6dfa6b89755875761c20f143c86e1af",
+          "0160380f3fb369ba4fa9172b1a716a98d6dfa6b89755875761c20f143c86e1af",
+          "0160380f3fb369ba4fa9172b1a716a98d6dfa6b89755875761c20f143c86e1af",
+          "0160380f3fb369ba4fa9172b1a716a98d6dfa6b89755875761c20f143c86e1af",
+          "0160380f3fb369ba4fa9172b1a716a98d6dfa6b89755875761c20f143c86e1af",
+          "0160380f3fb369ba4fa9172b1a716a98d6dfa6b89755875761c20f143c86e1af",
+          "0160380f3fb369ba4fa9172b1a716a98d6dfa6b89755875761c20f143c86e1af",
+          "0160380f3fb369ba4fa9172b1a716a98d6dfa6b89755875761c20f143c86e1af",
+          "0160380f3fb369ba4fa9172b1a716a98d6dfa6b89755875761c20f143c86e1af",
+          "0160380f3fb369ba4fa9172b1a716a98d6dfa6b89755875761c20f143c86e1af",
+        ];
+  }
+
+  get listAddressOperater() {
+    return [
+          "0x4b473D9D7684E6D949C316a1E178caefB804e85e",
+          "0x4b473D9D7684E6D949C316a1E178caefB804e85e",
+          "0x4b473D9D7684E6D949C316a1E178caefB804e85e",
+          "0x4b473D9D7684E6D949C316a1E178caefB804e85e",
+          "0x4b473D9D7684E6D949C316a1E178caefB804e85e",
+          "0x4b473D9D7684E6D949C316a1E178caefB804e85e",
+          "0x4b473D9D7684E6D949C316a1E178caefB804e85e",
+          "0x4b473D9D7684E6D949C316a1E178caefB804e85e",
+          "0x4b473D9D7684E6D949C316a1E178caefB804e85e",
+          "0x4b473D9D7684E6D949C316a1E178caefB804e85e",
+        ];
   }
 
   getContract(network: Network, key: ContractName) {
