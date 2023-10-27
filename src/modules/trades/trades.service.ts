@@ -18,13 +18,9 @@ import { NetworkAndPaginationAndSortDto } from "common/dto/network.dto";
 import { JobTradeService } from "modules/_jobs/trades/job-trade.service";
 import { EthersService } from "modules/_shared/services/ethers.service";
 import config from "common/config";
-import { ContractName, PairContractName, PairContractType } from "common/constants/contract";
+import { PairContractName, PairContractType } from "common/constants/contract";
 import { PAIR_CONTRACT_ABIS } from "common/constants/abis";
 import { calcLockedAmount } from "common/utils/trades";
-import {
-  SettlementFeeSignature,
-} from "common/utils/signature";
-import { SignerType } from "common/enums/signer.enum";
 import { SETTLEMENT_FEE } from "common/constants/fee";
 import { decryptAES } from "common/utils/encrypt";
 // import { generateSignHashType } from "common/utils/ethers";
@@ -42,7 +38,7 @@ export class TradesService {
   ) {}
 
   async createTrade(userAddress: string, data: CreateTradeDto) {
-    const { isLimitOrder, network, pair } = data;
+    const { isLimitOrder, pair } = data;
 
     const user = await this.userService.getUserByAddress(userAddress);
     const wallet = await this.userService.findWalletByNetworkAndId(data.network, user._id);
@@ -60,22 +56,7 @@ export class TradesService {
     }
 
     const now = new Date();
-
-    // settlementFeeSignInfo
     const settlementFee = SETTLEMENT_FEE[pair.replace("-", "").toUpperCase()];
-    const messageSettlementFeeSignature = {
-      assetPair: pair.replace("-", "").toUpperCase(),
-      expiryTimestamp: Math.floor(86400 + now.getTime() / 1000),
-      settlementFee,
-    };
-
-    const settlementFeeSignature = await this.ethersService.signTypeData(
-      network,
-      SignerType.sfPublisher,
-      config.getContract(network, ContractName.ROUTER).address,
-      SettlementFeeSignature,
-      messageSettlementFeeSignature,
-    );
 
     const _data: TradesDocument | any = {
       ...data,
@@ -87,7 +68,6 @@ export class TradesService {
       state: isLimitOrder ? TRADE_STATE.QUEUED : TRADE_STATE.OPENED,
       openDate: now,
       settlementFee,
-      settlementFeeSignature,
     };
 
     // calc lockedAmount

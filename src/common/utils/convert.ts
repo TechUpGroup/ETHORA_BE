@@ -63,5 +63,5 @@ export const replaceEscaped = (val: string) => {
 
 export const convertPriceTrade = (value: string): string => {
   if (value === "0") return "0";
-  return BigNumber(value).div(Math.pow(10, 8)).toFixed(0);
+  return BigNumber(value).multipliedBy(Math.pow(10, 8)).toFixed(0);
 };

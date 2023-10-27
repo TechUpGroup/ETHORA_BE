@@ -1,4 +1,4 @@
-import { generateParamsSign } from "./ethers";
+import { generatePackedSign } from "./ethers";
 
 export const DOMAIN_TYPE = [
   {
@@ -144,6 +144,6 @@ export function createTypeData(types: any, chainId: number, verifyingContract: s
   };
 }
 
-export function generateMessage(assetPair: string, timestamp: string, price: number) {
-  return generateParamsSign(["string", "uint256", "uint256"], [assetPair, timestamp, price]);
+export function generateMessage(assetPair: string, timestamp: string, price: string) {
+  return generatePackedSign(["string", "uint256", "uint256"], [assetPair, timestamp, price]);
 }
