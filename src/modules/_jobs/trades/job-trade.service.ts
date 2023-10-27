@@ -17,6 +17,7 @@ import { PaginateModel } from "mongoose";
 import { UserTradeSignature, UserTradeSignatureWithSettlementFee, generateMessage } from "common/utils/signature";
 import { SignerType } from "common/enums/signer.enum";
 import { decryptAES } from "common/utils/encrypt";
+import { convertPriceTrade } from "common/utils/convert";
 
 @Injectable()
 export class JobTradeService {
@@ -39,7 +40,7 @@ export class JobTradeService {
   }
 
   private async loadTradesMarket() {
-    const trades = await this.tradesModel.aggregate([
+    let trades = await this.tradesModel.aggregate([
       {
         $match: {
           state: TRADE_STATE.OPENED,
@@ -79,7 +80,7 @@ export class JobTradeService {
     ]);
     if (trades.length) {
       console.log("[TradeMarket] Loaded", trades.length, "tradesMarket to queues");
-      trades
+      trades = trades
         .filter((trade) => trade.user.wallet && trade.user.wallet.privateKey)
         .map((trade) => {
           return {
@@ -93,7 +94,7 @@ export class JobTradeService {
   }
 
   private async loadTradesLimitOrder() {
-    const trades = await this.tradesModel.aggregate([
+    let trades = await this.tradesModel.aggregate([
       {
         $match: {
           state: TRADE_STATE.OPENED,
@@ -133,7 +134,7 @@ export class JobTradeService {
     ]);
     if (trades.length) {
       console.log("[TradeMarket] Loaded", trades.length, "tradesMarket to queues");
-      trades
+      trades = trades
         .filter((trade) => trade.user.wallet && trade.user.wallet.privateKey)
         .map((trade) => {
           return {
@@ -223,9 +224,9 @@ export class JobTradeService {
           const prices = item.pair
             ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
             : 0;
-          const entryPrice = prices[4].price;
+          const entryPrice = prices[prices.length - 1].price;
           return {
-            ...item._doc,
+            ...item,
             price: entryPrice,
           };
         });
@@ -274,13 +275,13 @@ export class JobTradeService {
               ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
               : [];
             prices = prices.map((price) => price.price);
-            return this.checkLimitPriceAvaliable(item.strike, prices);
+            return this.checkLimitPriceAvaliable(convertPriceTrade(item.strike.toString()), prices);
           })
           .map((item: any) => {
             const prices = item.pair
               ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
               : [];
-            const entryPrice = prices[4].price || 0;
+            const entryPrice = prices[prices.length - 1].price || 0;
             return {
               ...item._doc,
               price: entryPrice,
@@ -317,19 +318,20 @@ export class JobTradeService {
           // userPartialSignatures
           let messageUserPartialSignature: any = {
             user: trade.userAddress,
-            totalFee: trade.tradeSize,
+            totalFee: convertPriceTrade(trade.tradeSize),
             period: trade.period,
             targetContract: trade.targetContract,
-            strike: trade.strike,
+            strike: convertPriceTrade(trade.strike),
             slippage: trade.slippage,
-            allowPartialFill: trade.allowPartialFill,
-            referralCode: trade.referralCode,
+            allowPartialFill: trade.allowPartialFill || false,
+            referralCode: trade.referralCode || "",
             timestamp: Math.floor(now.getTime() / 1000),
           };
           if (trade.isLimitOrder) {
             messageUserPartialSignature = {
               ...messageUserPartialSignature,
               settlementFee: trade.settlementFee,
+              timestamp: Math.floor(now.getTime() / 1000),
             };
           }
 
@@ -354,10 +356,10 @@ export class JobTradeService {
           openTxn.push({
             tradeParams: {
               queueId: trade.queueId,
-              totalFee: trade.tradeSize,
+              totalFee: convertPriceTrade(trade.tradeSize),
               period: trade.period,
               targetContract: trade.targetContract,
-              strike: trade.strike,
+              strike: convertPriceTrade(trade.strike),
               slippage: trade.slippage,
               allowPartialFill: trade.allowPartialFill || false,
               referralCode: trade.referralCode,
@@ -365,7 +367,7 @@ export class JobTradeService {
               price: trade.price,
               settlementFee: trade.settlementFee,
               isLimitOrder: trade.isLimitOrder,
-              limitOrderExpiry: 0,
+              limitOrderExpiry: trade.isLimitOrder ? Math.floor(now.getTime() / 1000 + 86400) : 0,
               userSignedSettlementFee: 500,
               settlementFeeSignInfo: trade.settlementFeeSignature,
               userSignInfo: userPartialSignature,
@@ -398,8 +400,8 @@ export class JobTradeService {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
       if (isLimitOrder) {
-        const queueIds = trades.map(trade => trade.queueId)
-        this.queuesLimitOrder.filter(trade => !queueIds.includes(trade.queueId));
+        const queueIds = trades.map((trade) => trade.queueId);
+        this.queuesLimitOrder.filter((trade) => !queueIds.includes(trade.queueId));
       }
     } catch (e) {
       this.logsService.createLog("openTradeContract", e.message);
