@@ -81,7 +81,12 @@ export class UsersService {
           mnemonic: encryptAES(wallet.mnemonic),
           oneCT: wallet.address,
         });
-        await this.walletsModel.create({ userId: userCreated._id, network, ...wallet });
+        await this.walletsModel.create({
+          userId: userCreated._id,
+          network,
+          address: wallet.address,
+          privateKey: encryptAES(wallet.privateKey),
+        });
       }
     } catch (e) {
       console.log(e);

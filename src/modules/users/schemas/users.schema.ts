@@ -27,7 +27,7 @@ export class Users {
   @Exclude()
   mnemonic: string;
 
-  @Prop({ required: false })
+  @Prop({ required: true, index: true, trim: true, lowercase: true, validate: validateAddress, unique: true })
   oneCT: string;
 
   @Prop({ required: true, default: uuidv4 })
@@ -51,7 +51,7 @@ export class Wallets {
   @Prop({ required: true, index: true, trim: true, lowercase: true, validate: validateAddress, unique: true })
   address: string;
 
-  @Prop({ required: true, index: true, trim: true, lowercase: true, unique: true })
+  @Prop({ required: true, index: true, trim: true, unique: true })
   @Exclude()
   privateKey: string;
 
