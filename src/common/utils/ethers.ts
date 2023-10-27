@@ -60,6 +60,12 @@ export const generateParamsSign = (params: string[], values: any[]) => {
   return arrayify(hashMessage);
 };
 
+export const generatePackedSign = (params: string[], values: any[]) => {
+  const encodedMessage = encodePacked(params, values);
+  const hashMessage = keccak256Base(encodedMessage);
+  return arrayify(hashMessage);
+};
+
 export const generateNonce = (address: string) => {
   const now = new Date().getTime();
   return keccak256(address.slice(2) + now.toString());

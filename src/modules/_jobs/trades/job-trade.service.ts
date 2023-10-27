@@ -14,7 +14,12 @@ import { LogsService } from "modules/logs/logs.service";
 import { TRADES_MODEL, TradesDocument } from "modules/trades/schemas/trades.schema";
 import { AddressZero } from "@ethersproject/constants";
 import { PaginateModel } from "mongoose";
-import { UserTradeSignature, UserTradeSignatureWithSettlementFee, generateMessage } from "common/utils/signature";
+import {
+  SettlementFeeSignature,
+  UserTradeSignature,
+  UserTradeSignatureWithSettlementFee,
+  generateMessage,
+} from "common/utils/signature";
 import { SignerType } from "common/enums/signer.enum";
 import { decryptAES } from "common/utils/encrypt";
 import { convertPriceTrade } from "common/utils/convert";
@@ -309,6 +314,13 @@ export class JobTradeService {
       const now = new Date();
       await Promise.all(
         trades.map(async (trade) => {
+          //
+          const messageSettlementFeeSignature = {
+            assetPair: trade.pair.replace("-", "").toUpperCase(),
+            expiryTimestamp: Math.floor(86400 + now.getTime() / 1000),
+            settlementFee: trade.settlementFee,
+          };
+
           // userPartialSignatures
           let messageUserPartialSignature: any = {
             user: trade.userAddress,
@@ -332,10 +344,17 @@ export class JobTradeService {
           const userFullMessage = generateMessage(
             trade.pair.replace("-", "").toUpperCase(),
             Math.floor(now.getTime() / 1000).toString(),
-            trade.settlementFee,
+            trade.price,
           );
 
-          const [userPartialSignature, userFullSignature] = await Promise.all([
+          const [settlementFeeSignature, userPartialSignature, userFullSignature] = await Promise.all([
+            this.ethersService.signTypeData(
+              network,
+              SignerType.sfPublisher,
+              config.getContract(network, ContractName.ROUTER).address,
+              SettlementFeeSignature,
+              messageSettlementFeeSignature,
+            ),
             this.ethersService.signTypeDataWithSinger(
               network,
               this.ethersService.getWallet(trade.privateKeyOneCT, network),
@@ -362,9 +381,18 @@ export class JobTradeService {
               isLimitOrder: trade.isLimitOrder,
               limitOrderExpiry: trade.isLimitOrder ? Math.floor(now.getTime() / 1000 + 86400) : 0,
               userSignedSettlementFee: 500,
-              settlementFeeSignInfo: trade.settlementFeeSignature || "0x",
-              userSignInfo: userPartialSignature,
-              publisherSignInfo: userFullSignature,
+              settlementFeeSignInfo: {
+                timestamp: Math.floor(86400 + now.getTime() / 1000),
+                signature: settlementFeeSignature,
+              },
+              userSignInfo: {
+                timestamp: Math.floor(now.getTime() / 1000),
+                signature: userPartialSignature,
+              },
+              publisherSignInfo: {
+                timestamp: Math.floor(now.getTime() / 1000),
+                signature: userFullSignature,
+              },
             },
             register: {
               oneCT: AddressZero,
