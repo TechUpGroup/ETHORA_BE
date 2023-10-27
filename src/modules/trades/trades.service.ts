@@ -66,14 +66,16 @@ export class TradesService {
     };
 
     // calc lockedAmount
-    const pairContractName = data.pair.replace(/[^a-zA-Z]/, "").toUpperCase() as PairContractName;
-    const contractInfo = config.getPairContract(data.network, pairContractName, PairContractType.BINARY_OPTION);
-    const contract = this.ethersService.getContract(
-      data.network,
-      contractInfo.address,
-      PAIR_CONTRACT_ABIS[pairContractName]?.abi,
-    );
-    _data["lockedAmount"] = await calcLockedAmount(contract, userAddress, data);
+    if (!data.isLimitOrder) {
+      const pairContractName = data.pair.replace(/[^a-zA-Z]/, "").toUpperCase() as PairContractName;
+      const contractInfo = config.getPairContract(data.network, pairContractName, PairContractType.BINARY_OPTION);
+      const contract = this.ethersService.getContract(
+        data.network,
+        contractInfo.address,
+        PAIR_CONTRACT_ABIS[pairContractName]?.abi,
+      );
+      _data["lockedAmount"] = await calcLockedAmount(contract, userAddress, data);
+    }
 
     // save
     const result = await this.model.create(_data);
