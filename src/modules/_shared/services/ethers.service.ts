@@ -136,7 +136,7 @@ export class EthersService {
     const domain = {
       ...DOMAIN,
       chainId: network,
-      verifyingContract: "0xbb2401ff6f6dbef3b3cd1db80ab2972b390540cf"
+      verifyingContract
     }
     return signer._signTypedData(domain, types, values);
   }
@@ -145,7 +145,7 @@ export class EthersService {
     const domain = {
       ...DOMAIN,
       chainId: network,
-      verifyingContract: "0xbb2401ff6f6dbef3b3cd1db80ab2972b390540cf"
+      verifyingContract,
     }
     return signer._signTypedData(domain, types, values);
   }
