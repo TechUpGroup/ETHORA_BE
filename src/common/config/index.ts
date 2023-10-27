@@ -105,6 +105,10 @@ class Config {
     };
   }
 
+  get quantityTxTrade() {
+    return 3;
+  }
+
   get network_supported() {
     const networks = this.getArray<Network>("network_supported");
     const allNetworks = Object.values(Network);

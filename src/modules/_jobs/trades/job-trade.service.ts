@@ -24,6 +24,7 @@ export class JobTradeService {
   public queuesLimitOrder: TradesDocument[] = [];
   public stateOperators: any = {};
   private isProcessingTradeMarket = false;
+  private isProcessingTradeLimit = false;
   private isProcessingSyncBalance = false;
 
   constructor(
@@ -78,14 +79,15 @@ export class JobTradeService {
     ]);
     if (trades.length) {
       console.log("[TradeMarket] Loaded", trades.length, "tradesMarket to queues");
-      trades.filter(trade => trade.user.wallet && trade.user.wallet.privateKey)
-      .map(trade => {
-        return {
-          ...trade,
-          oneCT: trade.user.oneCT,
-          privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
-        }
-      })
+      trades
+        .filter((trade) => trade.user.wallet && trade.user.wallet.privateKey)
+        .map((trade) => {
+          return {
+            ...trade,
+            oneCT: trade.user.oneCT,
+            privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
+          };
+        });
       this.queuesMarket.push(...trades);
     }
   }
@@ -131,14 +133,15 @@ export class JobTradeService {
     ]);
     if (trades.length) {
       console.log("[TradeMarket] Loaded", trades.length, "tradesMarket to queues");
-      trades.filter(trade => trade.user.wallet && trade.user.wallet.privateKey)
-      .map(trade => {
-        return {
-          ...trade,
-          oneCT: trade.user.oneCT,
-          privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
-        }
-      })
+      trades
+        .filter((trade) => trade.user.wallet && trade.user.wallet.privateKey)
+        .map((trade) => {
+          return {
+            ...trade,
+            oneCT: trade.user.oneCT,
+            privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
+          };
+        });
       this.queuesLimitOrder.push(...trades);
     }
   }
@@ -216,11 +219,11 @@ export class JobTradeService {
         console.log(">>>", currentPrice);
 
         // filter price with pair
-        const trades = this.queuesMarket.slice(0, 3).map((item: any) => {
+        const trades = this.queuesMarket.splice(0, config.quantityTxTrade).map((item: any) => {
           const prices = item.pair
             ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
             : 0;
-          const entryPrice = prices[2].price;
+          const entryPrice = prices[4].price;
           return {
             ...item._doc,
             price: entryPrice,
@@ -237,7 +240,64 @@ export class JobTradeService {
     this.isProcessingTradeMarket = false;
   }
 
-  private async openTradeContract(trades: any[]) {
+  @Cron(CronExpression.EVERY_SECOND)
+  private async processTradeLimit() {
+    if (this.isProcessingTradeLimit) {
+      console.log("[TradeLimit] Waiting for last job to finish...");
+      return;
+    }
+    this.isProcessingTradeLimit = true;
+    const pairPrice = this.socketPriceService.pairPrice;
+    try {
+      if (pairPrice) {
+        // TODO:
+        const currentPrices = pairPrice[FEED_IDS[PairContractName.BTCUSD].replace("0x", "")];
+        if (!currentPrices) {
+          console.log("[TradeLimit] No priceUpdate, stopped...");
+          this.isProcessingTradeLimit = false;
+          return;
+        }
+        if (!this.queuesLimitOrder.length) {
+          console.log("[TradeLimit] No queuesLimitOrder, stopped...");
+          this.isProcessingTradeLimit = false;
+          return;
+        }
+
+        console.log("[TradeLimit] Processing", this.queuesLimitOrder.length, "tradesLimit...");
+        const currentPrice = currentPrices[0];
+        console.log(">>>", currentPrice);
+
+        // filter price with pair
+        const trades = this.queuesLimitOrder
+          .filter((item: any) => {
+            let prices = item.pair
+              ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
+              : [];
+            prices = prices.map((price) => price.price);
+            return this.checkLimitPriceAvaliable(item.strike, prices);
+          })
+          .map((item: any) => {
+            const prices = item.pair
+              ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
+              : [];
+            const entryPrice = prices[4].price || 0;
+            return {
+              ...item._doc,
+              price: entryPrice,
+            };
+          });
+
+        // Call smartcontract
+        return this.openTradeContract(trades.slice(0, config.quantityTxTrade), true);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    this.isProcessingTradeLimit = false;
+  }
+
+  private async openTradeContract(trades: any[], isLimitOrder = false) {
     // choose operater
     const operater = this.chooseOperator();
     const network = trades[0].network;
@@ -252,80 +312,82 @@ export class JobTradeService {
 
       const openTxn: any[] = [];
       const now = new Date();
-      for (const trade of trades) {
-        // userPartialSignatures
-        let messageUserPartialSignature: any = {
-          user: trade.userAddress,
-          totalFee: trade.tradeSize,
-          period: trade.period,
-          targetContract: trade.targetContract,
-          strike: trade.strike,
-          slippage: trade.slippage,
-          allowPartialFill: trade.allowPartialFill,
-          referralCode: trade.referralCode,
-          timestamp: Math.floor(now.getTime() / 1000),
-        };
-        if (trade.isLimitOrder) {
-          messageUserPartialSignature = {
-            ...messageUserPartialSignature,
-            settlementFee: trade.settlementFee,
-          };
-        }
-
-        //userFullSignature
-        const userFullMessage = generateMessage(
-          trade.pair.replace("-", "").toUpperCase(),
-          Math.floor(now.getTime() / 1000).toString(),
-          trade.settlementFee,
-        );
-
-        const [userPartialSignature, userFullSignature] = await Promise.all([
-          this.ethersService.signTypeDataWithSinger(
-            network,
-            this.ethersService.getWallet(trade.privateKeyOneCT, network),
-            config.getContract(network, ContractName.ROUTER).address,
-            trade.isLimitOrder ? UserTradeSignatureWithSettlementFee : UserTradeSignature,
-            messageUserPartialSignature,
-          ),
-          this.ethersService.signMessage(network, SignerType.publisher, userFullMessage),
-        ]);
-
-        openTxn.push({
-          tradeParams: {
-            queueId: trade.queueId,
+      await Promise.all(
+        trades.map(async (trade) => {
+          // userPartialSignatures
+          let messageUserPartialSignature: any = {
+            user: trade.userAddress,
             totalFee: trade.tradeSize,
             period: trade.period,
             targetContract: trade.targetContract,
             strike: trade.strike,
             slippage: trade.slippage,
-            allowPartialFill: trade.allowPartialFill || false,
+            allowPartialFill: trade.allowPartialFill,
             referralCode: trade.referralCode,
-            isAbove: trade.isAbove,
-            price: trade.price,
-            settlementFee: trade.settlementFee,
-            isLimitOrder: trade.isLimitOrder,
-            limitOrderExpiry: 0,
-            userSignedSettlementFee: 500,
-            settlementFeeSignInfo: trade.settlementFeeSignature,
-            userSignInfo: userPartialSignature,
-            publisherSignInfo: userFullSignature,
-          },
-          register: {
-            oneCT: AddressZero,
-            signature: "0x",
-            shouldRegister: false,
-          },
-          permit: {
-            value: 0,
-            deadline: 0,
-            v: 0,
-            r: "0x",
-            s: "0x",
-            shouldApprove: false,
-          },
-          user: trade.userAddress,
-        });
-      }
+            timestamp: Math.floor(now.getTime() / 1000),
+          };
+          if (trade.isLimitOrder) {
+            messageUserPartialSignature = {
+              ...messageUserPartialSignature,
+              settlementFee: trade.settlementFee,
+            };
+          }
+
+          //userFullSignature
+          const userFullMessage = generateMessage(
+            trade.pair.replace("-", "").toUpperCase(),
+            Math.floor(now.getTime() / 1000).toString(),
+            trade.settlementFee,
+          );
+
+          const [userPartialSignature, userFullSignature] = await Promise.all([
+            this.ethersService.signTypeDataWithSinger(
+              network,
+              this.ethersService.getWallet(trade.privateKeyOneCT, network),
+              config.getContract(network, ContractName.ROUTER).address,
+              trade.isLimitOrder ? UserTradeSignatureWithSettlementFee : UserTradeSignature,
+              messageUserPartialSignature,
+            ),
+            this.ethersService.signMessage(network, SignerType.publisher, userFullMessage),
+          ]);
+
+          openTxn.push({
+            tradeParams: {
+              queueId: trade.queueId,
+              totalFee: trade.tradeSize,
+              period: trade.period,
+              targetContract: trade.targetContract,
+              strike: trade.strike,
+              slippage: trade.slippage,
+              allowPartialFill: trade.allowPartialFill || false,
+              referralCode: trade.referralCode,
+              isAbove: trade.isAbove,
+              price: trade.price,
+              settlementFee: trade.settlementFee,
+              isLimitOrder: trade.isLimitOrder,
+              limitOrderExpiry: 0,
+              userSignedSettlementFee: 500,
+              settlementFeeSignInfo: trade.settlementFeeSignature,
+              userSignInfo: userPartialSignature,
+              publisherSignInfo: userFullSignature,
+            },
+            register: {
+              oneCT: AddressZero,
+              signature: "0x",
+              shouldRegister: false,
+            },
+            permit: {
+              value: 0,
+              deadline: 0,
+              v: 0,
+              r: "0x",
+              s: "0x",
+              shouldApprove: false,
+            },
+            user: trade.userAddress,
+          });
+        }),
+      );
 
       // gas estimate
       await contract.estimateGas.openTrades(openTxn, {
@@ -335,6 +397,10 @@ export class JobTradeService {
       await contract.openTrades(openTxn, {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
+      if (isLimitOrder) {
+        const queueIds = trades.map(trade => trade.queueId)
+        this.queuesLimitOrder.filter(trade => !queueIds.includes(trade.queueId));
+      }
     } catch (e) {
       this.logsService.createLog("openTradeContract", e.message);
     } finally {
@@ -385,5 +451,12 @@ export class JobTradeService {
       console.log(e);
     }
     return operaters;
+  }
+
+  private checkLimitPriceAvaliable(targetPrice: string, prices: string[]) {
+    return (
+      prices.some((price) => BigNumber(price).gte(targetPrice)) &&
+      prices.some((price) => BigNumber(price).lte(targetPrice))
+    );
   }
 }
