@@ -14,6 +14,9 @@ import { LogsService } from "modules/logs/logs.service";
 import { TRADES_MODEL, TradesDocument } from "modules/trades/schemas/trades.schema";
 import { AddressZero } from "@ethersproject/constants";
 import { PaginateModel } from "mongoose";
+import { UserTradeSignature, UserTradeSignatureWithSettlementFee, generateMessage } from "common/utils/signature";
+import { SignerType } from "common/enums/signer.enum";
+import { decryptAES } from "common/utils/encrypt";
 
 @Injectable()
 export class JobTradeService {
@@ -35,22 +38,107 @@ export class JobTradeService {
   }
 
   private async loadTradesMarket() {
-    const trades = await this.tradesModel.find({
-      state: TRADE_STATE.OPENED,
-      isLimitOrder: false,
-    });
+    const trades = await this.tradesModel.aggregate([
+      {
+        $match: {
+          state: TRADE_STATE.OPENED,
+          isLimitOrder: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userAddress",
+          foreignField: "address",
+          as: "user",
+          pipeline: [
+            {
+              $lookup: {
+                from: "wallets",
+                localField: "_id",
+                foreignField: "userId",
+                as: "wallet",
+              },
+            },
+            {
+              $unwind: {
+                path: "$wallet",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$user",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
     if (trades.length) {
       console.log("[TradeMarket] Loaded", trades.length, "tradesMarket to queues");
+      trades.filter(trade => trade.user.wallet && trade.user.wallet.privateKey)
+      .map(trade => {
+        return {
+          ...trade,
+          oneCT: trade.user.oneCT,
+          privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
+        }
+      })
       this.queuesMarket.push(...trades);
     }
   }
 
   private async loadTradesLimitOrder() {
-    const trades = await this.tradesModel.find({
-      state: TRADE_STATE.QUEUED,
-      isLimitOrder: false,
-    });
+    const trades = await this.tradesModel.aggregate([
+      {
+        $match: {
+          state: TRADE_STATE.OPENED,
+          isLimitOrder: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userAddress",
+          foreignField: "address",
+          as: "user",
+          pipeline: [
+            {
+              $lookup: {
+                from: "wallets",
+                localField: "_id",
+                foreignField: "userId",
+                as: "wallet",
+              },
+            },
+            {
+              $unwind: {
+                path: "$wallet",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$user",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
     if (trades.length) {
+      console.log("[TradeMarket] Loaded", trades.length, "tradesMarket to queues");
+      trades.filter(trade => trade.user.wallet && trade.user.wallet.privateKey)
+      .map(trade => {
+        return {
+          ...trade,
+          oneCT: trade.user.oneCT,
+          privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
+        }
+      })
       this.queuesLimitOrder.push(...trades);
     }
   }
@@ -128,8 +216,10 @@ export class JobTradeService {
         console.log(">>>", currentPrice);
 
         // filter price with pair
-        const trades = this.queuesMarket.splice(0, 10).map((item: any) => {
-          const prices = item.pair ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")] : 0;
+        const trades = this.queuesMarket.slice(0, 3).map((item: any) => {
+          const prices = item.pair
+            ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
+            : 0;
           const entryPrice = prices[2].price;
           return {
             ...item._doc,
@@ -161,7 +251,45 @@ export class JobTradeService {
       );
 
       const openTxn: any[] = [];
+      const now = new Date();
       for (const trade of trades) {
+        // userPartialSignatures
+        let messageUserPartialSignature: any = {
+          user: trade.userAddress,
+          totalFee: trade.tradeSize,
+          period: trade.period,
+          targetContract: trade.targetContract,
+          strike: trade.strike,
+          slippage: trade.slippage,
+          allowPartialFill: trade.allowPartialFill,
+          referralCode: trade.referralCode,
+          timestamp: Math.floor(now.getTime() / 1000),
+        };
+        if (trade.isLimitOrder) {
+          messageUserPartialSignature = {
+            ...messageUserPartialSignature,
+            settlementFee: trade.settlementFee,
+          };
+        }
+
+        //userFullSignature
+        const userFullMessage = generateMessage(
+          trade.pair.replace("-", "").toUpperCase(),
+          Math.floor(now.getTime() / 1000).toString(),
+          trade.settlementFee,
+        );
+
+        const [userPartialSignature, userFullSignature] = await Promise.all([
+          this.ethersService.signTypeDataWithSinger(
+            network,
+            this.ethersService.getWallet(trade.privateKeyOneCT, network),
+            config.getContract(network, ContractName.ROUTER).address,
+            trade.isLimitOrder ? UserTradeSignatureWithSettlementFee : UserTradeSignature,
+            messageUserPartialSignature,
+          ),
+          this.ethersService.signMessage(network, SignerType.publisher, userFullMessage),
+        ]);
+
         openTxn.push({
           tradeParams: {
             queueId: trade.queueId,
@@ -179,8 +307,8 @@ export class JobTradeService {
             limitOrderExpiry: 0,
             userSignedSettlementFee: 500,
             settlementFeeSignInfo: trade.settlementFeeSignature,
-            userSignInfo: trade.userPartialSignature,
-            publisherSignInfo: trade.userFullSignature,
+            userSignInfo: userPartialSignature,
+            publisherSignInfo: userFullSignature,
           },
           register: {
             oneCT: AddressZero,

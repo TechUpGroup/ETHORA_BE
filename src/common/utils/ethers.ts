@@ -11,8 +11,6 @@ import { Wallet } from "@ethersproject/wallet";
 
 import type { Signer } from "@ethersproject/abstract-signer";
 import type { Provider } from "@ethersproject/providers";
-import { _TypedDataEncoder } from '@ethersproject/hash'
-import { DOMAIN } from "./signature";
 
 export const getLibrary = (provider: any) => {
   return new Web3Provider(provider);
@@ -80,12 +78,3 @@ export const generateRandom = () => {
   const randomCode = generateRandomString(75);
   return Math.floor(Math.random() * 10).toFixed() + randomCode;
 };
-
-export const generateSignHashType = async(chainId: number, verifyingContract: string, types: any, message: any) => {
-  const domain = {
-    ...DOMAIN,
-    chainId,
-    verifyingContract
-  }
-  return _TypedDataEncoder.hash(domain, types, message);
-}

@@ -18,16 +18,16 @@ import { NetworkAndPaginationAndSortDto } from "common/dto/network.dto";
 import { JobTradeService } from "modules/_jobs/trades/job-trade.service";
 import { EthersService } from "modules/_shared/services/ethers.service";
 import config from "common/config";
-import { PairContractName, PairContractType } from "common/constants/contract";
+import { ContractName, PairContractName, PairContractType } from "common/constants/contract";
 import { PAIR_CONTRACT_ABIS } from "common/constants/abis";
 import { calcLockedAmount } from "common/utils/trades";
-import { generateSignHashType } from "common/utils/ethers";
-import { ContractName } from "common/constants/contract";
 import {
   SettlementFeeSignature,
-  UserTradeSignature,
-  UserTradeSignatureWithSettlementFee,
 } from "common/utils/signature";
+import { SignerType } from "common/enums/signer.enum";
+import { SETTLEMENT_FEE } from "common/constants/fee";
+import { decryptAES } from "common/utils/encrypt";
+// import { generateSignHashType } from "common/utils/ethers";
 // import { Timeout } from "@nestjs/schedule";
 // import { tradesHistories } from "common/config/data-sample";
 
@@ -62,47 +62,19 @@ export class TradesService {
     const now = new Date();
 
     // settlementFeeSignInfo
+    const settlementFee = SETTLEMENT_FEE[pair.replace("-", "").toUpperCase()];
     const messageSettlementFeeSignature = {
-      assetpair: pair.replace("-", "").toUpperCase(),
-      expiryTimestamp: data.limitOrderDuration,
-      settlementFee: 500,
+      assetPair: pair.replace("-", "").toUpperCase(),
+      expiryTimestamp: Math.floor(86400 + now.getTime() / 1000),
+      settlementFee,
     };
-    const settlementFeeSignature = generateSignHashType(
+
+    const settlementFeeSignature = await this.ethersService.signTypeData(
       network,
+      SignerType.sfPublisher,
       config.getContract(network, ContractName.ROUTER).address,
       SettlementFeeSignature,
       messageSettlementFeeSignature,
-    );
-
-    // userPartialSignatures
-    const messageUserPartialSignature = {
-      user: userAddress,
-      totalFee: data.tradeSize,
-      period: data.period,
-      targetContract: data.targetContract,
-      strike: data.strike,
-      slippage: data.slippage,
-      allowPartialFill: data.allowPartialFill,
-      referralCode: data.referralCode,
-      timestamp: Math.floor(data.limitOrderDuration + now.getTime() / 1000),
-    };
-    const userPartialSignature = generateSignHashType(
-      network,
-      config.getContract(network, ContractName.ROUTER).address,
-      UserTradeSignature,
-      messageUserPartialSignature,
-    );
-
-    // userPartialSignature
-    const messageUserFullSignature = {
-      ...messageUserPartialSignature,
-      settlementFee: 500,
-    };
-    const userFullSignature = generateSignHashType(
-      network,
-      config.getContract(network, ContractName.ROUTER).address,
-      UserTradeSignatureWithSettlementFee,
-      messageUserFullSignature,
     );
 
     const _data: TradesDocument | any = {
@@ -114,10 +86,8 @@ export class TradesService {
       limitOrderExpirationDate: isLimitOrder ? new Date(data.limitOrderDuration * 1000 + now.getTime()) : now,
       state: isLimitOrder ? TRADE_STATE.QUEUED : TRADE_STATE.OPENED,
       openDate: now,
-      settlementFee: 500,
+      settlementFee,
       settlementFeeSignature,
-      userPartialSignature,
-      userFullSignature,
     };
 
     // calc lockedAmount
@@ -132,6 +102,9 @@ export class TradesService {
 
     // save
     const result = await this.model.create(_data);
+
+    result['oneCT'] = wallet.address;
+    result['privateKeyOneCT'] = decryptAES(wallet.privateKey);
 
     if (!isLimitOrder) {
       this.jobTradeService.queuesMarket.push(result);
@@ -157,40 +130,6 @@ export class TradesService {
     }
 
     const now = new Date();
-
-    // userPartialSignatures
-    const messageUserPartialSignature = {
-      user: userAddress,
-      totalFee: trade.tradeSize,
-      period: data.period || trade.period,
-      targetContract: trade.targetContract,
-      strike: data.strike || trade.strike,
-      slippage: data.slippage || trade.slippage,
-      allowPartialFill: trade.allowPartialFill,
-      referralCode: trade.referralCode,
-      timestamp: data.limitOrderDuration
-        ? Math.floor(data.limitOrderDuration + now.getTime() / 1000)
-        : Math.floor(new Date(trade.limitOrderDuration).getTime() / 1000),
-    };
-
-    const userPartialSignature = generateSignHashType(
-      data.network,
-      config.getContract(data.network, ContractName.ROUTER).address,
-      UserTradeSignature,
-      messageUserPartialSignature,
-    );
-
-    // userPartialSignature
-    const messageUserFullSignature = {
-      ...messageUserPartialSignature,
-      settlementFee: 500,
-    };
-    const userFullSignature = generateSignHashType(
-      data.network,
-      config.getContract(data.network, ContractName.ROUTER).address,
-      UserTradeSignatureWithSettlementFee,
-      messageUserFullSignature,
-    );
     const result = await this.model.updateOne(
       {
         _id: data._id,
@@ -199,8 +138,6 @@ export class TradesService {
       {
         $set: {
           ...data,
-          userPartialSignature,
-          userFullSignature,
           limitOrderExpirationDate: new Date(data.limitOrderDuration * 1000 + now.getTime()),
         },
       },
