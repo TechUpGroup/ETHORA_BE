@@ -333,7 +333,7 @@ export class JobTradeService {
             referralCode: trade.referralCode || "",
             timestamp: Math.floor(now.getTime() / 1000),
           };
-          if (trade.isLimitOrder) {
+          if (!trade.isLimitOrder) {
             messageUserPartialSignature = {
               ...messageUserPartialSignature,
               settlementFee: trade.settlementFee,
@@ -359,7 +359,7 @@ export class JobTradeService {
               network,
               this.ethersService.getWallet(trade.privateKeyOneCT, network),
               config.getContract(network, ContractName.ROUTER).address,
-              trade.isLimitOrder ? UserTradeSignatureWithSettlementFee : UserTradeSignature,
+              trade.isLimitOrder ? UserTradeSignature : UserTradeSignatureWithSettlementFee,
               messageUserPartialSignature,
             ),
             this.ethersService.signMessage(network, SignerType.publisher, userFullMessage),
