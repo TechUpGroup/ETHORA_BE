@@ -76,6 +76,7 @@ export const UserTradeSignature = {
     },
   ],
 };
+
 export const UserTradeSignatureWithSettlementFee = {
   UserTradeSignatureWithSettlementFee: [
     {
@@ -109,6 +110,100 @@ export const UserTradeSignatureWithSettlementFee = {
     {
       type: "string",
       name: "referralCode",
+    },
+    {
+      type: "uint256",
+      name: "timestamp",
+    },
+    {
+      type: "uint256",
+      name: "settlementFee",
+    },
+  ],
+};
+
+export const MarketDirectionSignature = {
+  MarketDirectionSignature: [
+    {
+      type: "address",
+      name: "user",
+    },
+    {
+      type: "uint256",
+      name: "totalFee",
+    },
+    {
+      type: "uint256",
+      name: "period",
+    },
+    {
+      type: "address",
+      name: "targetContract",
+    },
+    {
+      type: "uint256",
+      name: "strike",
+    },
+    {
+      type: "uint256",
+      name: "slippage",
+    },
+    {
+      type: "bool",
+      name: "allowPartialFill",
+    },
+    {
+      type: "string",
+      name: "referralCode",
+    },
+    {
+      type: "bool",
+      name: "isAbove",
+    },
+    {
+      type: "uint256",
+      name: "timestamp",
+    },
+  ],
+};
+
+export const MarketDirectionSignatureWithSettlementFee = {
+  MarketDirectionSignatureWithSettlementFee: [
+    {
+      type: "address",
+      name: "user",
+    },
+    {
+      type: "uint256",
+      name: "totalFee",
+    },
+    {
+      type: "uint256",
+      name: "period",
+    },
+    {
+      type: "address",
+      name: "targetContract",
+    },
+    {
+      type: "uint256",
+      name: "strike",
+    },
+    {
+      type: "uint256",
+      name: "slippage",
+    },
+    {
+      type: "bool",
+      name: "allowPartialFill",
+    },
+    {
+      type: "string",
+      name: "referralCode",
+    },
+    {
+      type: "bool",
+      name: "isAbove",
     },
     {
       type: "uint256",
