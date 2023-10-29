@@ -106,7 +106,7 @@ class Config {
   }
 
   get quantityTxTrade() {
-    return 3;
+    return 10;
   }
 
   get network_supported() {

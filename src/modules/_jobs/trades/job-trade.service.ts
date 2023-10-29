@@ -44,15 +44,74 @@ export class JobTradeService {
     private readonly ethersService: EthersService,
     private readonly logsService: LogsService,
   ) {
+    this.start();
+  }
+
+  private async start() {
+    await this.cancelTrade();
+    this.loadActiveTrades();
     this.loadTradesMarket();
     this.loadTradesLimitOrder();
+  }
+
+  private async loadActiveTrades() {
+    let trades = await this.tradesModel.aggregate([
+      {
+        $match: {
+          state: TRADE_STATE.OPENED,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userAddress",
+          foreignField: "address",
+          as: "user",
+          pipeline: [
+            {
+              $lookup: {
+                from: "wallets",
+                localField: "_id",
+                foreignField: "userId",
+                as: "wallet",
+              },
+            },
+            {
+              $unwind: {
+                path: "$wallet",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$user",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
+    if (trades.length) {
+      console.log("[ActiveTrade] Loaded", trades.length, "activeTrade to listActives");
+      trades = trades
+        .filter((trade) => trade.user.wallet && trade.user.wallet.privateKey)
+        .map((trade) => {
+          return {
+            ...trade,
+            oneCT: trade.user.oneCT,
+            privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
+          };
+        });
+      this.listActives.push(...trades);
+    }
   }
 
   private async loadTradesMarket() {
     let trades = await this.tradesModel.aggregate([
       {
         $match: {
-          state: TRADE_STATE.OPENED,
+          state: TRADE_STATE.QUEUED,
           isLimitOrder: false,
         },
       },
@@ -106,7 +165,7 @@ export class JobTradeService {
     let trades = await this.tradesModel.aggregate([
       {
         $match: {
-          state: TRADE_STATE.OPENED,
+          state: TRADE_STATE.QUEUED,
           isLimitOrder: true,
         },
       },
@@ -156,8 +215,7 @@ export class JobTradeService {
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
-  private async start() {
+  private async cancelTrade() {
     const trades = await this.tradesModel.find({
       state: TRADE_STATE.QUEUED,
     });
@@ -168,7 +226,12 @@ export class JobTradeService {
 
     const now = new Date();
     trades.forEach((trade) => {
-      if (trade.openDate && new Date(trade.openDate.getTime() + trade.limitOrderDuration * 1000) < now) {
+      // TODO:
+      if (
+        trade.isLimitOrder &&
+        trade.openDate &&
+        new Date(trade.openDate.getTime() + trade.limitOrderDuration * 1000) < now
+      ) {
         tradesExpired.push({
           updateOne: {
             filter: {
@@ -202,7 +265,9 @@ export class JobTradeService {
       return;
     }
     this.isProcessingTradeMarket = true;
+
     const pairPrice = this.socketPriceService.pairPrice;
+    const now = new Date();
     try {
       if (pairPrice) {
         // TODO:
@@ -230,12 +295,27 @@ export class JobTradeService {
           const entryPrice = prices[prices.length - 1].price;
           return {
             ...item,
+            openDate: now,
             price: entryPrice,
           };
         });
 
-        // Call smartcontract
         this.listActives.push(...trades);
+        // update db
+        this.tradesModel.bulkWrite(
+          trades.map((item) => ({
+            updateOne: {
+              filter: {
+                _id: item._id,
+              },
+              update: {
+                state: TRADE_STATE.OPENED,
+                openDate: now,
+              },
+            },
+          })),
+        );
+        // Call smartcontract
         return this.openTradeContract(trades);
       }
     } catch (e) {
@@ -252,7 +332,9 @@ export class JobTradeService {
       return;
     }
     this.isProcessingTradeLimit = true;
+
     const pairPrice = this.socketPriceService.pairPrice;
+    const now = new Date();
     try {
       if (pairPrice) {
         // TODO:
@@ -288,6 +370,7 @@ export class JobTradeService {
             const entryPrice = prices[prices.length - 1].price || 0;
             return {
               ...item._doc,
+              openDate: now,
               price: entryPrice,
             };
           });
@@ -295,6 +378,20 @@ export class JobTradeService {
         // Call smartcontract
         const _trades = trades.slice(0, config.quantityTxTrade);
         this.listActives.push(..._trades);
+        // update db
+        this.tradesModel.bulkWrite(
+          trades.map((item) => ({
+            updateOne: {
+              filter: {
+                _id: item._id,
+              },
+              update: {
+                state: TRADE_STATE.OPENED,
+                openDate: now,
+              },
+            },
+          })),
+        );
         return this.openTradeContract(_trades, true);
       }
     } catch (e) {
@@ -304,14 +401,16 @@ export class JobTradeService {
     this.isProcessingTradeLimit = false;
   }
 
-  // @Cron(CronExpression.EVERY_SECOND)
+  @Cron(CronExpression.EVERY_SECOND)
   private async closeTrades() {
     if (this.isClosingTrades) {
       console.log("[CloseTrades] Waiting for close last job to finish...");
       return;
     }
     this.isClosingTrades = true;
+
     const pairPrice = this.socketPriceService.pairPrice;
+    const now = new Date();
     try {
       if (pairPrice) {
         // TODO:
@@ -321,33 +420,37 @@ export class JobTradeService {
           this.isClosingTrades = false;
           return;
         }
-        if (!this.listActives.length) {
+        const indexes: number[] = [];
+        const listTrades = this.listActives.filter((item, index) => {
+          if (new Date(item.openDate.getTime() + item.period * 1000) <= now) {
+            indexes.push(index);
+            return true;
+          }
+          return false;
+        });
+        if (!listTrades.length) {
           console.log("[CloseTrades] No listActives, stopped...");
           this.isClosingTrades = false;
           return;
         }
 
-        console.log("[CloseTrades] Processing", this.listActives.length, "listActives...");
+        console.log("[CloseTrades] Processing", listTrades.length, "listActives...");
         const currentPrice = currentPrices[0];
         console.log(">>>", currentPrice);
 
         // filter price with pair
-        const now = new Date();
-        const trades = this.listActives
-          .filter((item) => {
-            return item.openDate && new Date(item.openDate.getTime() + item.period * 1000) < now;
-          })
-          .splice(0, config.quantityTxTrade)
-          .map((item: any) => {
-            const prices = item.pair
-              ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
-              : 0;
-            const entryPrice = prices[prices.length - 1].price;
-            return {
-              ...item,
-              price: entryPrice,
-            };
-          });
+        const trades = listTrades.splice(0, config.quantityTxTrade).map((item: any) => {
+          const prices = item.pair
+            ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
+            : 0;
+          const entryPrice = prices[prices.length - 1].price;
+          return {
+            ...item,
+            price: entryPrice,
+          };
+        });
+        // remove actives
+        indexes.splice(0, config.quantityTxTrade).forEach((item) => this.listActives.splice(item, 1));
 
         // Call smartcontract
         return this.closeTradeContract(trades);
@@ -359,8 +462,8 @@ export class JobTradeService {
     this.isClosingTrades = false;
   }
 
+  // choose operater
   private async openTradeContract(trades: any[], isLimitOrder = false) {
-    // choose operater
     const operater = this.chooseOperator();
     const network = trades[0].network;
     try {
@@ -552,9 +655,9 @@ export class JobTradeService {
             closeTradeParams: {
               optionId: trade.optionId,
               targetContract: trade.targetContract,
-              price: trade.price,
+              closingPrice: trade.price,
               isAbove: trade.isAbove,
-              userSignInfo: {
+              marketDirectionSignInfo: {
                 timestamp: Math.floor(now.getTime() / 1000),
                 signature: userPartialSignature,
               },
@@ -563,20 +666,6 @@ export class JobTradeService {
                 signature: userFullSignature,
               },
             },
-            register: {
-              oneCT: AddressZero,
-              signature: "0x",
-              shouldRegister: false,
-            },
-            permit: {
-              value: 0,
-              deadline: 0,
-              v: 0,
-              r: "0x",
-              s: "0x",
-              shouldApprove: false,
-            },
-            user: trade.userAddress,
           });
         }),
       );

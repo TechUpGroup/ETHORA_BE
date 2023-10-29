@@ -85,8 +85,8 @@ export class TradesService {
     // save
     const result = await this.model.create(_data);
 
-    result['oneCT'] = wallet.address;
-    result['privateKeyOneCT'] = decryptAES(wallet.privateKey);
+    result["oneCT"] = wallet.address;
+    result["privateKeyOneCT"] = decryptAES(wallet.privateKey);
 
     if (!isLimitOrder) {
       this.jobTradeService.queuesMarket.push(result);
@@ -278,6 +278,10 @@ export class TradesService {
         sort: { [sortBy]: sortType },
       },
     );
+  }
+
+  async bulkWrite(bw: any[]) {
+    await this.model.bulkWrite(bw);
   }
 
   // TODO: remove

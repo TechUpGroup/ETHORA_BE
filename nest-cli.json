@@ -7,12 +7,12 @@
     "assets": [
       {
         "include": "i18n/**/*",
-        "outDir": "dist",
+        "outDir": "dist/src",
         "watchAssets": true
       },
       {
         "include": "**/*.gql",
-        "outDir": "dist",
+        "outDir": "dist/src",
         "watchAssets": true
       }
     ],

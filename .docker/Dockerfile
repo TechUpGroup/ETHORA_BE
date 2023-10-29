@@ -23,7 +23,7 @@ RUN apk add --no-cache curl
 
 # Copy source built BE
 COPY package.json yarn.lock ./
-COPY public ./public
+COPY public ./dist/public
 COPY ./config/example.yaml ./config/default.yaml
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
@@ -35,4 +35,5 @@ ENV NODE_ENV=prod
 EXPOSE 8080
 
 # Start app
-CMD ["yarn", "start:prod"]
+# CMD ["yarn", "start:prod"]
+CMD ["node", "dist/src/main"]
