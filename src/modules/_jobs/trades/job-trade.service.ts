@@ -377,10 +377,14 @@ export class JobTradeService {
 
         // Call smartcontract
         const _trades = trades.slice(0, config.quantityTxTrade);
+        if (_trades.length <= 0) {
+          this.isProcessingTradeLimit = false;
+          return;
+        }
         this.listActives.push(..._trades);
         // update db
         this.tradesModel.bulkWrite(
-          trades.map((item) => ({
+          _trades.map((item) => ({
             updateOne: {
               filter: {
                 _id: item._id,
@@ -392,6 +396,7 @@ export class JobTradeService {
             },
           })),
         );
+        console.log(_trades);
         return this.openTradeContract(_trades, true);
       }
     } catch (e) {
@@ -464,6 +469,7 @@ export class JobTradeService {
         );
 
         // Call smartcontract
+        console.log(trades);
         return this.closeTradeContract(trades);
       }
     } catch (e) {
