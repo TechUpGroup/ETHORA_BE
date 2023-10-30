@@ -157,7 +157,7 @@ export class JobTradeService {
             privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
           };
         });
-      this. queuesMarket.push(...trades);
+      this.queuesMarket.push(...trades);
     }
   }
 
