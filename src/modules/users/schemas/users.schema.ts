@@ -1,5 +1,5 @@
 import { Options, validateAddress } from "common/config/mongoose.config";
-import { Document, SchemaTypes, Types } from "mongoose";
+import { Document, SchemaTypes, Types, Schema as SchemaMongoDB } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Network } from "common/enums/network.enum";
@@ -81,6 +81,9 @@ export class Wallets {
 
   @Prop({ type: Date, required: false, default: null })
   lastApproveDate: Date | null;
+
+  @Prop({ type: Date, required: false, default: null })
+  permit: SchemaMongoDB.Types.Mixed;
 }
 
 export type WalletsDocument = Wallets & Document;

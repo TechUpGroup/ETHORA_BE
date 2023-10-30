@@ -107,7 +107,7 @@ export class JobTradeService {
     }
   }
 
-  private async loadTradesMarket() {
+  private async loadTradesMarket() {  
     let trades = await this.tradesModel.aggregate([
       {
         $match: {
@@ -157,7 +157,7 @@ export class JobTradeService {
             privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
           };
         });
-      this.queuesMarket.push(...trades);
+      this. queuesMarket.push(...trades);
     }
   }
 
@@ -481,6 +481,8 @@ export class JobTradeService {
 
   // choose operater
   private async openTradeContract(trades: any[], isLimitOrder = false) {
+    if (!trades.length) return;
+    // choose operater
     const operater = this.chooseOperator();
     const network = trades[0].network;
     try {
