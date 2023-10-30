@@ -35,5 +35,5 @@ ENV NODE_ENV=prod
 EXPOSE 8080
 
 # Start app
-# CMD ["yarn", "start:prod"]
-CMD ["node", "dist/src/main"]
+CMD ["yarn", "start:prod"]
+# CMD ["node", "dist/src/main"]
