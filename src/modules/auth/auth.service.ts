@@ -179,11 +179,19 @@ export class AuthService {
     // process action
     try {
       const maxApprove = new BigNumber("1e24").toFixed(0).toString();
+      const tuple = {
+        value: maxApprove,
+        deadline: permit.deadline,
+        v: permit.v,
+        r: permit.r,
+        s: permit.s,
+        shouldApprove: true,
+      };
       await contract.estimateGas.approveViaSignature(
         ctr.contract_address,
         address,
         new Date().getTime(),
-        [maxApprove, permit.deadline, permit.v, permit.r, permit.s, true], // permit.shouldApprove = true
+        tuple,
         {
           gasPrice: this.ethersService.getCurrentGas(network),
         },
@@ -192,7 +200,7 @@ export class AuthService {
         ctr.contract_address,
         address,
         new Date().getTime(),
-        [maxApprove, permit.deadline, permit.v, permit.r, permit.s, true],
+        tuple,
         {
           gasPrice: this.ethersService.getCurrentGas(network),
         },
