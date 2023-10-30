@@ -65,8 +65,8 @@ export class TradesService {
       queuedDate: now,
       limitOrderDuration: isLimitOrder ? data.limitOrderDuration : 0,
       limitOrderExpirationDate: isLimitOrder ? new Date(data.limitOrderDuration * 1000 + now.getTime()) : now,
-      state: isLimitOrder ? TRADE_STATE.QUEUED : TRADE_STATE.OPENED,
-      openDate: now,
+      state: TRADE_STATE.QUEUED,
+      // openDate: now,
       settlementFee,
     };
 
