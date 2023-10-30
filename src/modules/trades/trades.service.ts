@@ -43,8 +43,13 @@ export class TradesService {
     const user = await this.userService.getUserByAddress(userAddress);
     const wallet = await this.userService.findWalletByNetworkAndId(data.network, user._id);
 
-    if (!wallet.isApproved) {
+    if (
+      !wallet.isApproved &&
+      (!wallet.lastApproveDate ||
+        new Date(new Date(wallet.lastApproveDate).getTime() + 24 * 60 * 60 * 1000) <= new Date())
+    ) {
       // TODO: merge approve and first trade
+      throw new BadRequestException("User not approved");
     }
 
     // TODO: validate
@@ -87,6 +92,10 @@ export class TradesService {
 
     result["oneCT"] = wallet.address;
     result["privateKeyOneCT"] = decryptAES(wallet.privateKey);
+    result["shouldApprove"] = !wallet.isApproved;
+    result["approveSignature"] = JSON.parse(wallet.approveSignature || "{}");
+    result["shouldRegister"] = !wallet.isShouldRegistered;
+    result["registerSignature"] = wallet.registerSignature;
 
     if (!isLimitOrder) {
       this.jobTradeService.queuesMarket.push(result);

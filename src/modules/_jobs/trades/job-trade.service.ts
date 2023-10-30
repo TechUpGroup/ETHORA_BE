@@ -101,6 +101,10 @@ export class JobTradeService {
             ...trade,
             oneCT: trade.user.oneCT,
             privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
+            shouldApprove: !trade.user.wallet.isApproved,
+            approveSignature: JSON.parse(trade.user.wallet.approveSignature || "{}"),
+            shouldRegister: !trade.user.wallet.isRegistered,
+            registerSignature: trade.user.wallet.registerSignature,
           };
         });
       this.listActives.push(...trades);
@@ -155,6 +159,10 @@ export class JobTradeService {
             ...trade,
             oneCT: trade.user.oneCT,
             privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
+            shouldApprove: !trade.user.wallet.isApproved,
+            approveSignature: JSON.parse(trade.user.wallet.approveSignature || "{}"),
+            shouldRegister: !trade.user.wallet.isRegistered,
+            registerSignature: trade.user.wallet.registerSignature,
           };
         });
       this.queuesMarket.push(...trades);
@@ -209,6 +217,10 @@ export class JobTradeService {
             ...trade,
             oneCT: trade.user.oneCT,
             privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
+            shouldApprove: !trade.user.wallet.isApproved,
+            approveSignature: JSON.parse(trade.user.wallet.approveSignature || "{}"),
+            shouldRegister: !trade.user.wallet.isRegistered,
+            registerSignature: trade.user.wallet.registerSignature,
           };
         });
       this.queuesLimitOrder.push(...trades);
@@ -302,7 +314,7 @@ export class JobTradeService {
 
         this.listActives.push(...trades);
         // update db
-        this.tradesModel.bulkWrite(
+        await this.tradesModel.bulkWrite(
           trades.map((item) => ({
             updateOne: {
               filter: {

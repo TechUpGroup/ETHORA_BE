@@ -64,19 +64,21 @@ export class Wallets {
   @Prop({ required: false, default: false })
   isRegistered: boolean;
 
+  @Prop({ required: false, default: "" })
+  @Exclude()
+  registerSignature: string;
+
   @Prop({ required: false, default: true })
   isShouldRegistered: boolean;
 
-  @Prop({ required: false, default: "" })
-  registerSignature: string;
+  @Prop({ type: Date, required: false, default: null })
+  lastRegisteredDate: Date | null;
 
   @Prop({ required: false, default: false })
   isApproved: boolean;
 
-  @Prop({ required: false, default: true })
-  isShouldApproved: boolean;
-
   @Prop({ required: false, default: "" })
+  @Exclude()
   approveSignature: string;
 
   @Prop({ type: Date, required: false, default: null })

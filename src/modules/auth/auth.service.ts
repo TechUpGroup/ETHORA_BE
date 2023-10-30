@@ -9,13 +9,13 @@ import { ApproveDto, LoginDto, RegisterDto } from "./dto/login.dto";
 import { IVerifySignature } from "./interfaces/token.interface";
 import { TokensService } from "./token.service";
 import { EthersService } from "modules/_shared/services/ethers.service";
-import config from "common/config";
+// import config from "common/config";
 import { ContractName } from "common/constants/contract";
-import { RegisterAbi__factory, RouterAbi__factory } from "common/abis/types";
-import { SignerType } from "common/enums/signer.enum";
+// import { RegisterAbi__factory, RouterAbi__factory } from "common/abis/types";
+// import { SignerType } from "common/enums/signer.enum";
 import { plainToInstance } from "class-transformer";
 import { ContractsService } from "modules/contracts/contracts.service";
-import BigNumber from "bignumber.js";
+// import BigNumber from "bignumber.js";
 
 @Injectable()
 export class AuthService {
@@ -85,9 +85,12 @@ export class AuthService {
       user: {
         ...plainToInstance(Users, updatedUser.toObject()),
         isRegistered: wallet.isRegistered,
-        isApproved: wallet.isApproved,
-        isShouldApproved: wallet.isShouldApproved,
+        isApproved:
+          wallet.isApproved ||
+          (wallet.lastApproveDate &&
+            new Date(new Date(wallet.lastApproveDate).getTime() + 24 * 60 * 60 * 1000) > new Date()),
         lastApprovedDate: wallet.lastApproveDate,
+        lastRegisteredDate: wallet.lastRegisteredDate,
       },
       tokens,
     };
@@ -108,7 +111,7 @@ export class AuthService {
     // call contract
     const user = await this.userService.findUserById(userId);
     const wallet = await this.userService.findWalletByNetworkAndId(network, user._id);
-    const { oneCT, address } = user;
+    // const { oneCT, address } = user;
 
     if (wallet.isRegistered && isRegister) {
       throw new BadRequestException("Already registered");
@@ -118,35 +121,38 @@ export class AuthService {
     }
 
     //
-    const contract = this.ethersService.getContract(
-      network,
-      config.getContract(network, ContractName.REGISTER).address,
-      RegisterAbi__factory.abi,
-      SignerType.operator,
-    );
+    // const contract = this.ethersService.getContract(
+    //   network,
+    //   config.getContract(network, ContractName.REGISTER).address,
+    //   RegisterAbi__factory.abi,
+    //   SignerType.operator,
+    // );
 
-    // process action
-    try {
-      if (isRegister) {
-        await contract.estimateGas.registerAccount(oneCT, address, signature, {
-          gasPrice: this.ethersService.getCurrentGas(network),
-        });
-        await contract.registerAccount(oneCT, address, signature, {
-          gasPrice: this.ethersService.getCurrentGas(network),
-        });
-      } else {
-        await contract.estimateGas.deregisterAccount(address, signature, {
-          gasPrice: this.ethersService.getCurrentGas(network),
-        });
-        await contract.deregisterAccount(address, signature, {
-          gasPrice: this.ethersService.getCurrentGas(network),
-        });
-      }
-    } catch (e) {
-      throw new BadRequestException(e);
-    }
+    // // process action
+    // try {
+    //   if (isRegister) {
+    //     await contract.estimateGas.registerAccount(oneCT, address, signature, {
+    //       gasPrice: this.ethersService.getCurrentGas(network),
+    //     });
+    //     await contract.registerAccount(oneCT, address, signature, {
+    //       gasPrice: this.ethersService.getCurrentGas(network),
+    //     });
+    //   } else {
+    //     await contract.estimateGas.deregisterAccount(address, signature, {
+    //       gasPrice: this.ethersService.getCurrentGas(network),
+    //     });
+    //     await contract.deregisterAccount(address, signature, {
+    //       gasPrice: this.ethersService.getCurrentGas(network),
+    //     });
+    //   }
+    // } catch (e) {
+    //   throw new BadRequestException(e);
+    // }
 
     wallet.isRegistered = isRegister;
+    wallet.isShouldRegistered = isRegister;
+    wallet.registerSignature = signature;
+    wallet.lastRegisteredDate = isRegister ? new Date() : null;
     await wallet.save();
 
     //
@@ -162,56 +168,45 @@ export class AuthService {
     if (!ctr) {
       throw new NotFoundException("Token address not found");
     }
-    const { address } = user;
+    // const { address } = user;
 
     if (wallet.isApproved) {
       throw new BadRequestException("Already approved");
     }
 
     //
-    const contract = this.ethersService.getContract(
-      network,
-      config.getContract(network, ContractName.ROUTER).address,
-      RouterAbi__factory.abi,
-      SignerType.operator,
-    );
+    // const contract = this.ethersService.getContract(
+    //   network,
+    //   config.getContract(network, ContractName.ROUTER).address,
+    //   RouterAbi__factory.abi,
+    //   SignerType.operator,
+    // );
 
-    // process action
-    try {
-      const maxApprove = new BigNumber("1e24").toFixed(0).toString();
-      const tuple = {
-        value: maxApprove,
-        deadline: permit.deadline,
-        v: permit.v,
-        r: permit.r,
-        s: permit.s,
-        shouldApprove: true,
-      };
-      await contract.estimateGas.approveViaSignature(
-        ctr.contract_address,
-        address,
-        new Date().getTime(),
-        tuple,
-        {
-          gasPrice: this.ethersService.getCurrentGas(network),
-        },
-      );
-      await contract.approveViaSignature(
-        ctr.contract_address,
-        address,
-        new Date().getTime(),
-        tuple,
-        {
-          gasPrice: this.ethersService.getCurrentGas(network),
-        },
-      );
-    } catch (e) {
-      throw new BadRequestException(e);
-    }
+    // // process action
+    // try {
+    //   const maxApprove = new BigNumber("1e24").toFixed(0).toString();
+    //   const tuple = {
+    //     value: maxApprove,
+    //     deadline: permit.deadline,
+    //     v: permit.v,
+    //     r: permit.r,
+    //     s: permit.s,
+    //     shouldApprove: true,
+    //   };
+    //   await contract.estimateGas.approveViaSignature(ctr.contract_address, address, new Date().getTime(), tuple, {
+    //     gasPrice: this.ethersService.getCurrentGas(network),
+    //   });
+    //   await contract.approveViaSignature(ctr.contract_address, address, new Date().getTime(), tuple, {
+    //     gasPrice: this.ethersService.getCurrentGas(network),
+    //   });
+    // } catch (e) {
+    //   throw new BadRequestException(e);
+    // }
 
     // TODO: approve before trade
-    wallet.isApproved = true;
+    // wallet.isApproved = true;
     wallet.lastApproveDate = new Date();
+    wallet.approveSignature = JSON.stringify(permit);
     await wallet.save();
 
     //
