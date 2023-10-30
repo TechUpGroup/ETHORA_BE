@@ -12,7 +12,7 @@
       },
       {
         "include": "**/*.gql",
-        "outDir": "dist/src",
+        "outDir": "dist",
         "watchAssets": true
       }
     ],
