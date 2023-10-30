@@ -164,7 +164,7 @@ export class AuthService {
     }
     const { address } = user;
 
-    if (wallet.lastApproveDate && new Date(wallet.lastApproveDate.getTime() + 86400000) <= new Date()) {
+    if (wallet.isApproved) {
       throw new BadRequestException("Already approved");
     }
     wallet.permit = permit as any;
