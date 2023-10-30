@@ -27,7 +27,7 @@ export class Users {
   @Exclude()
   mnemonic: string;
 
-  @Prop({ required: true, index: true, trim: true, lowercase: true, validate: validateAddress, unique: true })
+  @Prop({ required: false, index: true, trim: true, lowercase: true, validate: validateAddress, unique: true })
   oneCT: string;
 
   @Prop({ required: true, default: uuidv4 })

@@ -440,17 +440,28 @@ export class JobTradeService {
 
         // filter price with pair
         const trades = listTrades.splice(0, config.quantityTxTrade).map((item: any) => {
-          const prices = item.pair
-            ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
-            : 0;
-          const entryPrice = prices[prices.length - 1].price;
           return {
             ...item,
-            price: entryPrice,
+            price: currentPrice.price,
           };
         });
         // remove actives
         indexes.splice(0, config.quantityTxTrade).forEach((item) => this.listActives.splice(item, 1));
+
+        // update db
+        this.tradesModel.bulkWrite(
+          trades.map((item) => ({
+            updateOne: {
+              filter: {
+                _id: item._id,
+              },
+              update: {
+                state: TRADE_STATE.CLOSED,
+                closeDate: now,
+              },
+            },
+          })),
+        );
 
         // Call smartcontract
         return this.closeTradeContract(trades);
@@ -590,6 +601,7 @@ export class JobTradeService {
         this.queuesLimitOrder.filter((trade) => !queueIds.includes(trade.queueId));
       }
     } catch (e) {
+      console.error(e);
       this.logsService.createLog("openTradeContract", e.message);
     } finally {
       delete this.stateOperators[operater];
@@ -679,6 +691,7 @@ export class JobTradeService {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
     } catch (e) {
+      console.error(e);
       this.logsService.createLog("closeTradeContract", e.message);
     } finally {
       delete this.stateOperators[operater];
