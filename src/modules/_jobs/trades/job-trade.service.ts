@@ -24,7 +24,6 @@ import {
 } from "common/utils/signature";
 import { SignerType } from "common/enums/signer.enum";
 import { decryptAES } from "common/utils/encrypt";
-import { convertPriceTrade } from "common/utils/convert";
 
 @Injectable()
 export class JobTradeService {
@@ -361,7 +360,7 @@ export class JobTradeService {
               ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
               : [];
             prices = prices.map((price) => price.price);
-            return this.checkLimitPriceAvaliable(convertPriceTrade(item.strike.toString()), prices);
+            return this.checkLimitPriceAvaliable(item.strike.toString(), prices);
           })
           .map((item: any) => {
             const prices = item.pair
@@ -508,10 +507,10 @@ export class JobTradeService {
           // userPartialSignatures
           let messageUserPartialSignature: any = {
             user: trade.userAddress,
-            totalFee: convertPriceTrade(trade.tradeSize),
+            totalFee: trade.tradeSize,
             period: trade.period,
             targetContract: trade.targetContract,
-            strike: convertPriceTrade(trade.strike),
+            strike: trade.strike,
             slippage: trade.slippage,
             allowPartialFill: trade.allowPartialFill || false,
             referralCode: trade.referralCode || "",
@@ -552,10 +551,10 @@ export class JobTradeService {
           openTxn.push({
             tradeParams: {
               queueId: trade.queueId,
-              totalFee: convertPriceTrade(trade.tradeSize),
+              totalFee: trade.tradeSize,
               period: trade.period,
               targetContract: trade.targetContract,
-              strike: convertPriceTrade(trade.strike),
+              strike: trade.strike,
               slippage: trade.slippage,
               allowPartialFill: trade.allowPartialFill || false,
               referralCode: trade.referralCode || "",
@@ -636,10 +635,10 @@ export class JobTradeService {
           // userPartialSignatures
           let messageUserPartialSignature: any = {
             user: trade.userAddress,
-            totalFee: convertPriceTrade(trade.tradeSize),
+            totalFee: trade.tradeSize,
             period: trade.period,
             targetContract: trade.targetContract,
-            strike: convertPriceTrade(trade.strike),
+            strike: trade.strike,
             slippage: trade.slippage,
             allowPartialFill: trade.allowPartialFill || false,
             referralCode: trade.referralCode || "",
