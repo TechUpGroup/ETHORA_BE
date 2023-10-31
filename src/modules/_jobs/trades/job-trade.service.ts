@@ -106,7 +106,7 @@ export class JobTradeService {
     }
   }
 
-  private async loadTradesMarket() {  
+  private async loadTradesMarket() {
     let trades = await this.tradesModel.aggregate([
       {
         $match: {
@@ -300,6 +300,10 @@ export class JobTradeService {
         });
 
         this.listActives.push(...trades);
+
+        // Call smartcontract
+        this.closeTradeContract(trades);
+
         // update db
         this.tradesModel.bulkWrite(
           trades.map((item) => ({
@@ -314,8 +318,6 @@ export class JobTradeService {
             },
           })),
         );
-        // Call smartcontract
-        return this.openTradeContract(trades);
       }
     } catch (e) {
       console.error(e);
@@ -381,8 +383,12 @@ export class JobTradeService {
           return;
         }
         this.listActives.push(..._trades);
+
+        // Call smartcontract
+        this.closeTradeContract(trades);
+
         // update db
-        this.tradesModel.bulkWrite(
+        await this.tradesModel.bulkWrite(
           _trades.map((item) => ({
             updateOne: {
               filter: {
@@ -395,8 +401,6 @@ export class JobTradeService {
             },
           })),
         );
-        console.log(_trades);
-        return this.openTradeContract(_trades, true);
       }
     } catch (e) {
       console.error(e);
@@ -452,8 +456,11 @@ export class JobTradeService {
         // remove actives
         indexes.splice(0, config.quantityTxTrade).forEach((item) => this.listActives.splice(item, 1));
 
+        // Call smartcontract
+        this.closeTradeContract(trades);
+
         // update db
-        this.tradesModel.bulkWrite(
+        await this.tradesModel.bulkWrite(
           trades.map((item) => ({
             updateOne: {
               filter: {
@@ -466,10 +473,6 @@ export class JobTradeService {
             },
           })),
         );
-
-        // Call smartcontract
-        console.log(trades);
-        return this.closeTradeContract(trades);
       }
     } catch (e) {
       console.error(e);
