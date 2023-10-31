@@ -302,7 +302,7 @@ export class JobTradeService {
         this.listActives.push(...trades);
 
         // Call smartcontract
-        this.closeTradeContract(trades);
+        this.openTradeContract(trades);
 
         // update db
         this.tradesModel.bulkWrite(
@@ -385,10 +385,10 @@ export class JobTradeService {
         this.listActives.push(..._trades);
 
         // Call smartcontract
-        this.closeTradeContract(trades);
+        this.openTradeContract(trades);
 
         // update db
-        await this.tradesModel.bulkWrite(
+        this.tradesModel.bulkWrite(
           _trades.map((item) => ({
             updateOne: {
               filter: {
@@ -460,7 +460,7 @@ export class JobTradeService {
         this.closeTradeContract(trades);
 
         // update db
-        await this.tradesModel.bulkWrite(
+        this.tradesModel.bulkWrite(
           trades.map((item) => ({
             updateOne: {
               filter: {
