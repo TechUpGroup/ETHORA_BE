@@ -10,7 +10,7 @@ import { CancelTradeEvent, FailResolveEvent, FailUnlockEvent, OpenTradeEvent } f
 import { TradesService } from "modules/trades/trades.service";
 import { JobTradeService } from "modules/_jobs/trades/job-trade.service";
 import { LogsService } from "modules/logs/logs.service";
-import { ROUTER_EVENT } from "common/constants/event";
+import { REASON_FAIL, REASON_FAIL_RETRY, ROUTER_EVENT } from "common/constants/event";
 import { TRADE_STATE } from "common/enums/trades.enum";
 import { decryptAES } from "common/utils/encrypt";
 
@@ -97,7 +97,7 @@ export class JobSyncRouterService {
               update: {
                 status: TRADE_STATE.CANCELLED,
                 isCancelled: true,
-                cancellationReason: reason.toString(),
+                cancellationReason: REASON_FAIL[reason] || "System error",
               },
             },
           });
@@ -112,14 +112,14 @@ export class JobSyncRouterService {
               update: {
                 status: TRADE_STATE.CANCELLED,
                 isCancelled: true,
-                cancellationReason: reason.toString(),
+                cancellationReason: REASON_FAIL[reason] || "System error",
               },
             },
           });
         }
         if (nameEvent === ROUTER_EVENT.FAILUNLOCK) {
           const { optionId, reason } = (event as FailUnlockEvent).args;
-          if(reason) {
+          if (REASON_FAIL_RETRY[reason]) {
             retryTx.push(optionId);
           } else {
             bulkUpdate.push({
@@ -130,7 +130,7 @@ export class JobSyncRouterService {
                 update: {
                   status: TRADE_STATE.CANCELLED,
                   isCancelled: true,
-                  cancellationReason: reason.toString(),
+                  cancellationReason: REASON_FAIL[reason] || "System error",
                 },
               },
             });
@@ -139,17 +139,17 @@ export class JobSyncRouterService {
       }
 
       // retry when excuteOption close trade
-      if(retryTx.length) {
+      if (retryTx.length) {
         const trades = await this.tradeService.getAllTradesClosed(retryTx);
         const _trades = trades
-        .filter((trade) => trade.user.wallet && trade.user.wallet.privateKey)
-        .map((trade) => {
-          return {
-            ...trade,
-            oneCT: trade.user.oneCT,
-            privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
-          };
-        });
+          .filter((trade) => trade.user.wallet && trade.user.wallet.privateKey)
+          .map((trade) => {
+            return {
+              ...trade,
+              oneCT: trade.user.oneCT,
+              privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
+            };
+          });
         this.jobTradeService.listActives.push(..._trades);
       }
 
