@@ -23,7 +23,5 @@ export const REASON_FAIL_RETRY = {
     "Router: Wrong closing time": "Wrong closing time",
     "Router: Wrong price": "Wrong price",
     "O10": "Error",
-    "O5": "Error",
-    "Pool: lockedAmount is already unlocked": "lockedAmount is already unlocked",
 }
   
