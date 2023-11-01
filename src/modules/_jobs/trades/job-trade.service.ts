@@ -510,10 +510,10 @@ export class JobTradeService {
           // userPartialSignatures
           let messageUserPartialSignature: any = {
             user: trade.userAddress,
-            totalFee: trade.tradeSize,
+            totalFee: trade.tradeSize.toFixed(0),
             period: trade.period,
             targetContract: trade.targetContract,
-            strike: trade.strike,
+            strike: trade.strike.toFixed(0),
             slippage: trade.slippage,
             allowPartialFill: trade.allowPartialFill || false,
             referralCode: trade.referralCode || "",
@@ -554,10 +554,10 @@ export class JobTradeService {
           openTxn.push({
             tradeParams: {
               queueId: trade.queueId,
-              totalFee: trade.tradeSize,
+              totalFee: trade.tradeSize.toFixed(0),
               period: trade.period,
               targetContract: trade.targetContract,
-              strike: trade.strike,
+              strike: trade.strike.toFixed(0),
               slippage: trade.slippage,
               allowPartialFill: trade.allowPartialFill || false,
               referralCode: trade.referralCode || "",
