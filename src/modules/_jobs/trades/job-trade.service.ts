@@ -907,7 +907,7 @@ export class JobTradeService {
   }
 
   private chooseOperator() {
-    let operaterMinTime = "";
+    let operaterMinTime = config.listOperater[0];
     let minTime = 9000000000000;
     config.listOperater.forEach((o) => {
       if (!this.stateOperators[o]) {
