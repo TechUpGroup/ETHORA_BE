@@ -66,7 +66,7 @@ export class JobSyncRouterService {
       const historyCreateArr: any[] = [];
       const bulkUpdate: any[] = [];
       const openTradeQueueIds: any = {};
-      const retryTx: any = {};
+      const retryTx: any[] = [];
       for (const event of events) {
         const { transactionHash, event: nameEvent } = event;
         historyCreateArr.push({
