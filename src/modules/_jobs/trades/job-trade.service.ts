@@ -293,7 +293,7 @@ export class JobTradeService {
             : 0;
           const entryPrice = prices[prices.length - 1].price;
           return {
-            ...(item._doc || item),
+            ...(item?._doc || item),
             openDate: now,
             price: entryPrice,
           };
@@ -370,7 +370,7 @@ export class JobTradeService {
               : [];
             const entryPrice = prices[prices.length - 1].price || 0;
             return {
-              ...(item._doc || item),
+              ...(item?._doc || item),
               openDate: now,
               price: entryPrice,
             };
@@ -449,7 +449,7 @@ export class JobTradeService {
         // filter price with pair
         const trades = listTrades.splice(0, config.quantityTxTrade).map((item: any) => {
           return {
-            ...(item._doc || item),
+            ...(item?._doc || item),
             price: currentPrice.price,
           };
         });
@@ -510,7 +510,7 @@ export class JobTradeService {
           // userPartialSignatures
           let messageUserPartialSignature: any = {
             user: trade.userAddress,
-            totalFee: trade.tradeSize.toFixed(0),
+            totalFee: trade.tradeSize,
             period: trade.period,
             targetContract: trade.targetContract,
             strike: trade.strike.toFixed(0),
@@ -554,7 +554,7 @@ export class JobTradeService {
           openTxn.push({
             tradeParams: {
               queueId: trade.queueId,
-              totalFee: trade.tradeSize.toFixed(0),
+              totalFee: trade.tradeSize,
               period: trade.period,
               targetContract: trade.targetContract,
               strike: trade.strike.toFixed(0),
