@@ -689,32 +689,30 @@ export class JobTradeService {
           ]);
 
           closeTxn.push({
-            closeTradeParams: {
-              optionId: trade.optionId,
-              targetContract: trade.targetContract,
-              closingPrice: trade.price,
-              isAbove: trade.isAbove,
-              marketDirectionSignInfo: {
-                timestamp: Math.floor(now.getTime() / 1000),
-                signature: userPartialSignature,
-              },
-              publisherSignInfo: {
-                timestamp: Math.floor(now.getTime() / 1000),
-                signature: userFullSignature,
-              },
-              register: {
-                oneCT: AddressZero,
-                signature: "0x",
-                shouldRegister: false,
-              },
-              permit: {
-                value: 0,
-                deadline: 0,
-                v: 0,
-                r: "0x0000000000000000000000000000000000000000000000000000000000000000",
-                s: "0x0000000000000000000000000000000000000000000000000000000000000000",
-                shouldApprove: false,
-              }
+            optionId: trade.optionId,
+            targetContract: trade.targetContract,
+            closingPrice: trade.price,
+            isAbove: trade.isAbove,
+            marketDirectionSignInfo: {
+              timestamp: Math.floor(now.getTime() / 1000),
+              signature: userPartialSignature,
+            },
+            publisherSignInfo: {
+              timestamp: Math.floor(now.getTime() / 1000),
+              signature: userFullSignature,
+            },
+            register: {
+              oneCT: AddressZero,
+              signature: "0x",
+              shouldRegister: false,
+            },
+            permit: {
+              value: 0,
+              deadline: 0,
+              v: 0,
+              r: "0x0000000000000000000000000000000000000000000000000000000000000000",
+              s: "0x0000000000000000000000000000000000000000000000000000000000000000",
+              shouldApprove: false,
             },
           });
         }),
