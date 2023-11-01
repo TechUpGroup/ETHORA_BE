@@ -613,6 +613,7 @@ export class JobTradeService {
     } catch (e) {
       console.error(e);
       this.logsService.createLog("openTradeContract", e);
+      this.logsService.createLog("getCurrentGas", this.ethersService.getCurrentGas(network));
     } finally {
       delete this.stateOperators[operater];
     }
