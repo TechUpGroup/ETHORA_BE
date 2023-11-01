@@ -448,9 +448,12 @@ export class JobTradeService {
 
         // filter price with pair
         const trades = listTrades.splice(0, config.quantityTxTrade).map((item: any) => {
+          const prices = item.pair
+              ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
+              : [];
           return {
             ...item,
-            price: currentPrice.price,
+            price: prices[prices.length - 1].price || 0
           };
         });
         // remove actives
