@@ -293,7 +293,7 @@ export class JobTradeService {
             : 0;
           const entryPrice = prices[prices.length - 1].price;
           return {
-            ...(item?._doc || item),
+            ...item,
             openDate: now,
             price: entryPrice,
           };
@@ -370,7 +370,7 @@ export class JobTradeService {
               : [];
             const entryPrice = prices[prices.length - 1].price || 0;
             return {
-              ...(item?._doc || item),
+              ...item,
               openDate: now,
               price: entryPrice,
             };
@@ -449,7 +449,7 @@ export class JobTradeService {
         // filter price with pair
         const trades = listTrades.splice(0, config.quantityTxTrade).map((item: any) => {
           return {
-            ...(item?._doc || item),
+            ...item,
             price: currentPrice.price,
           };
         });
@@ -612,7 +612,7 @@ export class JobTradeService {
       }
     } catch (e) {
       console.error(e);
-      this.logsService.createLog("openTradeContract", e.message);
+      this.logsService.createLog("openTradeContract", e);
     } finally {
       delete this.stateOperators[operater];
     }
@@ -702,7 +702,7 @@ export class JobTradeService {
       });
     } catch (e) {
       console.error(e);
-      this.logsService.createLog("closeTradeContract", e.message);
+      this.logsService.createLog("closeTradeContract", e);
     } finally {
       delete this.stateOperators[operater];
     }

@@ -86,13 +86,13 @@ export class TradesService {
     // save
     const result = await this.model.create(_data);
 
-    result["oneCT"] = wallet.address;
-    result["privateKeyOneCT"] = decryptAES(wallet.privateKey);
+    result['_doc']["oneCT"] = wallet.address;
+    result['_doc']["privateKeyOneCT"] = decryptAES(wallet.privateKey);
 
     if (!isLimitOrder) {
-      this.jobTradeService.queuesMarket.push(result);
+      this.jobTradeService.queuesMarket.push(result['_doc']);
     } else {
-      this.jobTradeService.queuesLimitOrder.push(result);
+      this.jobTradeService.queuesLimitOrder.push(result['_doc']);
     }
 
     // return
