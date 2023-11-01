@@ -4,13 +4,15 @@ import { IEventParams } from "../interfaces/helper.interface";
 import { HelperService } from "./_helper.service";
 import { ContractsService } from "modules/contracts/contracts.service";
 import { HistoryService } from "modules/history/history.service";
-import { EthersService } from "modules/_shared/services/ethers.service";
 import { RouterAbi__factory } from "common/abis/types";
 import { ContractName } from "common/constants/contract";
-import { OpenTradeEvent } from "common/abis/types/RouterAbi";
+import { CancelTradeEvent, FailResolveEvent, FailUnlockEvent, OpenTradeEvent } from "common/abis/types/RouterAbi";
 import { TradesService } from "modules/trades/trades.service";
 import { JobTradeService } from "modules/_jobs/trades/job-trade.service";
 import { LogsService } from "modules/logs/logs.service";
+import { ROUTER_EVENT } from "common/constants/event";
+import { TRADE_STATE } from "common/enums/trades.enum";
+import { decryptAES } from "common/utils/encrypt";
 
 @Injectable()
 export class JobSyncRouterService {
@@ -18,7 +20,6 @@ export class JobSyncRouterService {
     private readonly helperService: HelperService,
     private readonly contractService: ContractsService,
     private readonly historyService: HistoryService,
-    private readonly etherService: EthersService,
     private readonly tradeService: TradesService,
     private readonly jobTradeService: JobTradeService,
     private readonly logsService: LogsService,
@@ -32,18 +33,16 @@ export class JobSyncRouterService {
     if (this.isRunning) return;
     this.isRunning = true;
     try {
-      try {
-        await this.helperService.excuteSync({
-          contract: router,
-          network: router.network,
-          acceptEvents: ["OpenTrade"],
-          ABI: RouterAbi__factory.abi,
-          callback: this.handleEvents,
-        });
-      } catch (err) {
-        this.logsService.createLog("JobSyncRouterService -> start:", err);
-        console.log("JobSyncRouterService -> start: ", err);
-      }
+      await this.helperService.excuteSync({
+        contract: router,
+        network: router.network,
+        acceptEvents: Object.values(ROUTER_EVENT),
+        ABI: RouterAbi__factory.abi,
+        callback: this.handleEvents,
+      });
+    } catch (err) {
+      this.logsService.createLog("JobSyncRouterService -> start:", err);
+      console.log("JobSyncRouterService -> start: ", err);
     } finally {
       this.isRunning = false;
     }
@@ -56,36 +55,102 @@ export class JobSyncRouterService {
       const txsHashExists = await this.historyService.findTransactionHashExists(eventHashes);
       const events = this.helperService.filterEvents(listEvents, txsHashExists);
 
-      // get time of block
-      const blocktimestamps = {};
-      const listBlockNumber = [...new Set(events.map((i) => i.blockNumber))];
-      const listBlockTime = await Promise.all(
-        listBlockNumber.map((blockNumber) => this.etherService.getBlockTime(contract.network, blockNumber)),
-      );
-      listBlockTime.forEach((blockTime, i) => (blocktimestamps[listBlockNumber[i]] = blockTime));
+      // // get time of block
+      // const blocktimestamps = {};
+      // const listBlockNumber = [...new Set(events.map((i) => i.blockNumber))];
+      // const listBlockTime = await Promise.all(
+      //   listBlockNumber.map((blockNumber) => this.etherService.getBlockTime(contract.network, blockNumber)),
+      // );
+      // listBlockTime.forEach((blockTime, i) => (blocktimestamps[listBlockNumber[i]] = blockTime));
 
       const historyCreateArr: any[] = [];
-      const openTradeArr: any[] = [];
+      const bulkUpdate: any[] = [];
       const openTradeQueueIds: any = {};
+      const retryTx: any = {};
       for (const event of events) {
-        const { queueId, optionId } = (event as OpenTradeEvent).args;
-
-        openTradeArr.push({
-          updateOne: {
-            filter: {
-              queueId: queueId.toString(),
-            },
-            update: {
-              optionId: optionId.toString(),
-            },
-          },
-        });
-        openTradeQueueIds[queueId.toString()] = optionId.toString();
-
+        const { transactionHash, event: nameEvent } = event;
         historyCreateArr.push({
-          txHash: event.transactionHash.toLowerCase(),
+          txHash: transactionHash.toLowerCase(),
           network,
         });
+        if (nameEvent === ROUTER_EVENT.OPENTRADE) {
+          const { queueId, optionId } = (event as OpenTradeEvent).args;
+          bulkUpdate.push({
+            updateOne: {
+              filter: {
+                queueId: queueId.toString(),
+              },
+              update: {
+                optionId: optionId.toString(),
+              },
+            },
+          });
+          openTradeQueueIds[queueId.toString()] = optionId.toString();
+        }
+        if (nameEvent === ROUTER_EVENT.CANCELTRADE) {
+          const { queueId, reason } = (event as CancelTradeEvent).args;
+          bulkUpdate.push({
+            updateOne: {
+              filter: {
+                queueId: queueId.toString(),
+              },
+              update: {
+                status: TRADE_STATE.CANCELLED,
+                isCancelled: true,
+                cancellationReason: reason.toString(),
+              },
+            },
+          });
+        }
+        if (nameEvent === ROUTER_EVENT.FAILRESOLVE) {
+          const { queueId, reason } = (event as FailResolveEvent).args;
+          bulkUpdate.push({
+            updateOne: {
+              filter: {
+                queueId: queueId.toString(),
+              },
+              update: {
+                status: TRADE_STATE.CANCELLED,
+                isCancelled: true,
+                cancellationReason: reason.toString(),
+              },
+            },
+          });
+        }
+        if (nameEvent === ROUTER_EVENT.FAILUNLOCK) {
+          const { optionId, reason } = (event as FailUnlockEvent).args;
+          if(reason) {
+            retryTx.push(optionId);
+          } else {
+            bulkUpdate.push({
+              updateOne: {
+                filter: {
+                  optionId: +optionId.toString(),
+                },
+                update: {
+                  status: TRADE_STATE.CANCELLED,
+                  isCancelled: true,
+                  cancellationReason: reason.toString(),
+                },
+              },
+            });
+          }
+        }
+      }
+
+      // retry when excuteOption close trade
+      if(retryTx.length) {
+        const trades = await this.tradeService.getAllTradesClosed(retryTx);
+        const _trades = trades
+        .filter((trade) => trade.user.wallet && trade.user.wallet.privateKey)
+        .map((trade) => {
+          return {
+            ...trade,
+            oneCT: trade.user.oneCT,
+            privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
+          };
+        });
+        this.jobTradeService.listActives.push(..._trades);
       }
 
       // update to queue
@@ -97,7 +162,7 @@ export class JobSyncRouterService {
 
       // save to db
       await Promise.all([
-        openTradeArr.length ? this.tradeService.bulkWrite(openTradeArr) : undefined,
+        bulkUpdate.length ? this.tradeService.bulkWrite(bulkUpdate) : undefined,
         historyCreateArr.length ? this.historyService.saveHistories(historyCreateArr) : undefined,
       ]);
     } catch (err) {

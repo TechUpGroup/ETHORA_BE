@@ -23,6 +23,7 @@ import { PAIR_CONTRACT_ABIS } from "common/constants/abis";
 import { calcLockedAmount } from "common/utils/trades";
 import { SETTLEMENT_FEE } from "common/constants/fee";
 import { decryptAES } from "common/utils/encrypt";
+import BigNumber from "bignumber.js";
 // import { generateSignHashType } from "common/utils/ethers";
 // import { Timeout } from "@nestjs/schedule";
 // import { tradesHistories } from "common/config/data-sample";
@@ -38,13 +39,17 @@ export class TradesService {
   ) {}
 
   async createTrade(userAddress: string, data: CreateTradeDto) {
-    const { isLimitOrder, pair } = data;
+    const { isLimitOrder, pair, tradeSize } = data;
 
     const user = await this.userService.getUserByAddress(userAddress);
     const wallet = await this.userService.findWalletByNetworkAndId(data.network, user._id);
 
     if (!wallet.isApproved) {
-      // TODO: merge approve and first trade
+      throw new BadRequestException("Not approve");
+    }
+
+    if (BigNumber(tradeSize).gt("100000000")) {
+      throw new BadRequestException("Trade size over 100 USDC");
     }
 
     // TODO: validate
@@ -86,13 +91,13 @@ export class TradesService {
     // save
     const result = await this.model.create(_data);
 
-    result['_doc']["oneCT"] = wallet.address;
-    result['_doc']["privateKeyOneCT"] = decryptAES(wallet.privateKey);
+    result["_doc"]["oneCT"] = wallet.address;
+    result["_doc"]["privateKeyOneCT"] = decryptAES(wallet.privateKey);
 
     if (!isLimitOrder) {
-      this.jobTradeService.queuesMarket.push(result['_doc']);
+      this.jobTradeService.queuesMarket.push(result["_doc"]);
     } else {
-      this.jobTradeService.queuesLimitOrder.push(result['_doc']);
+      this.jobTradeService.queuesLimitOrder.push(result["_doc"]);
     }
 
     // return
@@ -126,6 +131,17 @@ export class TradesService {
       },
     );
 
+    this.jobTradeService.queuesLimitOrder.map((order) => {
+      if (order._id == data._id) {
+        return {
+          ...order,
+          ...data,
+          limitOrderExpirationDate: new Date(data.limitOrderDuration * 1000 + now.getTime())
+        }
+      }
+      return order;
+    });
+
     return result;
   }
 
@@ -142,6 +158,19 @@ export class TradesService {
       throw new BadRequestException("Close trade too early");
     }
 
+    // TODO:
+    let isTradeActive = false;
+    this.jobTradeService.listActives.forEach((a, i) => {
+      if(a._id == data._id) {
+        isTradeActive = true;
+        this.jobTradeService.listActives.splice(i, 1);
+        this.jobTradeService.queueCloseAnytime.push(a);
+      }
+    });
+    if(isTradeActive) {
+      throw new BadRequestException("Trade is in QUEUE");
+    }
+
     const result = await this.model.updateOne(
       {
         _id: data._id,
@@ -156,8 +185,6 @@ export class TradesService {
         },
       },
     );
-
-    // TODO: contract closeTrade()
 
     return result;
   }
@@ -266,6 +293,47 @@ export class TradesService {
         sort: { [sortBy]: sortType },
       },
     );
+  }
+
+  getAllTradesClosed(optionIds: number[]) {
+    return this.model.aggregate([
+      {
+        $match: {
+          optionId: { $in: optionIds },
+          state: TRADE_STATE.CLOSED,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userAddress",
+          foreignField: "address",
+          as: "user",
+          pipeline: [
+            {
+              $lookup: {
+                from: "wallets",
+                localField: "_id",
+                foreignField: "userId",
+                as: "wallet",
+              },
+            },
+            {
+              $unwind: {
+                path: "$wallet",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$user",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
   }
 
   async getHistoryUserTrades(userAddress: string, query: GetTradesUserActiveDto) {
