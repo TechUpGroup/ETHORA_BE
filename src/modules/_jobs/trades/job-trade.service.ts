@@ -487,6 +487,7 @@ export class JobTradeService {
     // choose operater
     const operater = this.chooseOperator();
     const network = trades[0].network;
+    const now = new Date();
     try {
       // get contract
       const contract = this.ethersService.getContractWithProvider(
@@ -497,7 +498,6 @@ export class JobTradeService {
       );
 
       const openTxn: any[] = [];
-      const now = new Date();
       await Promise.all(
         trades.map(async (trade) => {
           //
@@ -611,7 +611,21 @@ export class JobTradeService {
         this.queuesLimitOrder.filter((trade) => !queueIds.includes(trade.queueId));
       }
     } catch (e) {
-      console.error(e);
+      this.tradesModel.bulkWrite(
+        trades.map((item) => ({
+          updateOne: {
+            filter: {
+              _id: item._id,
+            },
+            update: {
+              state: TRADE_STATE.CANCELLED,
+              isCancelled: true,
+              cancellationReason: "Blockchain is busy",
+              cancellationDate: now,
+            },
+          },
+        })),
+      );
       this.logsService.createLog("openTradeContract", e);
       this.logsService.createLog("getCurrentGas", this.ethersService.getCurrentGas(network));
     } finally {

@@ -77,7 +77,7 @@ export class EthersService {
       allNetworks.map(async (network) => {
         try {
           const gasPrice = await this.getGasPrice(network);
-          this.currentGas.set(network, (formatDecimal(gasPrice) * 1.2).toFixed(0));
+          this.currentGas.set(network, (formatDecimal(gasPrice) * 2).toFixed(0));
         } catch {
           const provider = new JsonRpcBatchProvider(config.listRPC(network)[Math.floor(Math.random() * 4)]);
           const signerTypes = new Map<SignerType, Wallet>();
