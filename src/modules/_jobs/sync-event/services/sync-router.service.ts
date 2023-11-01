@@ -68,9 +68,10 @@ export class JobSyncRouterService {
       const openTradeQueueIds: any = {};
       const retryTx: any[] = [];
       for (const event of events) {
-        const { transactionHash, event: nameEvent } = event;
+        const { transactionHash, event: nameEvent, logIndex } = event;
         historyCreateArr.push({
-          txHash: transactionHash.toLowerCase(),
+          transaction_hash: transactionHash.toLowerCase(),
+          log_index: logIndex,
           network,
         });
         if (nameEvent === ROUTER_EVENT.OPENTRADE) {
