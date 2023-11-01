@@ -702,6 +702,19 @@ export class JobTradeService {
                 timestamp: Math.floor(now.getTime() / 1000),
                 signature: userFullSignature,
               },
+              register: {
+                oneCT: AddressZero,
+                signature: "0x",
+                shouldRegister: false,
+              },
+              permit: {
+                value: 0,
+                deadline: 0,
+                v: 0,
+                r: "0x0000000000000000000000000000000000000000000000000000000000000000",
+                s: "0x0000000000000000000000000000000000000000000000000000000000000000",
+                shouldApprove: false,
+              }
             },
           });
         }),

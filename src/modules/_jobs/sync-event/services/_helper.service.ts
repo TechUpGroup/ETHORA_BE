@@ -48,8 +48,8 @@ export class HelperService {
     const { blocknumber_synced, contract_address } = contract;
     const contractInst = this.etherService.getContract(network, contract_address, ABI);
     const blocknumber = await this.etherService.getBlockNumber(network);
-    const nextBlock = blocknumber_synced + 300;
-    const fromBlock = blocknumber_synced - 5;
+    const nextBlock = blocknumber_synced + 1000;
+    const fromBlock = blocknumber_synced - 10;
     const targetBlock = nextBlock > blocknumber ? blocknumber : nextBlock;
     const toBlock = targetBlock > fromBlock ? targetBlock : fromBlock;
 

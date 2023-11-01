@@ -10,6 +10,7 @@ import { ContractName } from "common/constants/contract";
 import { OpenTradeEvent } from "common/abis/types/RouterAbi";
 import { TradesService } from "modules/trades/trades.service";
 import { JobTradeService } from "modules/_jobs/trades/job-trade.service";
+import { LogsService } from "modules/logs/logs.service";
 
 @Injectable()
 export class JobSyncRouterService {
@@ -20,36 +21,31 @@ export class JobSyncRouterService {
     private readonly etherService: EthersService,
     private readonly tradeService: TradesService,
     private readonly jobTradeService: JobTradeService,
+    private readonly logsService: LogsService,
   ) {}
-  private isRunning = {};
+  private isRunning = false;
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   private async start() {
+    const router = await this.contractService.getContractByName(ContractName.ROUTER);
+    if (!router) return;
+    if (this.isRunning) return;
+    this.isRunning = true;
     try {
-      const factorys = await this.contractService.getContractByNames(ContractName.ROUTER);
-      if (!factorys.length) return;
-      for (const factory of factorys) {
-        const { network } = factory;
-        if (this.isRunning[network]) return;
-        this.isRunning[network] = true;
-        try {
-          try {
-            await this.helperService.excuteSync({
-              contract: factory,
-              network,
-              acceptEvents: ["OpenTrade"],
-              ABI: RouterAbi__factory.abi,
-              callback: this.handleEvents,
-            });
-          } catch (err) {
-            console.log("JobSyncServiceV3 -> start: ", err);
-          }
-        } finally {
-          this.isRunning[network] = false;
-        }
+      try {
+        await this.helperService.excuteSync({
+          contract: router,
+          network: router.network,
+          acceptEvents: ["OpenTrade"],
+          ABI: RouterAbi__factory.abi,
+          callback: this.handleEvents,
+        });
+      } catch (err) {
+        this.logsService.createLog("JobSyncRouterService -> start:", err);
+        console.log("JobSyncRouterService -> start: ", err);
       }
-    } catch (err) {
-      console.log("JobSyncServiceV3 -> querydb: ", err);
+    } finally {
+      this.isRunning = false;
     }
   }
 
@@ -86,30 +82,27 @@ export class JobSyncRouterService {
         });
         openTradeQueueIds[queueId.toString()] = optionId.toString();
 
-        const indexHistory = historyCreateArr.findIndex(
-          (history) => history.txHash.toLowerCase() === event.transactionHash.toLowerCase(),
-        );
-        if (indexHistory === -1) {
-          historyCreateArr.push({
-            txHash: event.transactionHash.toLowerCase(),
-            network,
-          });
-        }
+        historyCreateArr.push({
+          txHash: event.transactionHash.toLowerCase(),
+          network,
+        });
       }
 
-      // save to db
-      await Promise.all([
-        openTradeArr.length ? this.tradeService.bulkWrite(openTradeArr) : undefined,
-        historyCreateArr.length ? this.historyService.saveHistories(historyCreateArr) : undefined,
-      ]);
       // update to queue
       this.jobTradeService.listActives.forEach((item, index) => {
         if (openTradeQueueIds[item.queueId]) {
           this.jobTradeService.listActives[index].optionId = openTradeQueueIds[item.queueId];
         }
       });
+
+      // save to db
+      await Promise.all([
+        openTradeArr.length ? this.tradeService.bulkWrite(openTradeArr) : undefined,
+        historyCreateArr.length ? this.historyService.saveHistories(historyCreateArr) : undefined,
+      ]);
     } catch (err) {
-      console.log("JobSyncService -> handleEvents: ", err);
+      console.log("JobSyncRouterService -> handleEvents: ", err);
+      this.logsService.createLog("JobSyncRouterService", err);
     }
   };
 }
