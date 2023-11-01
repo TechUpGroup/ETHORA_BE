@@ -303,8 +303,6 @@ export class JobTradeService {
           return;
         }
 
-        this.listActives.push(...trades);
-
         // Call smartcontract
         this.openTradeContract(trades);
 
@@ -368,7 +366,7 @@ export class JobTradeService {
               : [];
             prices = prices.map((price) => price.price);
             indexes.push(index);
-            return this.checkLimitPriceAvaliable(item.strike.toString(), prices);
+            return this.checkLimitPriceAvaliable(item.strike.toString(), prices, item.isAbove);
           })
           .map((item: any) => {
             const prices = item.pair
@@ -392,7 +390,6 @@ export class JobTradeService {
           this.isProcessingTradeLimit = false;
           return;
         }
-        this.listActives.push(..._trades);
 
         // Call smartcontract
         this.openTradeContract(_trades);
@@ -682,6 +679,8 @@ export class JobTradeService {
       await contract.openTrades(openTxn, {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
+
+      this.listActives.push(...trades);
     } catch (e) {
       this.tradesModel.bulkWrite(
         trades.map((item) => ({
@@ -908,7 +907,7 @@ export class JobTradeService {
 
   private chooseOperator() {
     let operaterMinTime = config.listOperater[0];
-    let minTime = 9000000000000;
+    let minTime = 9000000000000000;
     config.listOperater.forEach((o) => {
       if (!this.stateOperators[o]) {
         this.stateOperators[o] = new Date().getTime();
@@ -942,10 +941,12 @@ export class JobTradeService {
     return operaters;
   }
 
-  private checkLimitPriceAvaliable(targetPrice: string, prices: string[]) {
+  private checkLimitPriceAvaliable(targetPrice: string, prices: string[], up: boolean) {
     return (
-      prices.some((price) => BigNumber(price).gte(targetPrice)) &&
-      prices.some((price) => BigNumber(price).lte(targetPrice))
+      (prices.some((price) => BigNumber(price).gte(targetPrice)) &&
+        prices.some((price) => BigNumber(price).lte(targetPrice))) ||
+      (up && prices.every((price) => BigNumber(price).gte(targetPrice))) ||
+      (!up && prices.every((price) => BigNumber(price).lte(targetPrice)))
     );
   }
 }
