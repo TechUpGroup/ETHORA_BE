@@ -293,7 +293,7 @@ export class JobTradeService {
             : 0;
           const entryPrice = prices[prices.length - 1].price;
           return {
-            ...item,
+            ...(item._doc || item),
             openDate: now,
             price: entryPrice,
           };
@@ -370,7 +370,7 @@ export class JobTradeService {
               : [];
             const entryPrice = prices[prices.length - 1].price || 0;
             return {
-              ...item._doc,
+              ...(item._doc || item),
               openDate: now,
               price: entryPrice,
             };
@@ -449,7 +449,7 @@ export class JobTradeService {
         // filter price with pair
         const trades = listTrades.splice(0, config.quantityTxTrade).map((item: any) => {
           return {
-            ...item,
+            ...(item._doc || item),
             price: currentPrice.price,
           };
         });
