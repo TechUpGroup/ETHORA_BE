@@ -17,7 +17,6 @@ import { HealthModule } from "modules/health/health.module";
 import { TransformInterceptor } from "common/interceptors/transform.interceptor";
 import { LeaderboardModule } from "modules/leaderboard/leaderboard.module";
 import { ContractsModule } from "modules/contracts/contracts.module";
-import { EthPairsModule } from "modules/eth-pair/eth-pair.module";
 import { DashboardModule } from "modules/dashboard/dashboard.module";
 import { StatsModule } from "modules/stats/stats.module";
 import { PricesModule } from "modules/price/price.moldule";
@@ -40,7 +39,6 @@ import { PricesModule } from "modules/price/price.moldule";
     SharedModule,
     HealthModule,
     ContractsModule,
-    EthPairsModule,
     // jobs module
     JobModule,
     // app modules
