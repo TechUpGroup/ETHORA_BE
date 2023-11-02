@@ -215,7 +215,7 @@ export class JobTradeService {
     }
   }
 
-  @Cron(CronExpression.EVERY_SECOND)
+  @Cron(CronExpression.EVERY_5_SECONDS)
   private async cancelTrade() {
     const trades = await this.tradesModel.find({
       state: TRADE_STATE.QUEUED,

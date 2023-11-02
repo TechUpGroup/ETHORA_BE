@@ -16,7 +16,6 @@ import { TradesModule } from "modules/trades/trades.module";
 import { HealthModule } from "modules/health/health.module";
 import { TransformInterceptor } from "common/interceptors/transform.interceptor";
 import { LeaderboardModule } from "modules/leaderboard/leaderboard.module";
-import { BlocksModule } from "modules/blocks/blocks.module";
 import { ContractsModule } from "modules/contracts/contracts.module";
 import { EthPairsModule } from "modules/eth-pair/eth-pair.module";
 import { DashboardModule } from "modules/dashboard/dashboard.module";
@@ -39,7 +38,6 @@ import { PricesModule } from "modules/price/price.moldule";
       resolvers: [{ use: QueryResolver, options: ["lang"] }, AcceptLanguageResolver],
     }),
     SharedModule,
-    BlocksModule,
     HealthModule,
     ContractsModule,
     EthPairsModule,
