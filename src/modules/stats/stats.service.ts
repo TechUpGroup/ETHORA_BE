@@ -120,6 +120,7 @@ export class StatsService {
       poolStats,
       feeStats: this.calcFeesData(start, feeStats),
       tradingStats: this.calcTradersData(tradingStats),
+      userStats,
     } as any;
   }
 
