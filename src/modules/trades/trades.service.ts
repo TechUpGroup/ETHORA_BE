@@ -171,7 +171,7 @@ export class TradesService {
         this.jobTradeService.queueCloseAnytime.push(a);
       }
     });
-    if(isTradeActive) {
+    if(!isTradeActive) {
       throw new BadRequestException("Trade is in QUEUE");
     }
 
