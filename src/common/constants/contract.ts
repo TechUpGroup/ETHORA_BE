@@ -5,22 +5,20 @@ export enum ContractName {
 }
 
 export enum PairContractName {
-  // Forex
+  BTCUSD = "BTCUSD",
+  ETHUSD = "ETHUSD",
+  LINKUSD = "LINKUSD",
+  TONUSD = "TONUSD",
+  ARBUSD = "ARBUSD",
+  XRPUSD = "XRPUSD",
+  SOLUSD = "SOLUSD",
+  BNBUSD = "BNBUSD",
+  // BOGEUSD = "",
+  // forex
+  XAUUSD = "XAUUSD",
+  XAGUSD = "XAGUSD",
   EURUSD = "EURUSD",
   GBPUSD = "GBPUSD",
-  AUDUSD = "AUDUSD",
-  USDJPY = "USDJPY",
-  EURJPY = "EURJPY",
-  GBPJPY = "GBPJPY",
-  NZDUSD = "NZDUSD",
-  USDICHE = "USDICHE",
-  USDICAD = "USDICAD",
-  // Crypto
-  BTCUSD = "BTCUSD",
-  BICUSD = "BICUSD",
-  ETHUSD = "ETHUSD",
-  ETHBTC = "ETHBTC",
-  LINKUSD = "LINKUSD",
 }
 
 export enum PairContractType {

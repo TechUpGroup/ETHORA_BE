@@ -1,3 +1,15 @@
 export const SETTLEMENT_FEE = {
-    BTCUSD: 1250
+    BTCUSD: 1250,
+    ETHUSD: 500,
+    LINKUSD: 1500,
+    TONUSD: 1750,
+    ARBUSD: 1500,
+    XRPUSD: 1500,
+    SOLUSD: 1750,
+    BNBUSD: 1500,
+    BOGEUSD: 1500,
+    EURUSD: 2250,
+    XAUUSD: 1250,
+    GBPUSD: 1250,
+    XAGUSD: 1250,
 }
