@@ -73,7 +73,7 @@ export class Trades {
   @Exclude()
   settlementFeeSignature: string;
 
-  @Prop({ required: false, default: null })
+  @Prop({ type: String, required: false, default: null })
   expirationDate: string | null;
 
   @Prop()
