@@ -682,22 +682,30 @@ export class JobTradeService {
 
       this.listActives.push(...trades);
     } catch (e) {
-      this.tradesModel.bulkWrite(
-        trades.map((item) => ({
-          updateOne: {
-            filter: {
-              _id: item._id,
+      if (e.match("nonce has already been used")) {
+        if(trades[0].isLimitOrder){
+          this.queuesLimitOrder.push(...trades);
+        } else {
+          this.queuesMarket.push(...trades);
+        }
+      } else {
+        this.tradesModel.bulkWrite(
+          trades.map((item) => ({
+            updateOne: {
+              filter: {
+                _id: item._id,
+              },
+              update: {
+                state: TRADE_STATE.CANCELLED,
+                isCancelled: true,
+                cancellationReason: "Blockchain is busy",
+                cancellationDate: now,
+              },
             },
-            update: {
-              state: TRADE_STATE.CANCELLED,
-              isCancelled: true,
-              cancellationReason: "Blockchain is busy",
-              cancellationDate: now,
-            },
-          },
-        })),
-      );
-      this.logsService.createLog("openTradeContract", e);
+          })),
+        );
+        this.logsService.createLog("openTradeContract", e);
+      }
     } finally {
       delete this.stateOperators[operater];
     }
@@ -743,7 +751,7 @@ export class JobTradeService {
           //userFullSignature
           const userFullMessage = generateMessage(
             trade.pair.replace("-", "").toUpperCase(),
-            Math.floor(now.getTime() / 1000).toString(),
+            trade.expirationDate,
             trade.price,
           );
 
@@ -768,7 +776,7 @@ export class JobTradeService {
               signature: userPartialSignature,
             },
             publisherSignInfo: {
-              timestamp: Math.floor(now.getTime() / 1000),
+              timestamp: trade.expirationDate,
               signature: userFullSignature,
             },
             register: {
@@ -797,7 +805,11 @@ export class JobTradeService {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
     } catch (e) {
-      this.logsService.createLog("excuteOptionContract", e);
+      if (e.match("nonce has already been used")) {
+        this.listActives.push(...trades);
+      } else {
+        this.logsService.createLog("excuteOptionContract", e);
+      }
     } finally {
       delete this.stateOperators[operater];
     }
@@ -843,7 +855,7 @@ export class JobTradeService {
           //userFullSignature
           const userFullMessage = generateMessage(
             trade.pair.replace("-", "").toUpperCase(),
-            Math.floor(now.getTime() / 1000).toString(),
+            trade.expirationDate,
             trade.price,
           );
 
@@ -869,7 +881,7 @@ export class JobTradeService {
                 signature: userPartialSignature,
               },
               publisherSignInfo: {
-                timestamp: Math.floor(now.getTime() / 1000),
+                timestamp: trade.expirationDate,
                 signature: userFullSignature,
               },
             },
@@ -906,7 +918,7 @@ export class JobTradeService {
   }
 
   private chooseOperator() {
-    let operaterMinTime = config.listOperater[0];
+    let operaterMinTime = config.listOperater[1];
     let minTime = 9000000000000000;
     config.listOperater.forEach((o) => {
       if (!this.stateOperators[o]) {
@@ -918,6 +930,7 @@ export class JobTradeService {
         operaterMinTime = o;
       }
     });
+    this.logsService.createLog("stateOperators", JSON.stringify(this.stateOperators));
     return operaterMinTime;
   }
 

@@ -75,7 +75,7 @@ export class JobSyncRouterService {
           network,
         });
         if (nameEvent === ROUTER_EVENT.OPENTRADE) {
-          const { queueId, optionId } = (event as OpenTradeEvent).args;
+          const { queueId, optionId, expiration } = (event as OpenTradeEvent).args;
           bulkUpdate.push({
             updateOne: {
               filter: {
@@ -83,10 +83,14 @@ export class JobSyncRouterService {
               },
               update: {
                 optionId: optionId.toString(),
+                expirationDate: expiration.toString(),
               },
             },
           });
-          openTradeQueueIds[queueId.toString()] = optionId.toString();
+          openTradeQueueIds[queueId.toString()] = {
+            optionId: optionId.toString(),
+            expirationDate: expiration.toString()
+          };
         }
         if (nameEvent === ROUTER_EVENT.CANCELTRADE) {
           const { queueId, reason } = (event as CancelTradeEvent).args;
@@ -157,7 +161,8 @@ export class JobSyncRouterService {
       // update to queue
       this.jobTradeService.listActives.forEach((item, index) => {
         if (openTradeQueueIds[item.queueId]) {
-          this.jobTradeService.listActives[index].optionId = openTradeQueueIds[item.queueId];
+          this.jobTradeService.listActives[index].optionId = openTradeQueueIds[item.queueId].optionId;
+          this.jobTradeService.listActives[index].expirationDate = openTradeQueueIds[item.queueId].expirationDate;
         }
       });
 

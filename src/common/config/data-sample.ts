@@ -117,7 +117,7 @@ export const tradesHistories: Array<Trades & { _id: any }> = [
     settlementFeeSignExpiration: 1695835681,
     settlementFeeSignature:
       "0x12dd44f1643251cf8b55132ee9f4958a1e48b0752817ce731634af459f791bea5193255faad456401e4ad2f186ac70cdd21f3077e1e05d83440efcb3b9b842581c",
-    expirationDate: new Date(1695835848000),
+    expirationDate: "1695835848",
     isAbove: false,
     state: TRADE_STATE.OPENED,
     optionId: 159,
@@ -162,7 +162,7 @@ export const tradesHistories: Array<Trades & { _id: any }> = [
     settlementFeeSignExpiration: 1695829350,
     settlementFeeSignature:
       "0x6807b8b941ce457494daa93b18332efed4431175d928e0711e846d07ef3596dc4812c35d55fead4018f695a36d06c817538a9da02267908f14b47d88d280e4451b",
-    expirationDate: new Date(1695829515000),
+    expirationDate: "1695829515",
     isAbove: false,
     state: TRADE_STATE.CLOSED,
     optionId: 156,
@@ -206,7 +206,7 @@ export const tradesHistories: Array<Trades & { _id: any }> = [
     settlementFeeSignExpiration: 1695828808,
     settlementFeeSignature:
       "0x714d8e9a26e4f3be180459d8c37f6a8125861e58a55b7a7b8f8fcaa17b92b16162b2428b942714de6c4905139d87ac3b294e3346a6d91faba67611c88914db3d1c",
-    expirationDate: new Date(1695828976000),
+    expirationDate: "1695828976",
     isAbove: false,
     state: TRADE_STATE.CLOSED,
     optionId: 155,
