@@ -19,11 +19,11 @@ import { JobTradeService } from "modules/_jobs/trades/job-trade.service";
 import { EthersService } from "modules/_shared/services/ethers.service";
 import config from "common/config";
 import { PairContractName, PairContractType } from "common/constants/contract";
-import { PAIR_CONTRACT_ABIS } from "common/constants/abis";
 import { calcLockedAmount } from "common/utils/trades";
 import { SETTLEMENT_FEE } from "common/constants/fee";
 import { decryptAES } from "common/utils/encrypt";
 import BigNumber from "bignumber.js";
+import { BtcusdBinaryOptions__factory } from "common/abis/types";
 // import { generateSignHashType } from "common/utils/ethers";
 // import { Timeout } from "@nestjs/schedule";
 // import { tradesHistories } from "common/config/data-sample";
@@ -87,7 +87,7 @@ export class TradesService {
       const contract = this.ethersService.getContract(
         data.network,
         contractInfo.address,
-        PAIR_CONTRACT_ABIS[pairContractName]?.abi,
+        BtcusdBinaryOptions__factory.abi,
       );
       _data["lockedAmount"] = await calcLockedAmount(contract, userAddress, data);
     }
