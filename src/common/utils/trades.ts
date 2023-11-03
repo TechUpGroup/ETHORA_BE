@@ -75,18 +75,18 @@ export const getProbabilityByTime = (
 export const calcLockedAmount = async (contract, userAddress: string, data: TradesDocument | any) => {
   const optionParams = {
     strike: data.strike,
-        amount: 0,
-        period: data.period,
-        allowPartialFill: data.allowPartialFill,
-        totalFee: data.tradeSize,
-        user: userAddress,
-        referralCode: data.referralCode || "",
-        baseSettlementFeePercentage: SETTLEMENT_FEE[data.pair.replace("-", "").toUpperCase()],
-  }
+    amount: 0,
+    period: data.period,
+    allowPartialFill: data.allowPartialFill,
+    totalFee: data.tradeSize,
+    user: userAddress,
+    referralCode: data.referralCode || "",
+    baseSettlementFeePercentage: SETTLEMENT_FEE[data.pair.replace("-", "").toUpperCase()],
+  };
   const [amount] = await contract.evaluateParams(
     optionParams,
     // data.slippage,
-    5
+    5,
   );
   return BigNumber(amount.toString()).plus(data.tradeSize).toFixed(0);
-}
+};
