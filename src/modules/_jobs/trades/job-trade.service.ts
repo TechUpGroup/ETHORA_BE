@@ -844,7 +844,7 @@ export class JobTradeService {
           //userFullSignature
           const userFullMessage = generateMessage(
             trade.pair.replace("-", "").toUpperCase(),
-            trade.expirationDate,
+            Math.floor(now.getTime() / 1000).toString(),
             BigNumber(trade.price).toFixed(0),
           );
 
@@ -877,7 +877,7 @@ export class JobTradeService {
                 signature: userPartialSignature,
               },
               publisherSignInfo: {
-                timestamp: trade.expirationDate,
+                timestamp: Math.floor(now.getTime() / 1000),
                 signature: userFullSignature,
               },
             },
