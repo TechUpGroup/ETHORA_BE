@@ -31,16 +31,16 @@ query ($address: String!, $timestamp: String!, $timestampReward: String!) {
     usdcTradesWon
     usdcVolume
     usdcWinRate
-    bfrNetPnL
-    bfrTotalTrades
-    bfrTradesWon
-    bfrVolume
-    bfrWinRate
-    arbNetPnL
-    arbTotalTrades
-    arbTradesWon
-    arbVolume
-    arbWinRate
+    # bfrNetPnL
+    # bfrTotalTrades
+    # bfrTradesWon
+    # bfrVolume
+    # bfrWinRate
+    # arbNetPnL
+    # arbTotalTrades
+    # arbTradesWon
+    # arbVolume
+    # arbWinRate
   }
   loserStats: weeklyLeaderboards(
     orderBy: netPnL
@@ -74,16 +74,16 @@ query ($address: String!, $timestamp: String!, $timestampReward: String!) {
     usdcTradesWon
     usdcVolume
     usdcWinRate
-    bfrNetPnL
-    bfrTotalTrades
-    bfrTradesWon
-    bfrVolume
-    bfrWinRate
-    arbNetPnL
-    arbTotalTrades
-    arbTradesWon
-    arbVolume
-    arbWinRate
+    # bfrNetPnL
+    # bfrTotalTrades
+    # bfrTradesWon
+    # bfrVolume
+    # bfrWinRate
+    # arbNetPnL
+    # arbTotalTrades
+    # arbTradesWon
+    # arbVolume
+    # arbWinRate
   }
   winnerWinrate: weeklyLeaderboards(
     orderBy: winRate
@@ -120,16 +120,16 @@ query ($address: String!, $timestamp: String!, $timestampReward: String!) {
     usdcTradesWon
     usdcVolume
     usdcWinRate
-    bfrNetPnL
-    bfrTotalTrades
-    bfrTradesWon
-    bfrVolume
-    bfrWinRate
-    arbNetPnL
-    arbTotalTrades
-    arbTradesWon
-    arbVolume
-    arbWinRate
+    # bfrNetPnL
+    # bfrTotalTrades
+    # bfrTradesWon
+    # bfrVolume
+    # bfrWinRate
+    # arbNetPnL
+    # arbTotalTrades
+    # arbTradesWon
+    # arbVolume
+    # arbWinRate
   }
   totalData: weeklyLeaderboards(orderBy: netPnL, orderDirection: desc, first: 1000, where: { timestamp: $timestamp }) {
     totalTrades
@@ -151,15 +151,15 @@ query ($address: String!, $timestamp: String!, $timestampReward: String!) {
     usdcTradesWon
     usdcVolume
     usdcWinRate
-    bfrNetPnL
-    bfrTotalTrades
-    bfrTradesWon
-    bfrVolume
-    bfrWinRate
-    arbNetPnL
-    arbTotalTrades
-    arbTradesWon
-    arbVolume
-    arbWinRate
+    # bfrNetPnL
+    # bfrTotalTrades
+    # bfrTradesWon
+    # bfrVolume
+    # bfrWinRate
+    # arbNetPnL
+    # arbTotalTrades
+    # arbTradesWon
+    # arbVolume
+    # arbWinRate
   }
 }
