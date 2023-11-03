@@ -56,7 +56,6 @@ export class JobSyncRouterService {
 
       const historyCreateArr: any[] = [];
       const bulkUpdate: any[] = [];
-      const openTradeQueueIds: any = {};
       const retryTx: any[] = [];
       for (const event of events) {
         const { transactionHash, event: nameEvent, logIndex } = event;
@@ -70,25 +69,24 @@ export class JobSyncRouterService {
           bulkUpdate.push({
             updateOne: {
               filter: {
-                queueId: queueId.toString(),
+                queueId: +queueId.toString(),
               },
               update: {
-                optionId: optionId.toString(),
+                optionId: +optionId.toString(),
                 expirationDate: expiration.toString(),
               },
             },
           });
-          openTradeQueueIds[queueId.toString()] = {
-            optionId: optionId.toString(),
-            expirationDate: expiration.toString()
-          };
+          const index = this.jobTradeService.listActives.findIndex((a) => a.queueId === +queueId.toString());
+          this.jobTradeService.listActives[index].optionId = +optionId.toString();
+          this.jobTradeService.listActives[index].expirationDate = expiration.toString();
         }
         if (nameEvent === ROUTER_EVENT.CANCELTRADE) {
           const { queueId, reason } = (event as CancelTradeEvent).args;
           bulkUpdate.push({
             updateOne: {
               filter: {
-                queueId: queueId.toString(),
+                queueId: +queueId.toString(),
               },
               update: {
                 status: TRADE_STATE.CANCELLED,
@@ -97,13 +95,15 @@ export class JobSyncRouterService {
               },
             },
           });
+          const index = this.jobTradeService.listActives.findIndex((a) => a.queueId === +queueId.toString());
+          this.jobTradeService.listActives.splice(index, 1);
         }
         if (nameEvent === ROUTER_EVENT.FAILRESOLVE) {
           const { queueId, reason } = (event as FailResolveEvent).args;
           bulkUpdate.push({
             updateOne: {
               filter: {
-                queueId: queueId.toString(),
+                queueId: +queueId.toString(),
               },
               update: {
                 status: TRADE_STATE.CANCELLED,
@@ -112,6 +112,8 @@ export class JobSyncRouterService {
               },
             },
           });
+          const index = this.jobTradeService.listActives.findIndex((a) => a.queueId === +queueId.toString());
+          this.jobTradeService.listActives.splice(index, 1);
         }
         if (nameEvent === ROUTER_EVENT.FAILUNLOCK) {
           const { optionId, reason } = (event as FailUnlockEvent).args;
@@ -148,14 +150,6 @@ export class JobSyncRouterService {
           });
         this.jobTradeService.listActives.push(..._trades);
       }
-
-      // update to queue
-      this.jobTradeService.listActives.forEach((item, index) => {
-        if (openTradeQueueIds[item.queueId]) {
-          this.jobTradeService.listActives[index].optionId = openTradeQueueIds[item.queueId].optionId;
-          this.jobTradeService.listActives[index].expirationDate = openTradeQueueIds[item.queueId].expirationDate;
-        }
-      });
 
       // save to db
       await Promise.allSettled([
