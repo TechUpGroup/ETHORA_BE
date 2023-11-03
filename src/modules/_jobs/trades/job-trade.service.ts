@@ -31,7 +31,6 @@ export class JobTradeService {
   public queueCloseAnytime: TradesDocument[] = [];
   public queuesMarket: TradesDocument[] = [];
   public queuesLimitOrder: TradesDocument[] = [];
-  public stateOperators: any = {};
   private isProcessingTradeMarket = false;
   private isProcessingTradeLimit = false;
   private isClosingTradesAnyTime = false;
@@ -682,7 +681,7 @@ export class JobTradeService {
 
       this.listActives.push(...trades);
     } catch (e) {
-      if (e.match("nonce has already been used")) {
+      if (e.code && e.code.match("NONCE_EXPIRED")) {
         if(trades[0].isLimitOrder){
           this.queuesLimitOrder.push(...trades);
         } else {
@@ -706,8 +705,6 @@ export class JobTradeService {
         );
         this.logsService.createLog("openTradeContract", e);
       }
-    } finally {
-      delete this.stateOperators[operater];
     }
   }
 
@@ -805,13 +802,11 @@ export class JobTradeService {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
     } catch (e) {
-      if (e.match("nonce has already been used")) {
+      if (e.code && e.code.match("NONCE_EXPIRED")) {
         this.listActives.push(...trades);
       } else {
         this.logsService.createLog("excuteOptionContract", e);
       }
-    } finally {
-      delete this.stateOperators[operater];
     }
   }
 
@@ -911,27 +906,18 @@ export class JobTradeService {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
     } catch (e) {
-      this.logsService.createLog("closeTradeContract", e);
-    } finally {
-      delete this.stateOperators[operater];
+      if (e.code && e.code.match("NONCE_EXPIRED")) {
+        this.queueCloseAnytime.push(...trades);
+      } else {
+        this.logsService.createLog("closeTradeContract", e);
+      }
     }
   }
 
+  private choosingIndex = 0;
   private chooseOperator() {
-    let operaterMinTime = config.listOperater[1];
-    let minTime = 9000000000000000;
-    config.listOperater.forEach((o) => {
-      if (!this.stateOperators[o]) {
-        this.stateOperators[o] = new Date().getTime();
-        return o;
-      }
-      if (minTime > this.stateOperators[o]) {
-        minTime = this.stateOperators[o];
-        operaterMinTime = o;
-      }
-    });
-    this.logsService.createLog("stateOperators", JSON.stringify(this.stateOperators));
-    return operaterMinTime;
+    this.choosingIndex = (this.choosingIndex + 1) % 5;
+    return config.listOperater[this.choosingIndex];
   }
 
   async getBalanceOperator() {

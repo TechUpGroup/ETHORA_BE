@@ -148,7 +148,6 @@ class Config {
 
   get listOperater() {
     return [
-      "0160380f3fb369ba4fa9172b1a716a98d6dfa6b89755875761c20f143c86e1af",
       "dcfd8d38aff7af1c55ce5875dfb5382d496a484b263ebe3aeedc95606a2b1259",
       "f49d455f0c7fd7ee1b9050aedb68a9e279100b25d7fdc68f3ed3e78fcb8ee3b4",
       "7d18b18b1829bcafbb980009f0431af04fc2f8ea3cd21014bc700d36af098cc4",
@@ -159,7 +158,6 @@ class Config {
 
   get listAddressOperater() {
     return [
-      "0x4b473D9D7684E6D949C316a1E178caefB804e85e",
       "0xbE5aC4FE08041ca0Bd211b74191D7d7e715e5047",
       "0xdef098259e7831E45eF33c2b9E8a66DD81759c70",
       "0x6C3286fDeBAF0A08CD9D15D5722381491d72c5a3",
