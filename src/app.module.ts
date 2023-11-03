@@ -1,6 +1,6 @@
 import config from "common/config";
 import { I18nAllExceptionFilter } from "common/filters/i18n-all-exception.filter";
-// import { JobModule } from "modules/_jobs/job.module";
+import { JobModule } from "modules/_jobs/job.module";
 import { SharedModule } from "modules/_shared/shared.module";
 import { AcceptLanguageResolver, I18nModule, QueryResolver } from "nestjs-i18n";
 import { join } from "path";
@@ -40,7 +40,7 @@ import { PricesModule } from "modules/price/price.moldule";
     HealthModule,
     ContractsModule,
     // jobs module
-    // JobModule,
+    JobModule,
     // app modules
     AuthModule,
     UsersModule,
