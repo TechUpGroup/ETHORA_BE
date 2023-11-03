@@ -42,7 +42,6 @@ export class JobSyncRouterService {
       });
     } catch (err) {
       this.logsService.createLog("JobSyncRouterService -> start:", err);
-      console.log("JobSyncRouterService -> start: ", err);
     } finally {
       this.isRunning = false;
     }
@@ -54,14 +53,6 @@ export class JobSyncRouterService {
       const { network } = contract;
       const txsHashExists = await this.historyService.findTransactionHashExists(eventHashes);
       const events = this.helperService.filterEvents(listEvents, txsHashExists);
-
-      // // get time of block
-      // const blocktimestamps = {};
-      // const listBlockNumber = [...new Set(events.map((i) => i.blockNumber))];
-      // const listBlockTime = await Promise.all(
-      //   listBlockNumber.map((blockNumber) => this.etherService.getBlockTime(contract.network, blockNumber)),
-      // );
-      // listBlockTime.forEach((blockTime, i) => (blocktimestamps[listBlockNumber[i]] = blockTime));
 
       const historyCreateArr: any[] = [];
       const bulkUpdate: any[] = [];
@@ -172,7 +163,6 @@ export class JobSyncRouterService {
         historyCreateArr.length ? this.historyService.saveHistories(historyCreateArr) : undefined,
       ]);
     } catch (err) {
-      console.log("JobSyncRouterService -> handleEvents: ", err);
       this.logsService.createLog("JobSyncRouterService", err);
     }
   };

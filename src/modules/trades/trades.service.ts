@@ -39,7 +39,7 @@ export class TradesService {
   ) {}
 
   async createTrade(userAddress: string, data: CreateTradeDto) {
-    const { isLimitOrder, pair, tradeSize } = data;
+    const { isLimitOrder, pair, tradeSize, period } = data;
 
     const user = await this.userService.getUserByAddress(userAddress);
     const wallet = await this.userService.findWalletByNetworkAndId(data.network, user._id);
@@ -50,6 +50,10 @@ export class TradesService {
 
     if (BigNumber(tradeSize).gt("100000000")) {
       throw new BadRequestException("Trade size over 100 USDC");
+    }
+
+    if (period < 180 || period > 14400) {
+      throw new BadRequestException("Time period invalid");
     }
 
     // TODO: validate
@@ -161,7 +165,7 @@ export class TradesService {
     // TODO:
     let isTradeActive = false;
     this.jobTradeService.listActives.forEach((a, i) => {
-      if(a._id == data._id) {
+      if(a.queueId === trade.queueId) {
         isTradeActive = true;
         this.jobTradeService.listActives.splice(i, 1);
         this.jobTradeService.queueCloseAnytime.push(a);

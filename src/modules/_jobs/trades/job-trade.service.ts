@@ -15,6 +15,7 @@ import { TRADES_MODEL, TradesDocument } from "modules/trades/schemas/trades.sche
 import { AddressZero } from "@ethersproject/constants";
 import { PaginateModel } from "mongoose";
 import {
+  CloseAnytimeSignature,
   MarketDirectionSignature,
   MarketDirectionSignatureWithSettlementFee,
   SettlementFeeSignature,
@@ -722,7 +723,7 @@ export class JobTradeService {
         this.ethersService.getWallet(operater, network),
       );
 
-      const closeTxn: any[] = [];
+      const optionData: any[] = [];
       const now = new Date();
       await Promise.all(
         trades.map(async (trade) => {
@@ -764,7 +765,7 @@ export class JobTradeService {
             this.ethersService.signMessage(network, SignerType.publisher, userFullMessage),
           ]);
 
-          closeTxn.push({
+          optionData.push({
             optionId: trade.optionId || 0,
             targetContract: trade.targetContract,
             closingPrice: BigNumber(trade.price).toFixed(0),
@@ -776,30 +777,17 @@ export class JobTradeService {
             publisherSignInfo: {
               timestamp: trade.expirationDate,
               signature: userFullSignature,
-            },
-            register: {
-              oneCT: AddressZero,
-              signature: "0x",
-              shouldRegister: false,
-            },
-            permit: {
-              value: 0,
-              deadline: 0,
-              v: 0,
-              r: "0x0000000000000000000000000000000000000000000000000000000000000000",
-              s: "0x0000000000000000000000000000000000000000000000000000000000000000",
-              shouldApprove: false,
-            },
+            }
           });
         }),
       );
 
       // gas estimate
-      await contract.estimateGas.executeOptions(closeTxn, {
+      await contract.estimateGas.executeOptions(optionData, {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
       // write contract
-      await contract.executeOptions(closeTxn, {
+      await contract.executeOptions(optionData, {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
     } catch (e) {
@@ -824,7 +812,7 @@ export class JobTradeService {
         this.ethersService.getWallet(operater, network),
       );
 
-      const closeAnyTimeTxn: any[] = [];
+      const closeParams: any[] = [];
       const now = new Date();
       await Promise.all(
         trades.map(async (trade) => {
@@ -847,6 +835,11 @@ export class JobTradeService {
               settlementFee: trade.settlementFee,
             };
           }
+          const messageUserSignInfo = {
+            assetPair: trade.pair.replace("-", "").toUpperCase(),
+            timestamp: Math.floor(now.getTime() / 1000),
+            optionId: trade.optionId || 0,
+          }
 
           //userFullSignature
           const userFullMessage = generateMessage(
@@ -855,7 +848,7 @@ export class JobTradeService {
             BigNumber(trade.price).toFixed(0),
           );
 
-          const [userPartialSignature, userFullSignature] = await Promise.all([
+          const [userPartialSignature, userSignerInfo, userFullSignature] = await Promise.all([
             this.ethersService.signTypeDataWithSinger(
               network,
               this.ethersService.getWallet(trade.privateKeyOneCT, network),
@@ -863,14 +856,21 @@ export class JobTradeService {
               trade.isLimitOrder ? MarketDirectionSignature : MarketDirectionSignatureWithSettlementFee,
               messageUserPartialSignature,
             ),
+            this.ethersService.signTypeDataWithSinger(
+              network,
+              this.ethersService.getWallet(trade.privateKeyOneCT, network),
+              config.getContract(network, ContractName.ROUTER).address,
+              CloseAnytimeSignature,
+              messageUserSignInfo,
+            ),
             this.ethersService.signMessage(network, SignerType.publisher, userFullMessage),
           ]);
 
-          closeAnyTimeTxn.push({
+          closeParams.push({
             closeTradeParams: {
               optionId: trade.optionId,
               targetContract: trade.targetContract,
-              closingPrice: BigNumber(BigNumber(trade.price)).toFixed(0),
+              closingPrice: BigNumber(trade.price).toFixed(0),
               isAbove: trade.isAbove,
               marketDirectionSignInfo: {
                 timestamp: Math.floor(now.getTime() / 1000),
@@ -886,24 +886,20 @@ export class JobTradeService {
               signature: "0x",
               shouldRegister: false,
             },
-            permit: {
-              value: 0,
-              deadline: 0,
-              v: 0,
-              r: "0x0000000000000000000000000000000000000000000000000000000000000000",
-              s: "0x0000000000000000000000000000000000000000000000000000000000000000",
-              shouldApprove: false,
+            userSignInfo: {
+              timestamp: Math.floor(now.getTime() / 1000),
+              signature: userSignerInfo,
             },
           });
         }),
       );
 
       // gas estimate
-      await contract.estimateGas.closeAnytime(closeAnyTimeTxn, {
+      await contract.estimateGas.closeAnytime(closeParams, {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
       // write contract
-      await contract.closeAnytime(closeAnyTimeTxn, {
+      await contract.closeAnytime(closeParams, {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
     } catch (e) {

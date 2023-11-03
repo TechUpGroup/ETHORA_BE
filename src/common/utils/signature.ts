@@ -216,6 +216,23 @@ export const MarketDirectionSignatureWithSettlementFee = {
   ],
 };
 
+export const CloseAnytimeSignature = {
+  CloseAnytimeSignature: [
+    {
+      type: "string",
+      name: "assetPair",
+    },
+    {
+      type: "uint256",
+      name: "timestamp",
+    },
+    {
+      type: "uint256",
+      name: "optionId",
+    },
+  ],
+};
+
 export const DOMAIN = {
   name: "Validator",
   version: "1",
