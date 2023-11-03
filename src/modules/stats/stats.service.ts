@@ -115,13 +115,62 @@ export class StatsService {
     return {
       USDC24stats,
       volumeStats: this.calcVolumesData(volumeStats),
-      burnedBFRs: dataBurned?.burnedBFRs || [],
+      burnedETRs: this.calcBurned(start, dataBurned?.burnedBFRs || []),
       overviewStats: dataOverview,
       poolStats,
       feeStats: this.calcFeesData(start, feeStats),
       tradingStats: this.calcTradersData(tradingStats),
       userStats,
     } as any;
+  }
+
+  private calcBurned(from: any, _data: any) {
+    const feesChartData = (() => {
+      const PROPS = "amount".split(" ");
+
+      if (!_data) {
+        return null;
+      }
+
+      const chartData = sortBy(_data, "timestamp").map((item) => {
+        const ret: any = { timestamp: item.timestamp };
+        let all = 0;
+        PROPS.forEach((prop) => {
+          if (item[prop]) {
+            ret[prop] = +item[prop];
+            if (prop === "amount") all += ret[prop];
+          }
+        });
+        ret.all = all;
+        ret.liquidation = item.marginAndLiquidation - item.margin;
+        // ret.all = PROPS.reduce((memo, prop) => memo + ret[prop], 0)
+        console.log(ret, "ret");
+        return ret;
+      });
+
+      let cumulative = 0;
+      const cumulativeByTs = {};
+      return chain(chartData)
+        .groupBy((item) => item.timestamp)
+        .map((values, timestamp) => {
+          const all = sumBy(values, "amount");
+          cumulative += all;
+
+          const ret = {
+            timestamp: Number(timestamp),
+            cumulative: cumulative / 1e18,
+          };
+          PROPS.forEach((prop) => {
+            ret[prop] = sumBy(values, prop) / 1e18;
+          });
+          cumulativeByTs[timestamp] = cumulative;
+          return ret;
+        })
+        .value()
+        .filter((item) => item.timestamp >= from);
+    })();
+
+    return feesChartData;
   }
 
   private calcFeesData(from: any, _data: any) {
