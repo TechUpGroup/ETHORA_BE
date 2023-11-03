@@ -24,6 +24,7 @@ import {
 } from "common/utils/signature";
 import { SignerType } from "common/enums/signer.enum";
 import { decryptAES } from "common/utils/encrypt";
+import { ERROR_RETRY } from "common/constants/event";
 
 @Injectable()
 export class JobTradeService {
@@ -681,7 +682,7 @@ export class JobTradeService {
 
       this.listActives.push(...trades);
     } catch (e) {
-      if (e.code && e.code.match("NONCE_EXPIRED")) {
+      if (e.code && Object.values(ERROR_RETRY).includes(e.code)) {
         if(trades[0].isLimitOrder){
           this.queuesLimitOrder.push(...trades);
         } else {
@@ -802,7 +803,7 @@ export class JobTradeService {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
     } catch (e) {
-      if (e.code && e.code.match("NONCE_EXPIRED")) {
+      if (e.code && Object.values(ERROR_RETRY).includes(e.code)) {
         this.listActives.push(...trades);
       } else {
         this.logsService.createLog("excuteOptionContract", e);
@@ -906,7 +907,7 @@ export class JobTradeService {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
     } catch (e) {
-      if (e.code && e.code.match("NONCE_EXPIRED")) {
+      if (e.code && Object.values(ERROR_RETRY).includes(e.code)) {
         this.queueCloseAnytime.push(...trades);
       } else {
         this.logsService.createLog("closeTradeContract", e);
