@@ -603,7 +603,7 @@ export class JobTradeService {
           const userFullMessage = generateMessage(
             trade.pair.replace("-", "").toUpperCase(),
             Math.floor(now.getTime() / 1000).toString(),
-            trade.price.toFixed(0),
+            BigNumber(trade.price).toFixed(0),
           );
 
           const [settlementFeeSignature, userPartialSignature, userFullSignature] = await Promise.all([
@@ -635,7 +635,7 @@ export class JobTradeService {
               allowPartialFill: trade.allowPartialFill || false,
               referralCode: trade.referralCode || "",
               isAbove: trade.isAbove,
-              price: trade.price.toFixed(0),
+              price: BigNumber(trade.price).toFixed(0),
               settlementFee: trade.settlementFee,
               isLimitOrder: trade.isLimitOrder,
               limitOrderExpiry: trade.isLimitOrder ? Math.floor(now.getTime() / 1000 + 86400) : 0,
@@ -750,7 +750,7 @@ export class JobTradeService {
           const userFullMessage = generateMessage(
             trade.pair.replace("-", "").toUpperCase(),
             trade.expirationDate,
-            trade.price.toFixed(0),
+            BigNumber(trade.price).toFixed(0),
           );
 
           const [userPartialSignature, userFullSignature] = await Promise.all([
@@ -767,7 +767,7 @@ export class JobTradeService {
           closeTxn.push({
             optionId: trade.optionId || 0,
             targetContract: trade.targetContract,
-            closingPrice: trade.price.toFixed(0),
+            closingPrice: BigNumber(trade.price).toFixed(0),
             isAbove: trade.isAbove,
             marketDirectionSignInfo: {
               timestamp: Math.floor(now.getTime() / 1000),
@@ -852,7 +852,7 @@ export class JobTradeService {
           const userFullMessage = generateMessage(
             trade.pair.replace("-", "").toUpperCase(),
             trade.expirationDate,
-            trade.price.toFixed(0),
+            BigNumber(trade.price).toFixed(0),
           );
 
           const [userPartialSignature, userFullSignature] = await Promise.all([
@@ -870,7 +870,7 @@ export class JobTradeService {
             closeTradeParams: {
               optionId: trade.optionId,
               targetContract: trade.targetContract,
-              closingPrice: trade.price.toFixed(0),
+              closingPrice: BigNumber(BigNumber(trade.price)).toFixed(0),
               isAbove: trade.isAbove,
               marketDirectionSignInfo: {
                 timestamp: Math.floor(now.getTime() / 1000),
