@@ -117,6 +117,10 @@ export class EthersService {
     return this.getNetwork(network).provider;
   }
 
+  getProviderSyncBlock(network: Network) {
+    return new JsonRpcBatchProvider(config.listRPC(network)[config.listRPC(network).length - 1]);
+  }
+
   private getSigner(network: Network, type: SignerType) {
     const signers = this.getNetwork(network).signers;
     const signer = signers.get(type);

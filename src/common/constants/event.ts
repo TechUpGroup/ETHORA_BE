@@ -29,3 +29,5 @@ export const ERROR_RETRY = {
   UNPREDICTABLE_GAS_LIMIT: "UNPREDICTABLE_GAS_LIMIT",
   NONCE_EXPIRED: "NONCE_EXPIRED",
 };
+
+export const messageErr = "query returned more than 10000 results";

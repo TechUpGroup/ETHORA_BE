@@ -36,3 +36,20 @@ export class Histories  {
 
 export type HistoriesDocument = Histories & Document;
 export const HistoriesSchema = SchemaFactory.createForClass(Histories);
+
+
+@Schema(Options)
+export class HistoriesBlock  {
+  @Prop({
+    required: true,
+    unique: true
+  })
+  tx_hash_log_index: string;
+
+  @Prop({ required: true, index: true, enum: Network })
+  network: Network;
+
+}
+
+export type HistoriesBlockDocument = HistoriesBlock & Document;
+export const HistoriesBlockSchema = SchemaFactory.createForClass(HistoriesBlock);

@@ -9,3 +9,8 @@ export enum TRADE_STATE {
 export enum TRADE_TOKEN {
   USDC = "USDC",
 }
+
+export enum TRADE_STATUS {
+  WIN = "Win",
+  LOSS = "Loss",
+}

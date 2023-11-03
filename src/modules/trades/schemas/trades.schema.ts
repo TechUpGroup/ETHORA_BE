@@ -1,9 +1,10 @@
 import { Options, validateAddress } from "common/config/mongoose.config";
 import { Document } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { TRADE_STATE, TRADE_TOKEN } from "common/enums/trades.enum";
+import { TRADE_STATE, TRADE_STATUS, TRADE_TOKEN } from "common/enums/trades.enum";
 import { Exclude } from "class-transformer";
 import { Network } from "common/enums/network.enum";
+import { isNil } from "lodash";
 
 export const TRADES_MODEL = "trades";
 
@@ -82,6 +83,33 @@ export class Trades {
   @Prop({ required: true, default: TRADE_STATE.QUEUED })
   state: TRADE_STATE;
 
+  @Prop({ required: false, default: 0 })
+  profit?: number;
+
+  @Prop({
+    required: false,
+    default: function () {
+      const { tradeSize, profit } = this;
+      if (tradeSize && !isNil(profit)) {
+        return profit - Number(tradeSize);
+      }
+      return 0;
+    },
+  })
+  pnl?: number;
+
+  @Prop({
+    required: false,
+    default: function () {
+      const { pnl } = this;
+      if (!isNil(pnl) && pnl >= 0) {
+        return TRADE_STATUS.WIN;
+      }
+      return TRADE_STATUS.LOSS;
+    },
+  })
+  status?: TRADE_STATUS;
+
   @Prop({ type: Number, required: false, default: null })
   optionId: number | null;
 
@@ -94,8 +122,8 @@ export class Trades {
   @Prop({ require: true })
   network: Network;
 
-  @Prop({ type: Number, required: false, default: null })
-  expiryPrice: number | null;
+  @Prop({ type: String, required: false, default: null })
+  expiryPrice: string | null;
 
   @Prop({ type: String, required: false, default: null })
   payout: string | null;

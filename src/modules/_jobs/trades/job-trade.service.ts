@@ -316,6 +316,7 @@ export class JobTradeService {
               },
               update: {
                 state: TRADE_STATE.OPENED,
+                expiryPrice: BigNumber(item.price).toFixed(0),
                 openDate: now,
               },
             },
@@ -404,6 +405,7 @@ export class JobTradeService {
               },
               update: {
                 state: TRADE_STATE.OPENED,
+                expiryPrice: BigNumber(item.price).toFixed(0),
                 openDate: now,
               },
             },
@@ -482,6 +484,7 @@ export class JobTradeService {
               },
               update: {
                 state: TRADE_STATE.CLOSED,
+                expiryPrice: BigNumber(item.price).toFixed(0),
                 closeDate: now,
               },
             },
@@ -539,6 +542,20 @@ export class JobTradeService {
 
         // Call smartcontract
         this.closeTradeContract(trades);
+
+        // update db
+        this.tradesModel.bulkWrite(
+          trades.map((item) => ({
+            updateOne: {
+              filter: {
+                _id: item._id,
+              },
+              update: {
+                expiryPrice: BigNumber(item.price).toFixed(0),
+              },
+            },
+          })),
+        );
       }
     } catch (e) {
       console.error(e);

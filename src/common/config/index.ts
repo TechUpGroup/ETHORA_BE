@@ -140,8 +140,8 @@ class Config {
       ? [
           "https://arbitrum-goerli.publicnode.com",
           "https://arbitrum-goerli.public.blastapi.io",
-          "https://endpoints.omniatech.io/v1/arbitrum/goerli/public",
           "https://goerli-rollup.arbitrum.io/rpc",
+          "https://newest-patient-choice.arbitrum-goerli.discover.quiknode.pro/4253d8f64f144dcf08e74bd508dfc3e7adcfa13a/",
         ]
       : ["https://base.publicnode.com", "https://base.meowrpc.com", "https://1rpc.io/base", "https://base.drpc.org"];
   }

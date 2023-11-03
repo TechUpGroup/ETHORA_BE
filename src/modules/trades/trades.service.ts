@@ -184,8 +184,6 @@ export class TradesService {
         $set: {
           userCloseDate: new Date(),
           state: TRADE_STATE.CLOSED,
-          // TODO: update price
-          expiryPrice: 0,
         },
       },
     );
