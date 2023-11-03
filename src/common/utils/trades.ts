@@ -1,3 +1,5 @@
+import BigNumber from "bignumber.js";
+import { SETTLEMENT_FEE } from "common/constants/fee";
 import { TradesDocument } from "modules/trades/schemas/trades.schema";
 
 /* Calculate Choudhury’s approximation of the Black-Scholes CDF*/
@@ -71,10 +73,20 @@ export const getProbabilityByTime = (
 };
 
 export const calcLockedAmount = async (contract, userAddress: string, data: TradesDocument | any) => {
+  const optionParams = {
+    strike: data.strike,
+        amount: 0,
+        period: data.period,
+        allowPartialFill: data.allowPartialFill,
+        totalFee: data.tradeSize,
+        user: userAddress,
+        referralCode: data.referralCode || "",
+        baseSettlementFeePercentage: SETTLEMENT_FEE[data.pair.replace("-", "").toUpperCase()],
+  }
   const [amount] = await contract.evaluateParams(
-    [data.strike, 0, data.period, data.allowPartialFill, data.tradeSize, userAddress, data.referralCode, 1250],
-    data.slippage,
+    optionParams,
+    // data.slippage,
+    5
   );
-  const lockedAmount = Number(amount.toString()) / 1e6 + Number(data.tradeSize) / 1e6;
-  return `${Number(lockedAmount.toFixed(2)) * 1e6}`;
-};
+  return BigNumber(amount.toString()).plus(data.tradeSize).toFixed(0);
+}
