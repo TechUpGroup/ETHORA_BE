@@ -158,7 +158,7 @@ export class JobSyncRouterService {
       });
 
       // save to db
-      await Promise.all([
+      await Promise.allSettled([
         bulkUpdate.length ? this.tradeService.bulkWrite(bulkUpdate) : undefined,
         historyCreateArr.length ? this.historyService.saveHistories(historyCreateArr) : undefined,
       ]);
