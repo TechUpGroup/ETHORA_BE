@@ -82,10 +82,10 @@ export class JobSyncBlockService {
 
     const historyCreateArr: any[] = [];
     const bulkUpdate: any[] = [];
-    const optionIds: number[] = [];
+    const contractOptionIds: string[] = [];
     const profits: any = {};
     for (const event of events) {
-      const { transactionHash, topics, logIndex } = event;
+      const { transactionHash, topics, logIndex, address } = event;
       historyCreateArr.push({
         tx_hash_log_index: `${transactionHash.toLowerCase().trim()}_${logIndex}`,
         network,
@@ -95,7 +95,7 @@ export class JobSyncBlockService {
         bulkUpdate.push({
           updateOne: {
             filter: {
-              optionId: +id.toString(),
+              contractOption: `${address.toLowerCase().trim()}_${id.toString()}`,
             },
             update: {
               status: TRADE_STATUS.LOSS,
@@ -106,13 +106,13 @@ export class JobSyncBlockService {
       }
       if (topics.includes(TOPIC.EXERCISE)) {
         const { id, profit } = IBinaryOptions.parseLog(event).args;
-        optionIds.push(+id.toString());
+        contractOptionIds.push(`${address.toLowerCase().trim()}_${id.toString()}`);
         profits[+id.toString()] = +profit.toString()
       }
     }
 
     // filter status trade
-    const trades = await this.tradesService.getAllTradesByOptionIds(optionIds);
+    const trades = await this.tradesService.getAllTradesByOptionIdsAndTargetContract(contractOptionIds);
     trades.forEach(trade => {
       if (trade.optionId) {
         const profit = profits[trade.optionId];
@@ -123,7 +123,7 @@ export class JobSyncBlockService {
         bulkUpdate.push({
           updateOne: {
             filter: {
-              optionId: trade.optionId,
+              contractOption: `${trade.targetContract}_${trade.optionId}`,
             },
             update: {
               status,

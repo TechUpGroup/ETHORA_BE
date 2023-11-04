@@ -140,8 +140,8 @@ export class TradesService {
         return {
           ...order,
           ...data,
-          limitOrderExpirationDate: new Date(data.limitOrderDuration * 1000 + now.getTime())
-        }
+          limitOrderExpirationDate: new Date(data.limitOrderDuration * 1000 + now.getTime()),
+        };
       }
       return order;
     });
@@ -165,13 +165,13 @@ export class TradesService {
     // TODO:
     let isTradeActive = false;
     this.jobTradeService.listActives.forEach((a, i) => {
-      if(a.queueId === trade.queueId) {
+      if (a.queueId === trade.queueId) {
         isTradeActive = true;
         this.jobTradeService.listActives.splice(i, 1);
         this.jobTradeService.queueCloseAnytime.push(a);
       }
     });
-    if(!isTradeActive) {
+    if (!isTradeActive) {
       throw new BadRequestException("Trade is in QUEUE");
     }
 
@@ -245,10 +245,11 @@ export class TradesService {
     );
   }
 
-  getAllTradesByOptionIds(optionIds: number[]) {
+  getAllTradesByOptionIdsAndTargetContract(contractOptionIds: string[]) {
     return this.model.find(
-      { optionId: {$in: optionIds } },
+      { contractOption: { $in: contractOptionIds } },
       {
+        targetContract: 1,
         optionId: 1,
         tradeSize: 1,
       },

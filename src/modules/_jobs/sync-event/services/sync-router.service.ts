@@ -50,7 +50,7 @@ export class JobSyncRouterService {
   private handleEvents = async ({ events: listEvents, contract, eventHashes }: IEventParams) => {
     try {
       if (!listEvents.length) return;
-      const { network } = contract;
+      const { network, address } = contract;
       const txsHashExists = await this.historyService.findTransactionHashExists(eventHashes);
       const events = this.helperService.filterEvents(listEvents, txsHashExists);
 
@@ -74,6 +74,7 @@ export class JobSyncRouterService {
               update: {
                 optionId: +optionId.toString(),
                 expirationDate: expiration.toString(),
+                contractOption: `${address}_${optionId.toString()}`
               },
             },
           });

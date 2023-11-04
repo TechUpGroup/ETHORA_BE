@@ -4,7 +4,6 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { TRADE_STATE, TRADE_STATUS, TRADE_TOKEN } from "common/enums/trades.enum";
 import { Exclude } from "class-transformer";
 import { Network } from "common/enums/network.enum";
-import { isNil } from "lodash";
 
 export const TRADES_MODEL = "trades";
 
@@ -29,7 +28,7 @@ export class Trades {
   @Prop({ required: true })
   period: number;
 
-  @Prop({ required: true })
+  @Prop({ required: true, lowercase: true, trim: true })
   targetContract: string;
 
   @Prop({ required: true })
@@ -88,30 +87,25 @@ export class Trades {
 
   @Prop({
     required: false,
-    default: function () {
-      const { tradeSize, profit } = this;
-      if (tradeSize && !isNil(profit)) {
-        return profit - Number(tradeSize);
-      }
-      return 0;
-    },
+    default: 0,
   })
   pnl?: number;
 
   @Prop({
     required: false,
-    default: function () {
-      const { pnl } = this;
-      if (!isNil(pnl) && pnl >= 0) {
-        return TRADE_STATUS.WIN;
-      }
-      return TRADE_STATUS.LOSS;
-    },
+    enum: TRADE_STATUS,
+    default: TRADE_STATUS.LOSS
   })
   status?: TRADE_STATUS;
 
   @Prop({ type: Number, required: false, default: null })
   optionId: number | null;
+
+  @Prop({
+    type: String,
+    required: false,
+  })
+  contractOption?: string;
 
   @Prop()
   isLimitOrder: boolean;
