@@ -89,7 +89,7 @@ export class JobSyncRouterService {
                 queueId: +queueId.toString(),
               },
               update: {
-                status: TRADE_STATE.CANCELLED,
+                state: TRADE_STATE.CANCELLED,
                 isCancelled: true,
                 cancellationReason: REASON_FAIL[reason] || "System error",
               },
@@ -106,7 +106,7 @@ export class JobSyncRouterService {
                 queueId: +queueId.toString(),
               },
               update: {
-                status: TRADE_STATE.CANCELLED,
+                state: TRADE_STATE.CANCELLED,
                 isCancelled: true,
                 cancellationReason: REASON_FAIL[reason] || "System error",
               },
@@ -126,7 +126,7 @@ export class JobSyncRouterService {
                   optionId: +optionId.toString(),
                 },
                 update: {
-                  status: TRADE_STATE.CANCELLED,
+                  state: TRADE_STATE.CANCELLED,
                   isCancelled: true,
                   cancellationReason: REASON_FAIL[reason] || "System error",
                 },
