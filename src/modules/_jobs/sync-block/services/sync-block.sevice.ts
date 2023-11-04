@@ -110,7 +110,7 @@ export class JobSyncBlockService {
               optionId: +id.toString(),
             },
             update: {
-              profit: +profit.toFixed(),
+              profit: +profit.toString(),
             },
           },
         });
