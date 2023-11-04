@@ -245,6 +245,16 @@ export class TradesService {
     );
   }
 
+  getAllTradesByOptionIds(optionIds: number[]) {
+    return this.model.find(
+      { optionId: {$in: optionIds } },
+      {
+        optionId: 1,
+        tradeSize: 1,
+      },
+    );
+  }
+
   async getActiveUserTrades(userAddress: string, query: GetTradesUserActiveDto) {
     const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
 

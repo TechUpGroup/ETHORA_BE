@@ -82,6 +82,8 @@ export class JobSyncBlockService {
 
     const historyCreateArr: any[] = [];
     const bulkUpdate: any[] = [];
+    const optionIds: number[] = [];
+    const profits: any = {};
     for (const event of events) {
       const { transactionHash, topics, logIndex } = event;
       historyCreateArr.push({
@@ -104,18 +106,34 @@ export class JobSyncBlockService {
       }
       if (topics.includes(TOPIC.EXERCISE)) {
         const { id, profit } = IBinaryOptions.parseLog(event).args;
+        optionIds.push(+id.toString());
+        profits[+id.toString()] = +profit.toString()
+      }
+    }
+
+    // filter status trade
+    const trades = await this.tradesService.getAllTradesByOptionIds(optionIds);
+    trades.forEach(trade => {
+      if (trade.optionId) {
+        const profit = profits[trade.optionId];
+        let status = TRADE_STATUS.LOSS;
+        if(profit > Number(trade.tradeSize)) {
+          status = TRADE_STATUS.WIN
+        }
         bulkUpdate.push({
           updateOne: {
             filter: {
-              optionId: +id.toString(),
+              optionId: trade.optionId,
             },
             update: {
-              profit: +profit.toString(),
+              status,
+              profit,
+              pnl: profit - Number(trade.tradeSize)
             },
           },
         });
       }
-    }
+    })
 
     await Promise.all([
       historyCreateArr.length ? this.historiesService.saveHistoriesBlock(historyCreateArr) : undefined,
