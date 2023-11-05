@@ -19,6 +19,10 @@ export const REASON_FAIL = {
   "Pool: lockedAmount is already unlocked": "lockedAmount is already unlocked",
 };
 
+export const REASON_FAIL_NOT_CARE = [
+  "Router: Trade has already been opened"
+];
+
 export const REASON_FAIL_RETRY = {
   "Router: Wrong closing time": "Wrong closing time",
   "Router: Wrong price": "Wrong price",

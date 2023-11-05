@@ -10,7 +10,7 @@ import { CancelTradeEvent, FailResolveEvent, FailUnlockEvent, OpenTradeEvent } f
 import { TradesService } from "modules/trades/trades.service";
 import { JobTradeService } from "modules/_jobs/trades/job-trade.service";
 import { LogsService } from "modules/logs/logs.service";
-import { REASON_FAIL, REASON_FAIL_RETRY, ROUTER_EVENT } from "common/constants/event";
+import { REASON_FAIL, REASON_FAIL_NOT_CARE, REASON_FAIL_RETRY, ROUTER_EVENT } from "common/constants/event";
 import { TRADE_STATE } from "common/enums/trades.enum";
 import { decryptAES } from "common/utils/encrypt";
 
@@ -101,20 +101,22 @@ export class JobSyncRouterService {
         }
         if (nameEvent === ROUTER_EVENT.FAILRESOLVE) {
           const { queueId, reason } = (event as FailResolveEvent).args;
-          bulkUpdate.push({
-            updateOne: {
-              filter: {
-                queueId: +queueId.toString(),
+          if (!REASON_FAIL_NOT_CARE.includes(reason)) {
+            bulkUpdate.push({
+              updateOne: {
+                filter: {
+                  queueId: +queueId.toString(),
+                },
+                update: {
+                  state: TRADE_STATE.CANCELLED,
+                  isCancelled: true,
+                  cancellationReason: REASON_FAIL[reason] || "System error",
+                },
               },
-              update: {
-                state: TRADE_STATE.CANCELLED,
-                isCancelled: true,
-                cancellationReason: REASON_FAIL[reason] || "System error",
-              },
-            },
-          });
-          const index = this.jobTradeService.listActives.findIndex((a) => a.queueId === +queueId.toString());
-          this.jobTradeService.listActives.splice(index, 1);
+            });
+            const index = this.jobTradeService.listActives.findIndex((a) => a.queueId === +queueId.toString());
+            this.jobTradeService.listActives.splice(index, 1);
+          }
         }
         if (nameEvent === ROUTER_EVENT.FAILUNLOCK) {
           const { optionId, reason } = (event as FailUnlockEvent).args;
