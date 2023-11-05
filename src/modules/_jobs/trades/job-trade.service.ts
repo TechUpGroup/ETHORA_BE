@@ -959,8 +959,8 @@ export class JobTradeService {
     return (
       (prices.some((price) => BigNumber(price).gte(targetPrice)) &&
         prices.some((price) => BigNumber(price).lte(targetPrice))) ||
-      (up && prices.every((price) => BigNumber(price).gte(targetPrice))) ||
-      (!up && prices.every((price) => BigNumber(price).lte(targetPrice)))
+      (up && prices.every((price) => BigNumber(price).lte(targetPrice))) ||
+      (!up && prices.every((price) => BigNumber(price).gte(targetPrice)))
     );
   }
 }
