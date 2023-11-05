@@ -136,7 +136,7 @@ export class TradesService {
     );
 
     this.jobTradeService.queuesLimitOrder.map((order) => {
-      if (order._id == data._id) {
+      if (order._id === trade._id) {
         return {
           ...order,
           ...data,

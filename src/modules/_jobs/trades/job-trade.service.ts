@@ -732,6 +732,7 @@ export class JobTradeService {
     // choose operater
     const operater = this.chooseOperator();
     const network = trades[0].network;
+    const optionData: any[] = [];
     try {
       // get contract
       const contract = this.ethersService.getContractWithProvider(
@@ -741,7 +742,6 @@ export class JobTradeService {
         this.ethersService.getWallet(operater, network),
       );
 
-      const optionData: any[] = [];
       const now = new Date();
       await Promise.all(
         trades.map(async (trade) => {
@@ -813,6 +813,7 @@ export class JobTradeService {
         this.listActives.push(...trades);
       } else {
         this.logsService.createLog("excuteOptionContract", e);
+        this.logsService.createLog("optionData", JSON.stringify(optionData));
       }
     }
   }
