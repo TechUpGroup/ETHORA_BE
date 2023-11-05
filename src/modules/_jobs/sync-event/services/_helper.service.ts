@@ -14,7 +14,7 @@ export class HelperService {
   filterEvents(events: Event[], txsHashExists: string[]) {
     return events.filter(
       ({ transactionHash, logIndex }) =>
-        !txsHashExists.includes(`${transactionHash.toLowerCase()}_${logIndex}`),
+        !txsHashExists.includes(`${transactionHash.toLowerCase().trim()}_${logIndex}`),
     );
   }
 
@@ -59,7 +59,7 @@ export class HelperService {
 
     const allEvents = await contractInst.queryFilter({}, fromBlock, toBlock);
     const events = allEvents.filter((receipt) => acceptEvents.includes(receipt.event || ""));
-    const eventHashes = events.map(({ transactionHash, logIndex }) => `${transactionHash.toLowerCase()}_${logIndex}`);
+    const eventHashes = events.map(({ transactionHash, logIndex }) => `${transactionHash.toLowerCase().trim()}_${logIndex}`);
     return { blocknumber, fromBlock, toBlock, events, eventHashes };
   };
 }

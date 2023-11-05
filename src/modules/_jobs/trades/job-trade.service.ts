@@ -368,7 +368,7 @@ export class JobTradeService {
               : [];
             prices = prices.map((price) => price.price);
             indexes.push(index);
-            return this.checkLimitPriceAvaliable(item.strike.toString(), prices, item.isAbove);
+            return this.checkLimitPriceAvaliable(item.strike.toString(), prices, item.isAbove, item.slippage);
           })
           .map((item: any) => {
             const prices = item.pair
@@ -385,13 +385,13 @@ export class JobTradeService {
         // Call smartcontract
         const _trades = trades.slice(0, config.quantityTxTrade);
 
-        // remove trade limit
-        indexes.splice(0, config.quantityTxTrade).forEach((item) => this.queuesLimitOrder.splice(item, 1));
-
         if (!_trades.length) {
           this.isProcessingTradeLimit = false;
           return;
         }
+
+        // remove trade limit
+        indexes.splice(0, config.quantityTxTrade).forEach((item) => this.queuesLimitOrder.splice(item, 1));
 
         // Call smartcontract
         this.openTradeContract(_trades);
@@ -696,13 +696,13 @@ export class JobTradeService {
       // write contract
       await contract.openTrades(openTxn, {
         gasPrice: this.ethersService.getCurrentGas(network),
-        gasLimit: gasLimit.toString()
+        gasLimit: gasLimit.toString(),
       });
 
       this.listActives.push(...trades);
     } catch (e) {
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason)) {
-        if(trades[0].isLimitOrder){
+        if (trades[0].isLimitOrder) {
           this.queuesLimitOrder.push(...trades);
         } else {
           this.queuesMarket.push(...trades);
@@ -796,7 +796,7 @@ export class JobTradeService {
             publisherSignInfo: {
               timestamp: trade.expirationDate,
               signature: userFullSignature,
-            }
+            },
           });
         }),
       );
@@ -808,7 +808,7 @@ export class JobTradeService {
       // write contract
       await contract.executeOptions(optionData, {
         gasPrice: this.ethersService.getCurrentGas(network),
-        gasLimit: gasLimit.toString()
+        gasLimit: gasLimit.toString(),
       });
     } catch (e) {
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason)) {
@@ -860,7 +860,7 @@ export class JobTradeService {
             assetPair: trade.pair.replace("-", "").toUpperCase(),
             timestamp: Math.floor(now.getTime() / 1000),
             optionId: trade.optionId || 0,
-          }
+          };
 
           //userFullSignature
           const userFullMessage = generateMessage(
@@ -922,7 +922,7 @@ export class JobTradeService {
       // write contract
       await contract.closeAnytime(closeParams, {
         gasPrice: this.ethersService.getCurrentGas(network),
-        gasLimit: gasLimit.toString()
+        gasLimit: gasLimit.toString(),
       });
     } catch (e) {
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason)) {
@@ -959,12 +959,16 @@ export class JobTradeService {
     return operaters;
   }
 
-  private checkLimitPriceAvaliable(targetPrice: string, prices: string[], up: boolean) {
+  private checkLimitPriceAvaliable(targetPrice: string, prices: string[], up: boolean, slippage: number) {
     return (
       (prices.some((price) => BigNumber(price).gte(targetPrice)) &&
         prices.some((price) => BigNumber(price).lte(targetPrice))) ||
-      (up && prices.every((price) => BigNumber(price).lte(targetPrice))) ||
-      (!up && prices.every((price) => BigNumber(price).gte(targetPrice)))
+      (!up &&
+        Number(prices[prices.length - 1]) <= (Number(targetPrice) * (1e4 + slippage)) / 1e4 &&
+        Number(prices[prices.length - 1]) >= Number(targetPrice)) ||
+      (up &&
+        Number(prices[prices.length - 1]) >= (Number(targetPrice) * (1e4 - slippage)) / 1e4 &&
+        Number(prices[prices.length - 1]) <= Number(targetPrice))
     );
   }
 }

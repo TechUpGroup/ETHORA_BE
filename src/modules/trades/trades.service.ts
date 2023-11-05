@@ -122,6 +122,13 @@ export class TradesService {
     }
 
     const now = new Date();
+    const index = this.jobTradeService.queuesLimitOrder.findIndex(order => order.queueId === trade.queueId);
+    this.jobTradeService.queuesLimitOrder[index] = {
+      ...this.jobTradeService.queuesLimitOrder[index] as any,
+      ...data,
+      limitOrderExpirationDate: new Date(data.limitOrderDuration * 1000 + now.getTime()),
+    };
+
     const result = await this.model.updateOne(
       {
         _id: data._id,
@@ -134,17 +141,6 @@ export class TradesService {
         },
       },
     );
-
-    this.jobTradeService.queuesLimitOrder.map((order) => {
-      if (order._id === trade._id) {
-        return {
-          ...order,
-          ...data,
-          limitOrderExpirationDate: new Date(data.limitOrderDuration * 1000 + now.getTime()),
-        };
-      }
-      return order;
-    });
 
     return result;
   }
