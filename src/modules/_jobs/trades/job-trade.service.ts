@@ -696,7 +696,7 @@ export class JobTradeService {
       // write contract
       await contract.openTrades(openTxn, {
         gasPrice: this.ethersService.getCurrentGas(network),
-        gasLimit: BigNumber(gasLimit.toString()).multipliedBy(1.1).toFixed(),
+        gasLimit: BigNumber(gasLimit.toString()).multipliedBy(1.1).toFixed(0),
       });
 
       this.listActives.push(...trades);
@@ -808,7 +808,7 @@ export class JobTradeService {
       // write contract
       await contract.executeOptions(optionData, {
         gasPrice: this.ethersService.getCurrentGas(network),
-        gasLimit: BigNumber(gasLimit.toString()).multipliedBy(1.1).toFixed(),
+        gasLimit: BigNumber(gasLimit.toString()).multipliedBy(1.1).toFixed(0),
       });
     } catch (e) {
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason)) {
@@ -922,7 +922,7 @@ export class JobTradeService {
       // write contract
       await contract.closeAnytime(closeParams, {
         gasPrice: this.ethersService.getCurrentGas(network),
-        gasLimit: BigNumber(gasLimit.toString()).multipliedBy(1.1).toFixed(),
+        gasLimit: BigNumber(gasLimit.toString()).multipliedBy(1.1).toFixed(0),
       });
     } catch (e) {
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason)) {
