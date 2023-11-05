@@ -706,6 +706,7 @@ export class JobTradeService {
         } else {
           this.queuesMarket.push(...trades);
         }
+        this.logsService.createLog("openTradeContract => retry", e);
       } else {
         this.tradesModel.bulkWrite(
           trades.map((item) => ({
@@ -722,7 +723,7 @@ export class JobTradeService {
             },
           })),
         );
-        this.logsService.createLog("openTradeContract", e);
+        this.logsService.createLog("openTradeContract => cancel", e);
       }
     }
   }
