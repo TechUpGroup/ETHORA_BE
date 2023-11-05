@@ -690,12 +690,13 @@ export class JobTradeService {
       );
 
       // gas estimate
-      await contract.estimateGas.openTrades(openTxn, {
+      const gasLimit = await contract.estimateGas.openTrades(openTxn, {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
       // write contract
       await contract.openTrades(openTxn, {
         gasPrice: this.ethersService.getCurrentGas(network),
+        gasLimit: gasLimit.toString()
       });
 
       this.listActives.push(...trades);
@@ -801,12 +802,13 @@ export class JobTradeService {
       );
 
       // gas estimate
-      await contract.estimateGas.executeOptions(optionData, {
+      const gasLimit = await contract.estimateGas.executeOptions(optionData, {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
       // write contract
       await contract.executeOptions(optionData, {
         gasPrice: this.ethersService.getCurrentGas(network),
+        gasLimit: gasLimit.toString()
       });
     } catch (e) {
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason)) {
@@ -914,12 +916,13 @@ export class JobTradeService {
       );
 
       // gas estimate
-      await contract.estimateGas.closeAnytime(closeParams, {
+      const gasLimit = await contract.estimateGas.closeAnytime(closeParams, {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
       // write contract
       await contract.closeAnytime(closeParams, {
         gasPrice: this.ethersService.getCurrentGas(network),
+        gasLimit: gasLimit.toString()
       });
     } catch (e) {
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason)) {
