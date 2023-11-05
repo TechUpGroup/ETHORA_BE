@@ -700,7 +700,7 @@ export class JobTradeService {
 
       this.listActives.push(...trades);
     } catch (e) {
-      if (e.code && Object.values(ERROR_RETRY).includes(e.code)) {
+      if (e.reason && Object.values(ERROR_RETRY).includes(e.reason)) {
         if(trades[0].isLimitOrder){
           this.queuesLimitOrder.push(...trades);
         } else {
@@ -809,7 +809,7 @@ export class JobTradeService {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
     } catch (e) {
-      if (e.code && Object.values(ERROR_RETRY).includes(e.code)) {
+      if (e.reason && Object.values(ERROR_RETRY).includes(e.reason)) {
         this.listActives.push(...trades);
       } else {
         this.logsService.createLog("excuteOptionContract", e);
@@ -921,7 +921,7 @@ export class JobTradeService {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
     } catch (e) {
-      if (e.code && Object.values(ERROR_RETRY).includes(e.code)) {
+      if (e.reason && Object.values(ERROR_RETRY).includes(e.reason)) {
         this.queueCloseAnytime.push(...trades);
       } else {
         this.logsService.createLog("closeTradeContract", e);

@@ -296,7 +296,7 @@ export class TradesService {
   }
 
   async getCancelledUserTrades(userAddress: string, query: GetTradesUserActiveDto) {
-    const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
+    const { page, limit, sortBy = "updatedAt", sortType = -1 } = query;
 
     return await this.model.paginate(
       { userAddress, state: TRADE_STATE.CANCELLED },
@@ -350,7 +350,7 @@ export class TradesService {
   }
 
   async getHistoryUserTrades(userAddress: string, query: GetTradesUserActiveDto) {
-    const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
+    const { page, limit, sortBy = "updatedAt", sortType = -1 } = query;
 
     return await this.model.paginate(
       { userAddress, state: { $nin: [TRADE_STATE.OPENED, TRADE_STATE.QUEUED, TRADE_STATE.CREATED] } },
