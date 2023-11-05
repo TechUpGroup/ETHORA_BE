@@ -50,7 +50,7 @@ export class JobSyncRouterService {
   private handleEvents = async ({ events: listEvents, contract, eventHashes }: IEventParams) => {
     try {
       if (!listEvents.length) return;
-      const { network, address } = contract;
+      const { network } = contract;
       const txsHashExists = await this.historyService.findTransactionHashExists(eventHashes);
       const events = this.helperService.filterEvents(listEvents, txsHashExists);
 
@@ -65,7 +65,7 @@ export class JobSyncRouterService {
           network,
         });
         if (nameEvent === ROUTER_EVENT.OPENTRADE) {
-          const { queueId, optionId, expiration } = (event as OpenTradeEvent).args;
+          const { queueId, optionId, expiration, targetContract } = (event as OpenTradeEvent).args;
           bulkUpdate.push({
             updateOne: {
               filter: {
@@ -74,7 +74,7 @@ export class JobSyncRouterService {
               update: {
                 optionId: +optionId.toString(),
                 expirationDate: expiration.toString(),
-                contractOption: `${address}_${optionId.toString()}`
+                contractOption: `${targetContract.toLowerCase().trim()}_${optionId.toString()}`
               },
             },
           });

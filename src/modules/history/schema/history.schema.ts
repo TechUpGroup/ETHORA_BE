@@ -1,4 +1,4 @@
-import { Options } from "common/config/mongoose.config";
+import { Options, validateAddress } from "common/config/mongoose.config";
 import { Network } from "common/enums/network.enum";
 import { Document } from "mongoose";
 
@@ -45,6 +45,9 @@ export class HistoriesBlock  {
     unique: true
   })
   tx_hash_log_index: string;
+
+  @Prop({ required: false, trim: true, lowercase: true, validate: validateAddress })
+  contract_address: string;
 
   @Prop({ required: true, index: true, enum: Network })
   network: Network;

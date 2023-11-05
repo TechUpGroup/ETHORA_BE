@@ -88,6 +88,7 @@ export class JobSyncBlockService {
       const { transactionHash, topics, logIndex, address } = event;
       historyCreateArr.push({
         tx_hash_log_index: `${transactionHash.toLowerCase().trim()}_${logIndex}`,
+        contract_address: address.toLowerCase().trim(),
         network,
       });
       if (topics.includes(TOPIC.EXPIRE)) {
