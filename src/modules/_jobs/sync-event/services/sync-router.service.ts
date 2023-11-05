@@ -79,8 +79,8 @@ export class JobSyncRouterService {
             },
           });
           const index = this.jobTradeService.listActives.findIndex((a) => a.queueId === +queueId.toString());
-          this.jobTradeService.listActives[index].optionId = +optionId.toString();
-          this.jobTradeService.listActives[index].expirationDate = expiration.toString();
+          this.jobTradeService.listActives[index]["optionId"] = +optionId.toString();
+          this.jobTradeService.listActives[index]["expirationDate"] = expiration.toString();
         }
         if (nameEvent === ROUTER_EVENT.CANCELTRADE) {
           const { queueId, reason } = (event as CancelTradeEvent).args;
