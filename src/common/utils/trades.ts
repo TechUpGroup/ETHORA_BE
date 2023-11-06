@@ -74,7 +74,7 @@ export const getProbabilityByTime = (
 
 export const calcLockedAmount = async (contract, userAddress: string, data: TradesDocument | any) => {
   const optionParams = {
-    strike: data.strike,
+    strike: BigNumber(data.strike).toFixed(0),
     amount: 0,
     period: data.period,
     allowPartialFill: data.allowPartialFill,
