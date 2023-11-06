@@ -42,7 +42,15 @@ export class TradesService {
     const { isLimitOrder, pair, tradeSize, period } = data;
 
     const user = await this.userService.getUserByAddress(userAddress);
-    const wallet = await this.userService.findWalletByNetworkAndId(data.network, user._id);
+    const [wallet, lastTrade] = await Promise.all([
+      this.userService.findWalletByNetworkAndId(data.network, user._id),
+      this.model.find({ userAddress }).sort({ queuedDate: -1 }).limit(1),
+    ]);
+
+    const now = new Date();
+    if (lastTrade.length && new Date(lastTrade[0].queuedDate.getTime() + 1000) > now) {
+      throw new BadRequestException("Call too quickly");
+    }
 
     if (!wallet.isApproved) {
       throw new BadRequestException("Not approve");
@@ -64,7 +72,6 @@ export class TradesService {
       throw new BadRequestException("strikeDate too old");
     }
 
-    const now = new Date();
     const settlementFee = SETTLEMENT_FEE[pair.replace("-", "").toUpperCase()];
 
     const _data: TradesDocument | any = {
@@ -124,9 +131,9 @@ export class TradesService {
     }
 
     const now = new Date();
-    const index = this.jobTradeService.queuesLimitOrder.findIndex(order => order.queueId === trade.queueId);
+    const index = this.jobTradeService.queuesLimitOrder.findIndex((order) => order.queueId === trade.queueId);
     this.jobTradeService.queuesLimitOrder[index] = {
-      ...this.jobTradeService.queuesLimitOrder[index] as any,
+      ...(this.jobTradeService.queuesLimitOrder[index] as any),
       ...data,
       limitOrderExpirationDate: new Date(data.limitOrderDuration * 1000 + now.getTime()),
     };
@@ -258,20 +265,13 @@ export class TradesService {
     const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
 
     return await this.model.paginate(
-      { userAddress, state: { $in: [TRADE_STATE.OPENED, TRADE_STATE.QUEUED] }, isLimitOrder: false },
       {
-        page,
-        limit,
-        sort: { [sortBy]: sortType },
+        userAddress,
+        $or: [
+          { state: { $in: [TRADE_STATE.OPENED, TRADE_STATE.QUEUED] }, isLimitOrder: false },
+          { state: TRADE_STATE.OPENED, isLimitOrder: true },
+        ],
       },
-    );
-  }
-
-  async getActivesUserTrades(userAddress: string, query: GetTradesUserActiveDto) {
-    const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
-
-    return await this.model.paginate(
-      { userAddress, state: { $in: [TRADE_STATE.OPENED, TRADE_STATE.QUEUED] } },
       {
         page,
         limit,
@@ -284,7 +284,7 @@ export class TradesService {
     const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
 
     return await this.model.paginate(
-      { userAddress, state: { $in: [TRADE_STATE.OPENED, TRADE_STATE.QUEUED] }, isLimitOrder: true },
+      { userAddress, state: TRADE_STATE.QUEUED, isLimitOrder: true },
       {
         page,
         limit,
@@ -378,6 +378,6 @@ export class TradesService {
       queuesLimitOrder: this.jobTradeService.queuesLimitOrder,
       listActives: this.jobTradeService.listActives,
       queueCloseAnytime: this.jobTradeService.queueCloseAnytime,
-    }
+    };
   }
 }

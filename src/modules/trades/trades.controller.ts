@@ -70,13 +70,6 @@ export class TradesController {
     return this.service.getActiveUserTrades(user.address, query);
   }
 
-  @Get("user/actives")
-  @Auth()
-  @ApiOperation({ summary: `Get Active User Trades (Markets & Limit Orders)` })
-  getActivesUserTrades(@User() user: UsersDocument, @Query() query: GetTradesUserActiveDto) {
-    return this.service.getActivesUserTrades(user.address, query);
-  }
-
   @Get("user/limit-orders")
   @Auth()
   @ApiOperation({ summary: `Get Active User Trades (Limit Orders only)` })
