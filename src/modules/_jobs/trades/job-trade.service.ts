@@ -395,7 +395,7 @@ export class JobTradeService {
         }
 
         // remove trade limit
-        indexes.splice(0, config.quantityTxTrade).forEach((item) => this.queuesLimitOrder.splice(item, 1));
+        indexes.slice(0, config.quantityTxTrade).forEach((item) => this.queuesLimitOrder.splice(item, 1));
 
         // Call smartcontract
         this.openTradeContract(_trades);
@@ -459,7 +459,7 @@ export class JobTradeService {
         console.log("[ExcuteOptions] Processing");
 
         // filter price with pair
-        const trades = listTrades.splice(0, config.quantityTxTrade).map((item: any) => {
+        const trades = listTrades.slice(0, config.quantityTxTrade).map((item: any) => {
           const prices = item.pair
             ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
             : [];
@@ -469,7 +469,7 @@ export class JobTradeService {
           };
         });
         // remove actives
-        indexes.splice(0, config.quantityTxTrade).forEach((item) => this.listActives.splice(item, 1));
+        indexes.slice(0, config.quantityTxTrade).forEach((item) => this.listActives.splice(item, 1));
 
         if (!trades.length) {
           this.isExcuteOption = false;
