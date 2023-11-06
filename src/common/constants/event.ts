@@ -20,7 +20,8 @@ export const REASON_FAIL = {
 };
 
 export const REASON_FAIL_NOT_CARE = [
-  "Router: Trade has already been opened"
+  "Router: Trade has already been opened",
+  "Router: Signature already used"
 ];
 
 export const REASON_FAIL_RETRY = {
