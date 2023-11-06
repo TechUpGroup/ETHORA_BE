@@ -2,9 +2,9 @@ import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import BigNumber from "bignumber.js";
-import { RouterAbi__factory } from "common/abis/types";
+import { BtcusdBinaryOptions__factory, RouterAbi__factory } from "common/abis/types";
 import config from "common/config";
-import { ContractName, PairContractName } from "common/constants/contract";
+import { ContractName, PairContractName, PairContractType } from "common/constants/contract";
 import { FEED_IDS } from "common/constants/price";
 import { Network } from "common/enums/network.enum";
 import { TRADE_STATE } from "common/enums/trades.enum";
@@ -33,6 +33,7 @@ export class JobTradeService {
   public queueCloseAnytime: TradesDocument[];
   public queuesMarket: TradesDocument[];
   public queuesLimitOrder: TradesDocument[];
+  public currenMaxOI: any;
   private isProcessingTradeMarket = false;
   private isProcessingTradeLimit = false;
   private isClosingTradesAnyTime = false;
@@ -49,7 +50,9 @@ export class JobTradeService {
     this.queueCloseAnytime = [];
     this.queuesMarket = [];
     this.queuesLimitOrder = [];
+    this.currenMaxOI = {};
     this.start();
+    void this.syncMaxOI();
   }
 
   private async start() {
@@ -234,7 +237,7 @@ export class JobTradeService {
     trades.forEach((trade) => {
       // TODO:
       const expired = trade.limitOrderDuration !== 0 ? trade.limitOrderDuration : 60;
-      if (trade.openDate && new Date(trade.openDate.getTime() + expired * 1000) < now) {
+      if (trade.queuedDate && new Date(trade.queuedDate.getTime() + expired * 1000) < now) {
         tradesExpired.push({
           updateOne: {
             filter: {
@@ -246,7 +249,6 @@ export class JobTradeService {
                 isCancelled: true,
                 cancellationReason: "The trade reached overtime",
                 cancellationDate: now,
-                // closeDate: now,
               },
             },
           },
@@ -568,6 +570,26 @@ export class JobTradeService {
     this.isClosingTradesAnyTime = false;
   }
 
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  async syncMaxOI() {
+    const network = config.isDevelopment ? Network.goerli : Network.base;
+    Object.values(PairContractName).forEach(async (pair) => {
+      try {
+        const pairContractName = pair.replace(/[^a-zA-Z]/, "").toUpperCase() as PairContractName;
+        const contractInfo = config.getPairContract(network, pairContractName, PairContractType.BINARY_OPTION);
+        const contract = this.ethersService.getContract(
+          network,
+          contractInfo.address,
+          BtcusdBinaryOptions__factory.abi,
+        );
+        const amount = await contract.getMaxOI();
+        this.currenMaxOI[pairContractName] = BigNumber(amount.toString()).toFixed(0);
+      } catch (e) {
+        console.log(e);
+      }
+    });
+  }
+
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async syncBalanceOperator() {
     try {
@@ -743,13 +765,15 @@ export class JobTradeService {
     //log
     this.logsService.createLog(
       "trades => excuteOptionContract",
-      JSON.stringify(trades.map((e) => {
-        return {
-          queueId: e.queueId,
-          optionId: e.optionId || "",
-          expirationDate: e.expirationDate || "",
-        };
-      }))
+      JSON.stringify(
+        trades.map((e) => {
+          return {
+            queueId: e.queueId,
+            optionId: e.optionId || "",
+            expirationDate: e.expirationDate || "",
+          };
+        }),
+      ),
     );
 
     // choose operater
@@ -846,13 +870,15 @@ export class JobTradeService {
     //log
     this.logsService.createLog(
       "trades => closeTradeContract",
-      JSON.stringify(trades.map((e) => {
-        return {
-          queueId: e.queueId,
-          optionId: e.optionId || "",
-          expirationDate: e.expirationDate || "",
-        };
-      }))
+      JSON.stringify(
+        trades.map((e) => {
+          return {
+            queueId: e.queueId,
+            optionId: e.optionId || "",
+            expirationDate: e.expirationDate || "",
+          };
+        }),
+      ),
     );
 
     // choose operater

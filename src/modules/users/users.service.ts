@@ -132,7 +132,7 @@ export class UsersService {
 
   async findWalletByNetworkAndId(network: Network, userId: string) {
     const wallet = await this.walletsModel.findOne({
-      userId: userId,
+      userId: new Types.ObjectId(userId),
       network,
     });
     if (!wallet) {

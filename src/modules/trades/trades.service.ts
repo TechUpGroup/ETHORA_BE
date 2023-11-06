@@ -24,6 +24,7 @@ import { SETTLEMENT_FEE } from "common/constants/fee";
 import { decryptAES } from "common/utils/encrypt";
 import BigNumber from "bignumber.js";
 import { BtcusdBinaryOptions__factory } from "common/abis/types";
+import { UsersDocument } from "modules/users/schemas/users.schema";
 // import { generateSignHashType } from "common/utils/ethers";
 // import { Timeout } from "@nestjs/schedule";
 // import { tradesHistories } from "common/config/data-sample";
@@ -38,18 +39,37 @@ export class TradesService {
     private readonly ethersService: EthersService,
   ) {}
 
-  async createTrade(userAddress: string, data: CreateTradeDto) {
-    const { isLimitOrder, pair, tradeSize, period } = data;
+  async createTrade(user: UsersDocument, data: CreateTradeDto) {
+    const { isLimitOrder, pair, period, targetContract, allowPartialFill, tradeSize } = data;
+    const userAddress = user.address;
 
-    const user = await this.userService.getUserByAddress(userAddress);
-    const [wallet, lastTrade] = await Promise.all([
+    // init instance contract
+    const pairContractName = pair.replace(/[^a-zA-Z]/, "").toUpperCase() as PairContractName;
+    const contractInfo = config.getPairContract(data.network, pairContractName, PairContractType.BINARY_OPTION);
+    const contract = this.ethersService.getContract(
+      data.network,
+      contractInfo.address,
+      BtcusdBinaryOptions__factory.abi,
+    );
+
+    const [wallet, lastTrade, totalTrade, lockedAmount] = await Promise.all([
       this.userService.findWalletByNetworkAndId(data.network, user._id),
       this.model.find({ userAddress }).sort({ queuedDate: -1 }).limit(1),
+      this.getTotalTradeOfPool(targetContract),
+      calcLockedAmount(contract, userAddress, data),
     ]);
 
     const now = new Date();
+    const maxOI = this.jobTradeService.currenMaxOI[pairContractName];
     if (lastTrade.length && new Date(lastTrade[0].queuedDate.getTime() + 1000) > now) {
       throw new BadRequestException("Call too quickly");
+    }
+
+    if (
+      maxOI &&
+      (BigNumber(totalTrade).gte(maxOI) || (!allowPartialFill && BigNumber(totalTrade).plus(tradeSize).gte(maxOI)))
+    ) {
+      throw new BadRequestException("Max OI");
     }
 
     if (!wallet.isApproved) {
@@ -83,23 +103,10 @@ export class TradesService {
       limitOrderExpirationDate: isLimitOrder ? new Date(data.limitOrderDuration * 1000 + now.getTime()) : now,
       state: TRADE_STATE.QUEUED,
       slippage: 5,
-      openDate: now,
       settlementFee,
+      lockedAmount,
+      payout: lockedAmount,
     };
-
-    // calc lockedAmount
-    if (!data.isLimitOrder) {
-      const pairContractName = data.pair.replace(/[^a-zA-Z]/, "").toUpperCase() as PairContractName;
-      const contractInfo = config.getPairContract(data.network, pairContractName, PairContractType.BINARY_OPTION);
-      const contract = this.ethersService.getContract(
-        data.network,
-        contractInfo.address,
-        BtcusdBinaryOptions__factory.abi,
-      );
-      const a = await calcLockedAmount(contract, userAddress, data);
-      _data["lockedAmount"] = a;
-      _data["payout"] = a;
-    }
 
     // save
     const result = await this.model.create(_data);
@@ -357,6 +364,32 @@ export class TradesService {
         sort: { [sortBy]: sortType },
       },
     );
+  }
+
+  async getTotalTradeOfPool(targetContract: string) {
+    const res = await this.model.aggregate([
+      {
+        $match: {
+          targetContract,
+          state: TRADE_STATE.OPENED,
+        },
+      },
+      {
+        $project: {
+          tradeSize: { $toDouble: "$tradeSize" },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalTrade: { $sum: "$tradeSize" },
+        },
+      },
+    ]);
+    if (!res.length) {
+      return 0;
+    }
+    return res[0].totalTrade;
   }
 
   async bulkWrite(bw: any[]) {

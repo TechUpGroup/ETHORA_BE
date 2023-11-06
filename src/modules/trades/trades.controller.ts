@@ -27,7 +27,7 @@ export class TradesController {
   @Auth()
   @ApiOperation({ summary: `Create a trade` })
   createTrade(@User() user: UsersDocument, @Body() data: CreateTradeDto) {
-    return this.service.createTrade(user.address, data);
+    return this.service.createTrade(user, data);
   }
 
   @Put("update")

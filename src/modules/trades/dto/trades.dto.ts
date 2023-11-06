@@ -45,6 +45,7 @@ export class CreateTradeDto extends NetworkDto {
 
   @ApiProperty({ default: "0xBf41098CD4a6a405e6E33647B983d1A63334bc1B" })
   @IsEthereumAddress()
+  @ToLowerCase()
   targetContract: string;
 
   @ApiProperty({ default: "BTC-USD" })
