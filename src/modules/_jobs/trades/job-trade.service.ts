@@ -808,7 +808,7 @@ export class JobTradeService {
       // write contract
       await contract.executeOptions(optionData, {
         gasPrice: this.ethersService.getCurrentGas(network),
-        gasLimit: BigNumber(gasLimit.toString()).multipliedBy(1.1).toFixed(0),
+        gasLimit: BigNumber(gasLimit.toString()).multipliedBy(1.3).toFixed(0),
       });
     } catch (e) {
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason)) {

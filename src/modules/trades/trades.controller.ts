@@ -97,4 +97,11 @@ export class TradesController {
   getCancelledUserTrades(@User() user: UsersDocument, @Query() query: GetTradesUserActiveDto) {
     return this.service.getCancelledUserTrades(user.address, query);
   }
+
+  @Get("queue")
+  @Auth()
+  @ApiOperation({ summary: `Get queue` })
+  getQueue() {
+    return this.service.queue();
+  }
 }

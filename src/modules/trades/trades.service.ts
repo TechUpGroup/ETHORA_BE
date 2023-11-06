@@ -370,4 +370,13 @@ export class TradesService {
   //   await this.model.insertMany(tradesHistories);
   //   console.log("Done inserted trades history.");
   // }
+
+  queue() {
+    return {
+      queuesMarket: this.jobTradeService.queuesMarket,
+      queuesLimitOrder: this.jobTradeService.queuesLimitOrder,
+      listActives: this.jobTradeService.listActives,
+      queueCloseAnytime: this.jobTradeService.queueCloseAnytime,
+    }
+  }
 }
