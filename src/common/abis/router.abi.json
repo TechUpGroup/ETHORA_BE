@@ -194,6 +194,12 @@
         "internalType": "uint256",
         "name": "expiration",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "revisedFee",
+        "type": "uint256"
       }
     ],
     "name": "OpenTrade",

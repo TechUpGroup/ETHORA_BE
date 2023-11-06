@@ -65,7 +65,7 @@ export class JobSyncRouterService {
           network,
         });
         if (nameEvent === ROUTER_EVENT.OPENTRADE) {
-          const { queueId, optionId, expiration, targetContract } = (event as OpenTradeEvent).args;
+          const { queueId, optionId, expiration, targetContract, revisedFee } = (event as OpenTradeEvent).args;
           bulkUpdate.push({
             updateOne: {
               filter: {
@@ -75,6 +75,7 @@ export class JobSyncRouterService {
                 optionId: +optionId.toString(),
                 expirationDate: expiration.toString(),
                 contractOption: `${targetContract.toLowerCase().trim()}_${optionId.toString()}`,
+                tradeSize: revisedFee.toString()
               },
             },
           });
