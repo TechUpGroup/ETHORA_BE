@@ -89,7 +89,9 @@ export class TradesService {
         contractInfo.address,
         BtcusdBinaryOptions__factory.abi,
       );
-      _data["lockedAmount"] = await calcLockedAmount(contract, userAddress, data);
+      const a = await calcLockedAmount(contract, userAddress, data);
+      _data["lockedAmount"] = a;
+      _data["payout"] = a;
     }
 
     // save

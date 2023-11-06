@@ -83,10 +83,10 @@ export const calcLockedAmount = async (contract, userAddress: string, data: Trad
     referralCode: data.referralCode || "",
     baseSettlementFeePercentage: SETTLEMENT_FEE[data.pair.replace("-", "").toUpperCase()],
   };
-  const [amount] = await contract.evaluateParams(
+  const [amount, ] = await contract.evaluateParams(
     optionParams,
     // data.slippage,
     5,
   );
-  return BigNumber(amount.toString()).plus(data.tradeSize).toFixed(0);
+  return BigNumber(amount.toString()).toFixed(0);
 };
