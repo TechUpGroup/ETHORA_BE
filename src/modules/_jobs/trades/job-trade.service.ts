@@ -581,7 +581,7 @@ export class JobTradeService {
   private async openTradeContract(trades: any[]) {
     //log
     this.logsService.createLog(
-      "trades => market",
+      "trades => openTradeContract",
       trades.map((e) => e.queueId),
     );
 
@@ -742,14 +742,14 @@ export class JobTradeService {
   private async excuteOptionContract(trades: any[]) {
     //log
     this.logsService.createLog(
-      "trades => market",
-      trades.map((e) => {
+      "trades => excuteOptionContract",
+      JSON.stringify(trades.map((e) => {
         return {
           queueId: e.queueId,
           optionId: e.optionId || "",
           expirationDate: e.expirationDate || "",
         };
-      }),
+      }))
     );
 
     // choose operater
@@ -845,8 +845,14 @@ export class JobTradeService {
   private async closeTradeContract(trades: any[]) {
     //log
     this.logsService.createLog(
-      "trades => market",
-      trades.map((e) => e.queueId),
+      "trades => closeTradeContract",
+      JSON.stringify(trades.map((e) => {
+        return {
+          queueId: e.queueId,
+          optionId: e.optionId || "",
+          expirationDate: e.expirationDate || "",
+        };
+      }))
     );
 
     // choose operater
