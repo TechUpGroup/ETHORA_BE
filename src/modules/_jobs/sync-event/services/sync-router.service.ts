@@ -74,7 +74,7 @@ export class JobSyncRouterService {
               update: {
                 optionId: +optionId.toString(),
                 expirationDate: expiration.toString(),
-                contractOption: `${targetContract.toLowerCase().trim()}_${optionId.toString()}`
+                contractOption: `${targetContract.toLowerCase().trim()}_${optionId.toString()}`,
               },
             },
           });
@@ -119,22 +119,24 @@ export class JobSyncRouterService {
           }
         }
         if (nameEvent === ROUTER_EVENT.FAILUNLOCK) {
-          const { optionId, reason } = (event as FailUnlockEvent).args;
-          if (REASON_FAIL_RETRY[reason]) {
-            retryTx.push(optionId);
-          } else {
-            bulkUpdate.push({
-              updateOne: {
-                filter: {
-                  optionId: +optionId.toString(),
+          const { optionId, reason, targetContract } = (event as FailUnlockEvent).args;
+          if (!REASON_FAIL_NOT_CARE.includes(reason)) {
+            if (REASON_FAIL_RETRY.includes(reason)) {
+              retryTx.push(`${targetContract.toLowerCase().trim()}_${optionId.toString()}`);
+            } else {
+              bulkUpdate.push({
+                updateOne: {
+                  filter: {
+                    contractOption: `${targetContract.toLowerCase().trim()}_${optionId.toString()}`,
+                  },
+                  update: {
+                    state: TRADE_STATE.CANCELLED,
+                    isCancelled: true,
+                    cancellationReason: REASON_FAIL[reason] || "System error",
+                  },
                 },
-                update: {
-                  state: TRADE_STATE.CANCELLED,
-                  isCancelled: true,
-                  cancellationReason: REASON_FAIL[reason] || "System error",
-                },
-              },
-            });
+              });
+            }
           }
         }
       }

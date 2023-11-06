@@ -29,10 +29,10 @@ import { ERROR_RETRY } from "common/constants/event";
 
 @Injectable()
 export class JobTradeService {
-  public listActives: TradesDocument[] = [];
-  public queueCloseAnytime: TradesDocument[] = [];
-  public queuesMarket: TradesDocument[] = [];
-  public queuesLimitOrder: TradesDocument[] = [];
+  public listActives: TradesDocument[];
+  public queueCloseAnytime: TradesDocument[];
+  public queuesMarket: TradesDocument[];
+  public queuesLimitOrder: TradesDocument[];
   private isProcessingTradeMarket = false;
   private isProcessingTradeLimit = false;
   private isClosingTradesAnyTime = false;
@@ -45,6 +45,10 @@ export class JobTradeService {
     private readonly ethersService: EthersService,
     private readonly logsService: LogsService,
   ) {
+    this.listActives = [];
+    this.queueCloseAnytime = [];
+    this.queuesMarket = [];
+    this.queuesLimitOrder = [];
     this.start();
   }
 
@@ -575,6 +579,12 @@ export class JobTradeService {
 
   // choose operater
   private async openTradeContract(trades: any[]) {
+    //log
+    this.logsService.createLog(
+      "trades => market",
+      trades.map((e) => e.queueId),
+    );
+
     // choose operater
     const operater = this.chooseOperator();
     const network = trades[0].network;
@@ -730,6 +740,18 @@ export class JobTradeService {
   }
 
   private async excuteOptionContract(trades: any[]) {
+    //log
+    this.logsService.createLog(
+      "trades => market",
+      trades.map((e) => {
+        return {
+          queueId: e.queueId,
+          optionId: e.optionId || "",
+          expirationDate: e.expirationDate || "",
+        };
+      }),
+    );
+
     // choose operater
     const operater = this.chooseOperator();
     const network = trades[0].network;
@@ -769,7 +791,7 @@ export class JobTradeService {
           //userFullSignature
           const userFullMessage = generateMessage(
             trade.pair.replace("-", "").toUpperCase(),
-            trade.expirationDate,
+            trade.expirationDate || Math.floor(now.getTime() / 1000),
             BigNumber(trade.price).toFixed(0),
           );
 
@@ -794,7 +816,7 @@ export class JobTradeService {
               signature: userPartialSignature,
             },
             publisherSignInfo: {
-              timestamp: trade.expirationDate,
+              timestamp: trade.expirationDate || Math.floor(now.getTime() / 1000),
               signature: userFullSignature,
             },
           });
@@ -821,6 +843,12 @@ export class JobTradeService {
   }
 
   private async closeTradeContract(trades: any[]) {
+    //log
+    this.logsService.createLog(
+      "trades => market",
+      trades.map((e) => e.queueId),
+    );
+
     // choose operater
     const operater = this.chooseOperator();
     const network = trades[0].network;

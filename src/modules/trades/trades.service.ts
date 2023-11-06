@@ -308,8 +308,7 @@ export class TradesService {
     return this.model.aggregate([
       {
         $match: {
-          optionId: { $in: optionIds },
-          state: TRADE_STATE.CLOSED,
+          contractOption: { $in: optionIds },
         },
       },
       {
