@@ -369,8 +369,8 @@ export class JobTradeService {
         const indexes: number[] = [];
         const trades: any[] = [];
         this.queuesLimitOrder.forEach((item, index) => {
-          let prices = item.pair ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")] : [];
-          prices = prices.map((price) => price.price);
+          const pricePair = item.pair ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")] : [];
+          const prices = pricePair.map((price) => price.price);
           if (
             this.checkLimitPriceAvaliable(item.strike.toString(), prices, item.isAbove, item.slippage) &&
             indexes.length < config.quantityTxTrade
@@ -379,7 +379,7 @@ export class JobTradeService {
             trades.push({
               ...item,
               openDate: now,
-              price: prices[prices.length - 1].price || 0,
+              price: prices[prices.length - 1] || 0,
             });
           }
         });
