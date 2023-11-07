@@ -367,44 +367,37 @@ export class JobTradeService {
 
         // filter price with pair
         const indexes: number[] = [];
-        const trades = this.queuesLimitOrder
-          .filter((item: any, index) => {
-            let prices = item.pair
-              ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
-              : [];
-            prices = prices.map((price) => price.price);
+        const trades: any[] = [];
+        this.queuesLimitOrder.forEach((item, index) => {
+          let prices = item.pair ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")] : [];
+          prices = prices.map((price) => price.price);
+          if (
+            this.checkLimitPriceAvaliable(item.strike.toString(), prices, item.isAbove, item.slippage) &&
+            indexes.length < config.quantityTxTrade
+          ) {
             indexes.push(index);
-            return this.checkLimitPriceAvaliable(item.strike.toString(), prices, item.isAbove, item.slippage);
-          })
-          .map((item: any) => {
-            const prices = item.pair
-              ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
-              : [];
-            const entryPrice = prices[prices.length - 1].price || 0;
-            return {
+            trades.push({
               ...item,
               openDate: now,
-              price: entryPrice,
-            };
-          });
+              price: prices[prices.length - 1].price || 0,
+            });
+          }
+        });
 
-        // Call smartcontract
-        const _trades = trades.slice(0, config.quantityTxTrade);
-
-        if (!_trades.length) {
+        if (!trades.length) {
           this.isProcessingTradeLimit = false;
           return;
         }
 
         // remove trade limit
-        indexes.slice(0, config.quantityTxTrade).forEach((item) => this.queuesLimitOrder.splice(item, 1));
+        this.queuesLimitOrder.filter((item, index) => !indexes.includes(index));
 
         // Call smartcontract
-        this.openTradeContract(_trades);
+        this.openTradeContract(trades);
 
         // update db
         this.tradesModel.bulkWrite(
-          _trades.map((item) => ({
+          trades.map((item) => ({
             updateOne: {
               filter: {
                 _id: item._id,
@@ -445,38 +438,37 @@ export class JobTradeService {
           return;
         }
         const indexes: number[] = [];
-        const listTrades = this.listActives.filter((item, index) => {
-          if (new Date(item.openDate.getTime() + item.period * 1000) <= now) {
+        const trades: any[] = [];
+        // filter price with pair
+        this.listActives.forEach((item, index) => {
+          if (
+            new Date(item.openDate.getTime() + item.period * 1000) <= now &&
+            indexes.length < config.quantityTxTrade
+          ) {
             indexes.push(index);
-            return true;
+            const prices = item.pair
+              ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
+              : [];
+            trades.push({
+              ...item,
+              price: prices[prices.length - 1].price || 0,
+            });
           }
-          return false;
         });
-        if (!listTrades.length) {
+        if (!trades.length) {
           console.log("[ExcuteOptions] No listActives, stopped...");
           this.isExcuteOption = false;
           return;
         }
-
         console.log("[ExcuteOptions] Processing");
-
-        // filter price with pair
-        const trades = listTrades.slice(0, config.quantityTxTrade).map((item: any) => {
-          const prices = item.pair
-            ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
-            : [];
-          return {
-            ...item,
-            price: prices[prices.length - 1].price || 0,
-          };
-        });
-        // remove actives
-        indexes.slice(0, config.quantityTxTrade).forEach((item) => this.listActives.splice(item, 1));
 
         if (!trades.length) {
           this.isExcuteOption = false;
           return;
         }
+
+        // remove actives
+        this.listActives.filter((item, index) => !indexes.includes(index));
 
         // Call smartcontract
         this.excuteOptionContract(trades);
