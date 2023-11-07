@@ -86,8 +86,7 @@ export const calcLockedAmount = async (contract, userAddress: string, data: Trad
   try {
     const [amount] = await contract.evaluateParams(
       optionParams,
-      // data.slippage,
-      5,
+      data.slippage,
     );
     return BigNumber(amount.toString()).toFixed(0);
   } catch (e) {
