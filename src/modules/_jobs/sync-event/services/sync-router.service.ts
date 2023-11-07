@@ -57,6 +57,8 @@ export class JobSyncRouterService {
       const historyCreateArr: any[] = [];
       const bulkUpdate: any[] = [];
       const retryTx: any[] = [];
+
+      const now = new Date();
       for (const event of events) {
         const { transactionHash, event: nameEvent, logIndex } = event;
         historyCreateArr.push({
@@ -94,6 +96,7 @@ export class JobSyncRouterService {
                 state: TRADE_STATE.CANCELLED,
                 isCancelled: true,
                 cancellationReason: REASON_FAIL[reason] || "System error",
+                cancellationDate: now,
               },
             },
           });
@@ -112,6 +115,7 @@ export class JobSyncRouterService {
                   state: TRADE_STATE.CANCELLED,
                   isCancelled: true,
                   cancellationReason: REASON_FAIL[reason] || "System error",
+                  cancellationDate: now,
                 },
               },
             });
@@ -134,6 +138,7 @@ export class JobSyncRouterService {
                     state: TRADE_STATE.CANCELLED,
                     isCancelled: true,
                     cancellationReason: REASON_FAIL[reason] || "System error",
+                    cancellationDate: now,
                   },
                 },
               });
