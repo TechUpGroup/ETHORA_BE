@@ -93,22 +93,13 @@ export class JobSyncBlockService {
       });
       if (topics.includes(TOPIC.EXPIRE)) {
         const { id } = IBinaryOptions.parseLog(event).args;
-        bulkUpdate.push({
-          updateOne: {
-            filter: {
-              contractOption: `${address.toLowerCase().trim()}_${id.toString()}`,
-            },
-            update: {
-              status: TRADE_STATUS.LOSS,
-              profit: 0,
-            },
-          },
-        });
+        contractOptionIds.push(`${address.toLowerCase().trim()}_${id.toString()}`);
+        profits[+id.toString()] = 0;
       }
       if (topics.includes(TOPIC.EXERCISE)) {
         const { id, profit } = IBinaryOptions.parseLog(event).args;
         contractOptionIds.push(`${address.toLowerCase().trim()}_${id.toString()}`);
-        profits[+id.toString()] = +profit.toString()
+        profits[+id.toString()] = +profit.toString();
       }
     }
 
