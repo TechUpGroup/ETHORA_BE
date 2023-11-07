@@ -40,7 +40,7 @@ export class TradesService {
   ) {}
 
   async createTrade(user: UsersDocument, data: CreateTradeDto) {
-    const { isLimitOrder, pair, period, targetContract, allowPartialFill, tradeSize, slippage } = data;
+    const { isLimitOrder, pair, period, targetContract, allowPartialFill, tradeSize, slippage, isAbove } = data;
     const userAddress = user.address;
 
     if (slippage <= 0.5) {
@@ -58,7 +58,7 @@ export class TradesService {
 
     const [wallet, lastTrade, totalTrade, lockedAmount] = await Promise.all([
       this.userService.findWalletByNetworkAndId(data.network, user._id),
-      this.model.find({ userAddress }).sort({ queuedDate: -1 }).limit(1),
+      this.model.find({ userAddress, isAbove }).sort({ queuedDate: -1 }).limit(1),
       this.getTotalTradeOfPool(targetContract),
       calcLockedAmount(contract, userAddress, data),
     ]);
