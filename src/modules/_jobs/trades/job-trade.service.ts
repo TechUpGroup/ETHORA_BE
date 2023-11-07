@@ -390,7 +390,7 @@ export class JobTradeService {
         }
 
         // remove trade limit
-        this.queuesLimitOrder.filter((item, index) => !indexes.includes(index));
+        this.queuesLimitOrder = this.queuesLimitOrder.filter((item, index) => !indexes.includes(index));
 
         // Call smartcontract
         this.openTradeContract(trades);
@@ -468,7 +468,7 @@ export class JobTradeService {
         }
 
         // remove actives
-        this.listActives.filter((item, index) => !indexes.includes(index));
+        this.listActives = this.listActives.filter((item, index) => !indexes.includes(index));
 
         // Call smartcontract
         this.excuteOptionContract(trades);
