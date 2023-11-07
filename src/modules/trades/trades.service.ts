@@ -234,7 +234,7 @@ export class TradesService {
     const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
 
     return await this.model.paginate(
-      { state: { $in: [TRADE_STATE.OPENED, TRADE_STATE.QUEUED] } },
+      { state: TRADE_STATE.OPENED },
       {
         page,
         limit,
@@ -244,10 +244,10 @@ export class TradesService {
   }
 
   async getAllHistoryTrades(query: NetworkAndPaginationAndSortDto) {
-    const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
+    const { page, limit, sortBy = "updatedAt", sortType = -1 } = query;
 
     return await this.model.paginate(
-      { state: { $nin: [TRADE_STATE.OPENED, TRADE_STATE.QUEUED, TRADE_STATE.CREATED] } },
+      { state: TRADE_STATE.CLOSED },
       {
         page,
         limit,
@@ -356,7 +356,7 @@ export class TradesService {
     const { page, limit, sortBy = "updatedAt", sortType = -1 } = query;
 
     return await this.model.paginate(
-      { userAddress, state: { $nin: [TRADE_STATE.OPENED, TRADE_STATE.QUEUED, TRADE_STATE.CREATED] } },
+      { userAddress, state: TRADE_STATE.CLOSED },
       {
         page,
         limit,
