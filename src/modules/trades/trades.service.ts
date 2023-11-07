@@ -40,12 +40,13 @@ export class TradesService {
   ) {}
 
   async createTrade(user: UsersDocument, data: CreateTradeDto) {
-    const { isLimitOrder, pair, period, targetContract, allowPartialFill, tradeSize, slippage, isAbove } = data;
+    const { isLimitOrder, pair, period, targetContract, allowPartialFill, tradeSize, isAbove } = data;
     const userAddress = user.address;
+    data.slippage = 5;
 
-    if (slippage <= 0.5) {
-      throw new BadRequestException("Slippage is invalid");
-    }
+    // if (slippage <= 0.5) {
+    //   throw new BadRequestException("Slippage is invalid");
+    // }
 
     // init instance contract
     const pairContractName = pair.replace(/[^a-zA-Z]/, "").toUpperCase() as PairContractName;
