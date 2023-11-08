@@ -1,3 +1,6 @@
+import { ApiProperty } from "@nestjs/swagger";
+import { IsEthereumAddress, IsOptional } from "class-validator";
+import { ToLowerCase, Trim } from "common/decorators/transforms.decorator";
 import { NetworkDto } from "common/dto/network.dto";
 
 export interface UserStatsGql {
@@ -10,16 +13,11 @@ export interface UserStatsGql {
   usdcTradesWon: any;
   usdcVolume: any;
   usdcWinRate: any;
-  bfrNetPnL: any;
-  bfrTotalTrades: any;
-  bfrTradesWon: any;
-  bfrVolume: any;
-  bfrWinRate: any;
-  arbNetPnL: any;
-  arbTotalTrades: any;
-  arbTradesWon: any;
-  arbVolume: any;
-  arbWinRate: any;
+  etrNetPnL: any;
+  etrTotalTrades: any;
+  etrTradesWon: any;
+  etrVolume: any;
+  etrWinRate: any;
 }
 
 export interface MetricsGql {
@@ -46,16 +44,11 @@ export interface MetricsGql {
     totalRebateEarnedUSDC: any;
     totalTradingVolumeUSDC: any;
     totalDiscountAvailedUSDC: any;
-    totalTradesReferredBFR: any;
-    totalVolumeOfReferredTradesBFR: any;
-    totalRebateEarnedBFR: any;
-    totalTradingVolumeBFR: any;
-    totalDiscountAvailedBFR: any;
-    totalTradesReferredARB: any;
-    totalVolumeOfReferredTradesARB: any;
-    totalRebateEarnedARB: any;
-    totalTradingVolumeARB: any;
-    totalDiscountAvailedARB: any;
+    totalTradesReferredETR: any;
+    totalVolumeOfReferredTradesETR: any;
+    totalRebateEarnedETR: any;
+    totalTradingVolumeETR: any;
+    totalDiscountAvailedETR: any;
   }>;
   activeData: Array<{
     optionContract: {
@@ -66,7 +59,14 @@ export interface MetricsGql {
   }>;
 }
 
-export class UserStatsRequest extends NetworkDto {}
+export class UserStatsRequest extends NetworkDto {
+  @ApiProperty()
+  @ToLowerCase()
+  @IsOptional()
+  @Trim()
+  @IsEthereumAddress()
+  userAddress?: string;
+}
 
 export interface UserMetrics {
   contract: string;
@@ -78,8 +78,8 @@ export interface UserMetrics {
 
 export interface UserStatsResponse {
   stats: {
-    daily: number;
-    weekly: number;
+    daily: number | null;
+    weekly: number | null;
     winTrade: number;
     totalTrade: number;
     mostTradedContract: string | null;
@@ -89,9 +89,7 @@ export interface UserStatsResponse {
       totalRebateEarned: number;
       totalVolumeTrades: number;
       totalTrades: number;
-      totalTradesDetail: {
-        [key: string]: number;
-      } | null;
+      tier: number;
     };
     [key: string]: UserMetrics | any;
   };
