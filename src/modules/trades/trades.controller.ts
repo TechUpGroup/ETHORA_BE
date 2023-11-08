@@ -4,7 +4,7 @@ import { Body, Controller, Get, Post, Put, Query, UseInterceptors } from "@nestj
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { TradesService } from "./trades.service";
-import { Auth } from "common/decorators/http.decorators";
+import { Auth, AuthOptional } from "common/decorators/http.decorators";
 import {
   CancelTradeDto,
   CloseTradeDto,
@@ -64,31 +64,31 @@ export class TradesController {
   }
 
   @Get("user/active")
-  @Auth()
+  @AuthOptional()
   @ApiOperation({ summary: `Get Active User Trades (Markets only)` })
   getActiveUserTrades(@User() user: UsersDocument, @Query() query: GetTradesUserActiveDto) {
-    return this.service.getActiveUserTrades(user.address, query);
+    return this.service.getActiveUserTrades(query?.userAddress || user?.address, query);
   }
 
   @Get("user/limit-orders")
-  @Auth()
+  @AuthOptional()
   @ApiOperation({ summary: `Get Active User Trades (Limit Orders only)` })
   getLimitOrdersUserTrades(@User() user: UsersDocument, @Query() query: GetTradesUserActiveDto) {
-    return this.service.getLimitOrdersUserTrades(user.address, query);
+    return this.service.getLimitOrdersUserTrades(query?.userAddress || user?.address, query);
   }
 
   @Get("user/history")
-  @Auth()
+  @AuthOptional()
   @ApiOperation({ summary: `Get History User Trades` })
   getHistoryUserTrades(@User() user: UsersDocument, @Query() query: GetTradesUserActiveDto) {
-    return this.service.getHistoryUserTrades(user.address, query);
+    return this.service.getHistoryUserTrades(query?.userAddress || user?.address, query);
   }
 
   @Get("user/cancelled")
-  @Auth()
+  @AuthOptional()
   @ApiOperation({ summary: `Get Cancelled User Trades` })
   getCancelledUserTrades(@User() user: UsersDocument, @Query() query: GetTradesUserActiveDto) {
-    return this.service.getCancelledUserTrades(user.address, query);
+    return this.service.getCancelledUserTrades(query?.userAddress || user?.address, query);
   }
 
   @Get("queue")
