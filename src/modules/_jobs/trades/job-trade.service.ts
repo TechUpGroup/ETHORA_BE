@@ -729,7 +729,7 @@ export class JobTradeService {
       // write contract
       await contract.openTrades(openTxn, {
         gasPrice: this.ethersService.getCurrentGas(network),
-        gasLimit: BigNumber(gasLimit.toString()).multipliedBy(1.3).toFixed(0),
+        gasLimit: BigNumber(gasLimit.toString()).multipliedBy(3).toFixed(0),
       });
 
       this.listActives.push(...trades);
@@ -855,7 +855,7 @@ export class JobTradeService {
       // write contract
       await contract.executeOptions(optionData, {
         gasPrice: this.ethersService.getCurrentGas(network),
-        gasLimit: BigNumber(gasLimit.toString()).multipliedBy(1.3).toFixed(0),
+        gasLimit: BigNumber(gasLimit.toString()).multipliedBy(3).toFixed(0),
       });
     } catch (e) {
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason)) {
@@ -983,7 +983,7 @@ export class JobTradeService {
       // write contract
       await contract.closeAnytime(closeParams, {
         gasPrice: this.ethersService.getCurrentGas(network),
-        gasLimit: BigNumber(gasLimit.toString()).multipliedBy(1.3).toFixed(0),
+        gasLimit: BigNumber(gasLimit.toString()).multipliedBy(3).toFixed(0),
       });
     } catch (e) {
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason)) {
@@ -1021,27 +1021,27 @@ export class JobTradeService {
   }
 
   private getLimitPriceAvaliable(triggerPrice: string, prices: string[], slippage: number) {
-    for (const expiryPrice of prices) {
-      if (this.checkSlippage(triggerPrice, expiryPrice, slippage)) {
-        return expiryPrice;
+    for (const price of prices) {
+      if (this.checkSlippage(triggerPrice, price, slippage)) {
+        return price;
       }
     }
     return;
   }
 
   private getPriceMarketAvaliable(strikePrice: string, prices: string[], slippage: number) {
-    for (const expiryPrice of prices) {
-      if (this.checkSlippage(strikePrice, expiryPrice, slippage)) {
-        return expiryPrice;
+    for (const price of prices) {
+      if (this.checkSlippage(strikePrice, price, slippage)) {
+        return price;
       }
     }
     return prices[prices.length - 1];
   }
 
-  private checkSlippage(strikePrice: string, expiryPrice: string, slippage: number) {
+  private checkSlippage(strikePrice: string, price: string, slippage: number) {
     return (
-      Number(expiryPrice) >= (Number(strikePrice) * (1e4 - slippage)) / 1e4 &&
-      Number(expiryPrice) <= (Number(strikePrice) * (1e4 + slippage)) / 1e4
+      Number(price) >= (Number(strikePrice) * (1e4 - slippage)) / 1e4 &&
+      Number(price) <= (Number(strikePrice) * (1e4 + slippage)) / 1e4
     );
   }
 }
