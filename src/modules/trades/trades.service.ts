@@ -149,7 +149,7 @@ export class TradesService {
       limitOrderExpirationDate: new Date(data.limitOrderDuration * 1000 + now.getTime()),
     };
 
-    const result = await this.model.updateOne(
+    const result = await this.model.findOneAndUpdate(
       {
         _id: data._id,
         userAddress,
@@ -160,6 +160,9 @@ export class TradesService {
           limitOrderExpirationDate: new Date(data.limitOrderDuration * 1000 + now.getTime()),
         },
       },
+      {
+        new: true
+      }
     );
 
     return result;
@@ -191,7 +194,7 @@ export class TradesService {
       throw new BadRequestException("Trade is in QUEUE");
     }
 
-    const result = await this.model.updateOne(
+    const result = await this.model.findOneAndUpdate(
       {
         _id: data._id,
         userAddress,
@@ -202,6 +205,9 @@ export class TradesService {
           state: TRADE_STATE.CLOSED,
         },
       },
+      {
+        new: true
+      }
     );
 
     return result;
@@ -217,7 +223,7 @@ export class TradesService {
       throw new BadRequestException("Trade not in QUEUE state");
     }
 
-    const result = await this.model.updateOne(
+    const result = await this.model.findOneAndUpdate(
       {
         _id: data._id,
         userAddress,
@@ -230,6 +236,9 @@ export class TradesService {
           cancellationReason: "User cancelled",
         },
       },
+      {
+        new: true
+      }
     );
 
     return result;

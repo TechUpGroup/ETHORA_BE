@@ -294,14 +294,18 @@ export class JobTradeService {
 
         // filter price with pair
         const trades = this.queuesMarket.splice(0, config.quantityTxTrade).map((item: any) => {
-          const prices = item.pair
+          const pricePair = item.pair
             ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
             : 0;
-          const entryPrice = prices[prices.length - 1].price;
+          const entryPrice = this.getPriceMarketAvaliable(
+            item.strike,
+            pricePair.map((p) => p.price),
+            item.slippage,
+          );
           return {
             ...item,
             openDate: now,
-            price: entryPrice,
+            price: entryPrice || 0,
           };
         });
 
@@ -322,7 +326,7 @@ export class JobTradeService {
               },
               update: {
                 state: TRADE_STATE.OPENED,
-                expiryPrice: BigNumber(item.price).toFixed(0),
+                strike: BigNumber(item.price).toFixed(0),
                 openDate: now,
               },
             },
@@ -369,17 +373,20 @@ export class JobTradeService {
         const indexes: number[] = [];
         const trades: any[] = [];
         this.queuesLimitOrder.forEach((item, index) => {
-          const pricePair = item.pair ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")] : [];
-          const prices = pricePair.map((price) => price.price);
-          if (
-            this.checkLimitPriceAvaliable(item.strike.toString(), prices, item.isAbove, item.slippage) &&
-            indexes.length < config.quantityTxTrade
-          ) {
+          const pricePair = item.pair
+            ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
+            : [];
+          const entryPrice = this.getLimitPriceAvaliable(
+            item.strike.toString(),
+            pricePair.map((p) => p.price),
+            item.slippage,
+          );
+          if (entryPrice && indexes.length < config.quantityTxTrade) {
             indexes.push(index);
             trades.push({
               ...item,
               openDate: now,
-              price: prices[prices.length - 1] || 0,
+              price: entryPrice || 0,
             });
           }
         });
@@ -404,7 +411,7 @@ export class JobTradeService {
               },
               update: {
                 state: TRADE_STATE.OPENED,
-                expiryPrice: BigNumber(item.price).toFixed(0),
+                strike: BigNumber(item.price).toFixed(0),
                 openDate: now,
               },
             },
@@ -549,7 +556,9 @@ export class JobTradeService {
                 _id: item._id,
               },
               update: {
+                state: TRADE_STATE.CLOSED,
                 expiryPrice: BigNumber(item.price).toFixed(0),
+                closeDate: new Date(),
               },
             },
           })),
@@ -1011,16 +1020,28 @@ export class JobTradeService {
     return operaters;
   }
 
-  private checkLimitPriceAvaliable(targetPrice: string, prices: string[], up: boolean, slippage: number) {
+  private getLimitPriceAvaliable(triggerPrice: string, prices: string[], slippage: number) {
+    for (const expiryPrice of prices) {
+      if (this.checkSlippage(triggerPrice, expiryPrice, slippage)) {
+        return expiryPrice;
+      }
+    }
+    return;
+  }
+
+  private getPriceMarketAvaliable(strikePrice: string, prices: string[], slippage: number) {
+    for (const expiryPrice of prices) {
+      if (this.checkSlippage(strikePrice, expiryPrice, slippage)) {
+        return expiryPrice;
+      }
+    }
+    return prices[prices.length - 1];
+  }
+
+  private checkSlippage(strikePrice: string, expiryPrice: string, slippage: number) {
     return (
-      (prices.some((price) => BigNumber(price).gte(targetPrice)) &&
-        prices.some((price) => BigNumber(price).lte(targetPrice))) ||
-      (!up &&
-        Number(prices[prices.length - 1]) <= (Number(targetPrice) * (1e4 + slippage)) / 1e4 &&
-        Number(prices[prices.length - 1]) >= Number(targetPrice)) ||
-      (up &&
-        Number(prices[prices.length - 1]) >= (Number(targetPrice) * (1e4 - slippage)) / 1e4 &&
-        Number(prices[prices.length - 1]) <= Number(targetPrice))
+      Number(expiryPrice) >= (Number(strikePrice) * (1e4 - slippage)) / 1e4 &&
+      Number(expiryPrice) <= (Number(strikePrice) * (1e4 + slippage)) / 1e4
     );
   }
 }
