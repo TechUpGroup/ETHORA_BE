@@ -33,16 +33,11 @@ query ($address: String!) {
     usdcTradesWon
     usdcVolume
     usdcWinRate
-    bfrNetPnL
-    bfrTotalTrades
-    bfrTradesWon
-    bfrVolume
-    bfrWinRate
-    arbNetPnL
-    arbTotalTrades
-    arbTradesWon
-    arbVolume
-    arbWinRate
+    etrNetPnL
+    etrTotalTrades
+    etrTradesWon
+    etrVolume
+    etrWinRate
   }
   # ------------------
   # Weekly
@@ -78,16 +73,11 @@ query ($address: String!) {
     usdcTradesWon
     usdcVolume
     usdcWinRate
-    bfrNetPnL
-    bfrTotalTrades
-    bfrTradesWon
-    bfrVolume
-    bfrWinRate
-    arbNetPnL
-    arbTotalTrades
-    arbTradesWon
-    arbVolume
-    arbWinRate
+    etrNetPnL
+    etrTotalTrades
+    etrTradesWon
+    etrVolume
+    etrWinRate
   }
   # ------------------
   # Win Rate: (count payout > 0) / total count
@@ -126,16 +116,11 @@ query ($address: String!) {
     totalRebateEarnedUSDC
     totalTradingVolumeUSDC
     totalDiscountAvailedUSDC
-    totalTradesReferredBFR
-    totalVolumeOfReferredTradesBFR
-    totalRebateEarnedBFR
-    totalTradingVolumeBFR
-    totalDiscountAvailedBFR
-    totalTradesReferredARB
-    totalVolumeOfReferredTradesARB
-    totalRebateEarnedARB
-    totalTradingVolumeARB
-    totalDiscountAvailedARB
+    totalTradesReferredETR
+    totalVolumeOfReferredTradesETR
+    totalRebateEarnedETR
+    totalTradingVolumeETR
+    totalDiscountAvailedETR
   }
   # ------------------
   # Interest:
