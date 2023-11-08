@@ -161,6 +161,9 @@ export class Trades {
 
   @Prop({ type: String, required: false, default: null })
   pendingOperation?: string | null;
+
+  @Prop({ type: String, required: false, default: null })
+  closingTime?: string | null;
 }
 
 export type TradesDocument = Trades & Document;

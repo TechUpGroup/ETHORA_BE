@@ -187,7 +187,10 @@ export class TradesService {
       if (a.queueId === trade.queueId) {
         isTradeActive = true;
         this.jobTradeService.listActives.splice(i, 1);
-        this.jobTradeService.queueCloseAnytime.push(a);
+        this.jobTradeService.queueCloseAnytime.push({
+          ...a,
+          closingTime: data.closingTime
+        } as any);
       }
     });
     if (!isTradeActive) {
@@ -201,7 +204,7 @@ export class TradesService {
       },
       {
         $set: {
-          userCloseDate: new Date(),
+          userCloseDate: new Date(data.closingTime),
           state: TRADE_STATE.CLOSED,
         },
       },

@@ -557,9 +557,7 @@ export class JobTradeService {
                 _id: item._id,
               },
               update: {
-                state: TRADE_STATE.CLOSED,
                 expiryPrice: BigNumber(item.price).toFixed(0),
-                closeDate: new Date(),
               },
             },
           })),
@@ -920,7 +918,7 @@ export class JobTradeService {
           }
           const messageUserSignInfo = {
             assetPair: trade.pair.replace("-", "").toUpperCase(),
-            timestamp: Math.floor(now.getTime() / 1000),
+            timestamp: trade.closingTime || 0,
             optionId: trade.optionId || 0,
           };
 
@@ -970,7 +968,7 @@ export class JobTradeService {
               shouldRegister: false,
             },
             userSignInfo: {
-              timestamp: Math.floor(now.getTime() / 1000),
+              timestamp: trade.closingTime || 0,
               signature: userSignerInfo,
             },
           });
