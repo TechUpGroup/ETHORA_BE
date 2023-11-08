@@ -26,6 +26,7 @@ import {
 import { SignerType } from "common/enums/signer.enum";
 import { decryptAES } from "common/utils/encrypt";
 import { ERROR_RETRY } from "common/constants/event";
+import { JOB_TIME } from "common/constants/trades";
 
 @Injectable()
 export class JobTradeService {
@@ -263,7 +264,7 @@ export class JobTradeService {
     }
   }
 
-  @Cron(CronExpression.EVERY_SECOND)
+  @Cron(JOB_TIME.EVERY_3_SECONDS)
   private async processTradeMarket() {
     if (this.isProcessingTradeMarket) {
       console.log("[TradeMarket] Waiting for last job to finish...");
@@ -340,7 +341,7 @@ export class JobTradeService {
     this.isProcessingTradeMarket = false;
   }
 
-  @Cron(CronExpression.EVERY_SECOND)
+  @Cron(JOB_TIME.EVERY_3_SECONDS)
   private async processTradeLimit() {
     if (this.isProcessingTradeLimit) {
       console.log("[TradeLimit] Waiting for last job to finish...");
@@ -425,7 +426,7 @@ export class JobTradeService {
     this.isProcessingTradeLimit = false;
   }
 
-  @Cron(CronExpression.EVERY_SECOND)
+  @Cron(JOB_TIME.EVERY_3_SECONDS)
   private async excuteOptions() {
     if (this.isExcuteOption) {
       console.log("[ExcuteOptions] Waiting for close last job to finish...");
@@ -503,7 +504,7 @@ export class JobTradeService {
     this.isExcuteOption = false;
   }
 
-  @Cron(CronExpression.EVERY_SECOND)
+  @Cron(JOB_TIME.EVERY_3_SECONDS)
   private async closeTradesAnyTime() {
     if (this.isClosingTradesAnyTime) {
       console.log("[CloseTradesAnyTime] Waiting for close last job to finish...");

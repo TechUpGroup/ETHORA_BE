@@ -27,11 +27,11 @@ export class HelperService {
   async getLogs({ network, blocknumber_synced }: BlocksDocument) {
     try {
       if (isNil(this.syncBlock[network])) {
-        this.syncBlock[network] = 50;
+        this.syncBlock[network] = 30;
       }
       const blockNumber = this.ethersService.getBlockNumber(network);
       const provider = this.ethersService.getProviderSyncBlock(network);
-      const fromBlock = blocknumber_synced - 10;
+      const fromBlock = blocknumber_synced - 5;
       const nextBlock = blocknumber_synced + this.syncBlock[network];
       const targetBlock = nextBlock > blockNumber ? blockNumber : nextBlock;
       const toBlock = targetBlock > fromBlock ? targetBlock : fromBlock;
@@ -48,7 +48,7 @@ export class HelperService {
         toBlock,
         // topics: [TOPIC.EXERCISE, TOPIC.EXPIRE]
       });
-      this.syncBlock[network] = 50;
+      this.syncBlock[network] = 30;
       return {
         blockNumber,
         fromBlock,
