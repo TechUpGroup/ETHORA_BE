@@ -26,6 +26,7 @@ export class EthersService {
   private readonly ethersMap: Map<Network, EtherProvider>;
   private readonly currentBlockNumber: Map<Network, number>;
   private readonly currentGas: Map<Network, string>;
+  private chooseRPC = 0;
 
   constructor() {
     this.ethersMap = new Map<Network, EtherProvider>();
@@ -56,7 +57,8 @@ export class EthersService {
           const blockNumber = await this.getLastBlockNumber(network);
           this.currentBlockNumber.set(network, blockNumber);
         } catch {
-          const provider = new JsonRpcBatchProvider(config.listRPC(network)[Math.floor(Math.random() * 4)]);
+          this.chooseRPC = (this.chooseRPC + 1) % 4;
+          const provider = new JsonRpcBatchProvider(config.listRPC(network)[this.chooseRPC]);
           const signerTypes = new Map<SignerType, Wallet>();
           const prkOperator = configPrivate.get<string>(`blockchain.private_key.operator`);
           const prkSfPublisher = configPrivate.get<string>(`blockchain.private_key.sfPublisher`);
@@ -79,7 +81,8 @@ export class EthersService {
           const gasPrice = await this.getGasPrice(network);
           this.currentGas.set(network, (formatDecimal(gasPrice) * 2).toFixed(0));
         } catch {
-          const provider = new JsonRpcBatchProvider(config.listRPC(network)[Math.floor(Math.random() * 4)]);
+          this.chooseRPC = (this.chooseRPC + 1) % 4;
+          const provider = new JsonRpcBatchProvider(config.listRPC(network)[this.chooseRPC]);
           const signerTypes = new Map<SignerType, Wallet>();
           const prkOperator = configPrivate.get<string>(`blockchain.private_key.operator`);
           const prkSfPublisher = configPrivate.get<string>(`blockchain.private_key.sfPublisher`);
