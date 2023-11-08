@@ -5,7 +5,7 @@ import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { UsersDocument } from "./schemas/users.schema";
 import { UsersService } from "./users.service";
-import { Auth } from "common/decorators/http.decorators";
+import { Auth, AuthOptional } from "common/decorators/http.decorators";
 import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
 import { UserStatsRequest } from "./dto/stats.dto";
 
@@ -18,6 +18,7 @@ export class UsersController {
   @Get("me")
   @Auth()
   getMe(@User() user: UsersDocument) {
+    user.mnemonic = undefined as any;
     return user;
   }
 
@@ -28,10 +29,10 @@ export class UsersController {
   // }
 
   @Get("stats")
-  @Auth()
+  @AuthOptional()
   @CacheTTL(60 * 1000)
   @ApiOperation({ summary: `Get stats of user in profile` })
   getStats(@User() user: UsersDocument, @Query() query: UserStatsRequest) {
-    return this.service.getStats(user.address, query.network);
+    return this.service.getStats(query?.userAddress || user?.address || "", query.network);
   }
 }

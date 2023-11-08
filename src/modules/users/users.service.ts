@@ -13,6 +13,7 @@ import { EthersService } from "modules/_shared/services/ethers.service";
 import { randomBytes } from "crypto";
 import { encryptAES } from "common/utils/encrypt";
 import { Network } from "common/enums/network.enum";
+import { ContractName } from "common/constants/contract";
 
 @Injectable()
 export class UsersService {
@@ -202,6 +203,10 @@ export class UsersService {
   }
 
   async getStats(address: string, network: Network): Promise<UserStatsResponse> {
+    if (!address) {
+      throw new BadRequestException("userAddress cannot empty");
+    }
+
     const metricsGql = readFile("./graphql/stats.gql", __dirname);
     const graphql = config.getGraphql(network);
     const data: MetricsGql = await request<MetricsGql>(graphql.uri, metricsGql, { address }).catch((error) => {
@@ -221,7 +226,14 @@ export class UsersService {
         totalRebateEarned: 0,
         totalVolumeTrades: 0,
         totalTrades: 0,
-        totalTradesDetail: null,
+        tier: 1,
+      },
+      USDC: {
+        contract: config.getContract(network, ContractName.USDC).address,
+        totalPayout: 0,
+        netPnl: 0,
+        openInterest: 0,
+        volume: 0,
       },
     };
     const tmpMostAssets: { [key: string]: number } = {};

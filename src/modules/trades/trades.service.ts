@@ -284,6 +284,10 @@ export class TradesService {
   async getActiveUserTrades(userAddress: string, query: GetTradesUserActiveDto) {
     const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
 
+    if (!userAddress) {
+      throw new BadRequestException("userAddress is missing");
+    }
+
     return await this.model.paginate(
       {
         userAddress,
@@ -303,6 +307,10 @@ export class TradesService {
   async getLimitOrdersUserTrades(userAddress: string, query: GetTradesUserActiveDto) {
     const { page, limit, sortBy = "createdAt", sortType = -1 } = query;
 
+    if (!userAddress) {
+      throw new BadRequestException("userAddress is missing");
+    }
+
     return await this.model.paginate(
       { userAddress, state: TRADE_STATE.QUEUED, isLimitOrder: true },
       {
@@ -315,6 +323,10 @@ export class TradesService {
 
   async getCancelledUserTrades(userAddress: string, query: GetTradesUserActiveDto) {
     const { page, limit, sortBy = "updatedAt", sortType = -1 } = query;
+
+    if (!userAddress) {
+      throw new BadRequestException("userAddress is missing");
+    }
 
     return await this.model.paginate(
       { userAddress, state: TRADE_STATE.CANCELLED },
@@ -368,6 +380,10 @@ export class TradesService {
 
   async getHistoryUserTrades(userAddress: string, query: GetTradesUserActiveDto) {
     const { page, limit, sortBy = "updatedAt", sortType = -1 } = query;
+
+    if (!userAddress) {
+      throw new BadRequestException("userAddress is missing");
+    }
 
     return await this.model.paginate(
       { userAddress, state: TRADE_STATE.CLOSED },
