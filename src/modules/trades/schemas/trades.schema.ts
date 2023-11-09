@@ -173,7 +173,10 @@ export class Trades {
   tx_close?: string;
 
   @Prop({ required: false, default: 0 })
-  call?: number;
+  call_open?: number;
+
+  @Prop({ required: false, default: 0 })
+  call_close?: number;
 }
 
 export type TradesDocument = Trades & Document;
