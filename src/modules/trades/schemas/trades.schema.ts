@@ -28,7 +28,7 @@ export class Trades {
   @Prop({ required: true })
   period: number;
 
-  @Prop({ required: true, lowercase: true, trim: true })
+  @Prop({ required: true, lowercase: true, trim: true, index: true })
   targetContract: string;
 
   @Prop({ required: true })
@@ -79,7 +79,7 @@ export class Trades {
   @Prop()
   isAbove: boolean;
 
-  @Prop({ required: true, default: TRADE_STATE.QUEUED })
+  @Prop({ required: true, default: TRADE_STATE.QUEUED, index: true })
   state: TRADE_STATE;
 
   @Prop({ required: false, default: 0 })
@@ -104,10 +104,11 @@ export class Trades {
   @Prop({
     type: String,
     required: false,
+    index: true
   })
   contractOption?: string;
 
-  @Prop()
+  @Prop({ index: true })
   isLimitOrder: boolean;
 
   @Prop()
@@ -164,6 +165,15 @@ export class Trades {
 
   @Prop({ type: String, required: false, default: null })
   closingTime?: string | null;
+
+  @Prop({ required: false, trim: true, lowercase: true })
+  tx_open?: string;
+
+  @Prop({ required: false, trim: true, lowercase: true })
+  tx_close?: string;
+
+  @Prop({ required: false, default: 0 })
+  call?: number;
 }
 
 export type TradesDocument = Trades & Document;

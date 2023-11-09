@@ -84,6 +84,7 @@ export class JobSyncBlockService {
     const bulkUpdate: any[] = [];
     const contractOptionIds: string[] = [];
     const profits: any = {};
+    const txClosed: any = {};
     for (const event of events) {
       const { transactionHash, topics, logIndex, address } = event;
       historyCreateArr.push({
@@ -95,11 +96,13 @@ export class JobSyncBlockService {
         const { id } = IBinaryOptions.parseLog(event).args;
         contractOptionIds.push(`${address.toLowerCase().trim()}_${id.toString()}`);
         profits[+id.toString()] = 0;
+        txClosed[+id.toString()] = transactionHash.toLowerCase().trim();
       }
       if (topics.includes(TOPIC.EXERCISE)) {
         const { id, profit } = IBinaryOptions.parseLog(event).args;
         contractOptionIds.push(`${address.toLowerCase().trim()}_${id.toString()}`);
         profits[+id.toString()] = +profit.toString();
+        txClosed[+id.toString()] = transactionHash.toLowerCase().trim();
       }
     }
 
@@ -120,7 +123,8 @@ export class JobSyncBlockService {
             update: {
               status,
               profit,
-              pnl: profit - Number(trade.tradeSize)
+              pnl: profit - Number(trade.tradeSize),
+              tx_close: txClosed[trade.optionId],
             },
           },
         });

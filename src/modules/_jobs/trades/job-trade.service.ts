@@ -329,6 +329,9 @@ export class JobTradeService {
                 state: TRADE_STATE.OPENED,
                 strike: BigNumber(item.price).toFixed(0),
                 openDate: now,
+                $inc: {
+                  call: 1,
+                },
               },
             },
           })),
@@ -414,6 +417,9 @@ export class JobTradeService {
                 state: TRADE_STATE.OPENED,
                 strike: BigNumber(item.price).toFixed(0),
                 openDate: now,
+                $inc: {
+                  call: 1,
+                },
               },
             },
           })),
@@ -492,6 +498,9 @@ export class JobTradeService {
                 state: TRADE_STATE.CLOSED,
                 expiryPrice: BigNumber(item.price).toFixed(0),
                 closeDate: now,
+                $inc: {
+                  call: 1,
+                },
               },
             },
           })),
@@ -558,6 +567,9 @@ export class JobTradeService {
               },
               update: {
                 expiryPrice: BigNumber(item.price).toFixed(0),
+                $inc: {
+                  call: 1,
+                },
               },
             },
           })),
@@ -733,16 +745,21 @@ export class JobTradeService {
 
       this.listActives.push(...trades);
     } catch (e) {
-      if (e.reason && Object.values(ERROR_RETRY).includes(e.reason)) {
+      const _tradeRetry = trades.filter((trade) => trade.call <= config.maximumRetry);
+      const _tradeCancelled = trades.filter((trade) => trade.call > config.maximumRetry);
+      if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
+        const _trades = _tradeRetry.map((trade) => {
+          return { ...trade, call: trade.call + 1 };
+        });
         if (trades[0].isLimitOrder) {
-          this.queuesLimitOrder.push(...trades);
+          this.queuesLimitOrder.push(..._trades);
         } else {
-          this.queuesMarket.push(...trades);
+          this.queuesMarket.push(..._trades);
         }
         this.logsService.createLog("openTradeContract => retry", e);
-      } else {
+      } else if (_tradeCancelled.length) {
         this.tradesModel.bulkWrite(
-          trades.map((item) => ({
+          _tradeCancelled.map((item) => ({
             updateOne: {
               filter: {
                 _id: item._id,
@@ -857,8 +874,12 @@ export class JobTradeService {
         gasLimit: BigNumber(gasLimit.toString()).multipliedBy(3).toFixed(0),
       });
     } catch (e) {
-      if (e.reason && Object.values(ERROR_RETRY).includes(e.reason)) {
-        this.listActives.push(...trades);
+      const _tradeRetry = trades.filter((trade) => trade.call <= config.maximumRetry);
+      if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
+        const _trades = _tradeRetry.map((trade) => {
+          return { ...trade, call: trade.call + 1 };
+        });
+        this.listActives.push(..._trades);
       } else {
         this.logsService.createLog("excuteOptionContract", e);
         this.logsService.createLog("optionData", JSON.stringify(optionData));
@@ -985,8 +1006,12 @@ export class JobTradeService {
         gasLimit: BigNumber(gasLimit.toString()).multipliedBy(3).toFixed(0),
       });
     } catch (e) {
-      if (e.reason && Object.values(ERROR_RETRY).includes(e.reason)) {
-        this.queueCloseAnytime.push(...trades);
+      const _tradeRetry = trades.filter((trade) => trade.call <= config.maximumRetry);
+      if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
+        const _trades = _tradeRetry.map((trade) => {
+          return { ...trade, call: trade.call + 1 };
+        });
+        this.queueCloseAnytime.push(..._trades);
       } else {
         this.logsService.createLog("closeTradeContract", e);
       }
