@@ -31,16 +31,11 @@ query ($address: String!, $timestamp: String!, $timestampReward: String!) {
     usdcTradesWon
     usdcVolume
     usdcWinRate
-    # bfrNetPnL
-    # bfrTotalTrades
-    # bfrTradesWon
-    # bfrVolume
-    # bfrWinRate
-    # arbNetPnL
-    # arbTotalTrades
-    # arbTradesWon
-    # arbVolume
-    # arbWinRate
+    # etrNetPnL
+    # etrTotalTrades
+    # etrTradesWon
+    # etrVolume
+    # etrWinRate
   }
   loserStats: leaderboards(
     orderBy: netPnL
@@ -74,16 +69,11 @@ query ($address: String!, $timestamp: String!, $timestampReward: String!) {
     usdcTradesWon
     usdcVolume
     usdcWinRate
-    # bfrNetPnL
-    # bfrTotalTrades
-    # bfrTradesWon
-    # bfrVolume
-    # bfrWinRate
-    # arbNetPnL
-    # arbTotalTrades
-    # arbTradesWon
-    # arbVolume
-    # arbWinRate
+    # etrNetPnL
+    # etrTotalTrades
+    # etrTradesWon
+    # etrVolume
+    # etrWinRate
   }
   totalData: leaderboards(orderBy: netPnL, orderDirection: desc, where: { timestamp: $timestamp }) {
     totalTrades
@@ -105,15 +95,10 @@ query ($address: String!, $timestamp: String!, $timestampReward: String!) {
     usdcTradesWon
     usdcVolume
     usdcWinRate
-    # bfrNetPnL
-    # bfrTotalTrades
-    # bfrTradesWon
-    # bfrVolume
-    # bfrWinRate
-    # arbNetPnL
-    # arbTotalTrades
-    # arbTradesWon
-    # arbVolume
-    # arbWinRate
+    # etrNetPnL
+    # etrTotalTrades
+    # etrTradesWon
+    # etrVolume
+    # etrWinRate
   }
 }
