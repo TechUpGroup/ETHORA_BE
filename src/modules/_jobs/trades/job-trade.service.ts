@@ -330,7 +330,7 @@ export class JobTradeService {
                 strike: BigNumber(item.price).toFixed(0),
                 openDate: now,
                 $inc: {
-                  call: 1,
+                  call_open: 1,
                 },
               },
             },
@@ -418,7 +418,7 @@ export class JobTradeService {
                 strike: BigNumber(item.price).toFixed(0),
                 openDate: now,
                 $inc: {
-                  call: 1,
+                  call_open: 1,
                 },
               },
             },
@@ -499,7 +499,7 @@ export class JobTradeService {
                 expiryPrice: BigNumber(item.price).toFixed(0),
                 closeDate: now,
                 $inc: {
-                  call: 1,
+                  call_close: 1,
                 },
               },
             },
@@ -568,7 +568,7 @@ export class JobTradeService {
               update: {
                 expiryPrice: BigNumber(item.price).toFixed(0),
                 $inc: {
-                  call: 1,
+                  call_close: 1,
                 },
               },
             },
@@ -745,11 +745,11 @@ export class JobTradeService {
 
       this.listActives.push(...trades);
     } catch (e) {
-      const _tradeRetry = trades.filter((trade) => trade.call <= config.maximumRetry);
-      const _tradeCancelled = trades.filter((trade) => trade.call > config.maximumRetry);
+      const _tradeRetry = trades.filter((trade) => trade.call_open <= config.maximumRetry);
+      const _tradeCancelled = trades.filter((trade) => trade.call_open > config.maximumRetry);
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
         const _trades = _tradeRetry.map((trade) => {
-          return { ...trade, call: trade.call + 1 };
+          return { ...trade, call: trade.call_open + 1 };
         });
         if (trades[0].isLimitOrder) {
           this.queuesLimitOrder.push(..._trades);
@@ -874,10 +874,10 @@ export class JobTradeService {
         gasLimit: BigNumber(gasLimit.toString()).multipliedBy(3).toFixed(0),
       });
     } catch (e) {
-      const _tradeRetry = trades.filter((trade) => trade.call <= config.maximumRetry);
+      const _tradeRetry = trades.filter((trade) => trade.call_close <= config.maximumRetry);
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
         const _trades = _tradeRetry.map((trade) => {
-          return { ...trade, call: trade.call + 1 };
+          return { ...trade, call: trade.call_close + 1 };
         });
         this.listActives.push(..._trades);
       } else {
@@ -1006,10 +1006,10 @@ export class JobTradeService {
         gasLimit: BigNumber(gasLimit.toString()).multipliedBy(3).toFixed(0),
       });
     } catch (e) {
-      const _tradeRetry = trades.filter((trade) => trade.call <= config.maximumRetry);
+      const _tradeRetry = trades.filter((trade) => trade.call_close <= config.maximumRetry);
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
         const _trades = _tradeRetry.map((trade) => {
-          return { ...trade, call: trade.call + 1 };
+          return { ...trade, call: trade.call_close + 1 };
         });
         this.queueCloseAnytime.push(..._trades);
       } else {
