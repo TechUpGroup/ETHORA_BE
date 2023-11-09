@@ -24,7 +24,7 @@ export interface Dashboard24hStatsGql {
 export interface DashboardOverviewGql {
   totalStats: DashboardStatsGql;
   USDCstats: DashboardStatsGql;
-  BFRstats: DashboardStatsGql;
+  ETRstats: DashboardStatsGql;
   ARBstats: DashboardStatsGql;
   totalTraders: [
     {
@@ -33,6 +33,6 @@ export interface DashboardOverviewGql {
   ];
   total24stats: Dashboard24hStatsGql[];
   USDC24stats: Dashboard24hStatsGql[];
-  BFR24stats: Dashboard24hStatsGql[];
+  ETR24stats: Dashboard24hStatsGql[];
   ARB24stats: Dashboard24hStatsGql[];
 }
