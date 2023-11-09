@@ -499,7 +499,7 @@ export class JobTradeService {
                 expiryPrice: BigNumber(item.price).toFixed(0),
                 closeDate: now,
                 $inc: {
-                  call_closed: 1,
+                  call_close: 1,
                 },
               },
             },
@@ -568,7 +568,7 @@ export class JobTradeService {
               update: {
                 expiryPrice: BigNumber(item.price).toFixed(0),
                 $inc: {
-                  call_closed: 1,
+                  call_close: 1,
                 },
               },
             },
