@@ -204,7 +204,7 @@ export class TradesService {
       },
       {
         $set: {
-          userCloseDate: new Date(data.closingTime),
+          userCloseDate: new Date(+data.closingTime * 1000),
           state: TRADE_STATE.CLOSED,
         },
       },
