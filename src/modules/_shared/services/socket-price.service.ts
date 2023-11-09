@@ -57,7 +57,7 @@ export class SocketPriceService {
     }
 
     this.pairPrice[id].unshift({ price, publish_time });
-    this.pairPrice[id].splice(10);
+    this.pairPrice[id].splice(15);
   }
 
   public send(data: string) {

@@ -10,7 +10,7 @@ import { CancelTradeEvent, FailResolveEvent, FailUnlockEvent, OpenTradeEvent } f
 import { TradesService } from "modules/trades/trades.service";
 import { JobTradeService } from "modules/_jobs/trades/job-trade.service";
 import { LogsService } from "modules/logs/logs.service";
-import { REASON_FAIL, REASON_FAIL_NOT_CARE, REASON_FAIL_RETRY, ROUTER_EVENT } from "common/constants/event";
+import { REASON_FAIL, REASON_FAIL_NOT_CARE, ROUTER_EVENT } from "common/constants/event";
 import { TRADE_STATE } from "common/enums/trades.enum";
 import { decryptAES } from "common/utils/encrypt";
 
@@ -56,13 +56,13 @@ export class JobSyncRouterService {
 
       const historyCreateArr: any[] = [];
       const bulkUpdate: any[] = [];
-      const retryTx: any[] = [];
+      const retryCloseTrades: any[] = [];
 
       const now = new Date();
       for (const event of events) {
         const { transactionHash, event: nameEvent, logIndex } = event;
         historyCreateArr.push({
-          transaction_hash: transactionHash.toLowerCase(),
+          transaction_hash: transactionHash.toLowerCase().trim(),
           log_index: logIndex,
           network,
         });
@@ -77,7 +77,8 @@ export class JobSyncRouterService {
                 optionId: +optionId.toString(),
                 expirationDate: expiration.toString(),
                 contractOption: `${targetContract.toLowerCase().trim()}_${optionId.toString()}`,
-                tradeSize: revisedFee.toString()
+                tradeSize: revisedFee.toString(),
+                tx_open: transactionHash.toLowerCase().trim(),
               },
             },
           });
@@ -97,6 +98,7 @@ export class JobSyncRouterService {
                 isCancelled: true,
                 cancellationReason: REASON_FAIL[reason] || "System error",
                 cancellationDate: now,
+                tx_open: transactionHash.toLowerCase().trim(),
               },
             },
           });
@@ -116,6 +118,7 @@ export class JobSyncRouterService {
                   isCancelled: true,
                   cancellationReason: REASON_FAIL[reason] || "System error",
                   cancellationDate: now,
+                  tx_open: transactionHash.toLowerCase().trim(),
                 },
               },
             });
@@ -125,41 +128,28 @@ export class JobSyncRouterService {
         }
         if (nameEvent === ROUTER_EVENT.FAILUNLOCK) {
           const { optionId, reason, targetContract } = (event as FailUnlockEvent).args;
-          if (!REASON_FAIL_NOT_CARE.includes(reason)) {
-            if (REASON_FAIL_RETRY.includes(reason)) {
-              retryTx.push(`${targetContract.toLowerCase().trim()}_${optionId.toString()}`);
-            } else {
-              bulkUpdate.push({
-                updateOne: {
-                  filter: {
-                    contractOption: `${targetContract.toLowerCase().trim()}_${optionId.toString()}`,
-                  },
-                  update: {
-                    state: TRADE_STATE.CANCELLED,
-                    isCancelled: true,
-                    cancellationReason: REASON_FAIL[reason] || "System error",
-                    cancellationDate: now,
-                  },
-                },
-              });
-            }
+          if (!REASON_FAIL_NOT_CARE.includes(reason) && !retryCloseTrades.includes(`${targetContract.toLowerCase().trim()}_${optionId.toString()}`)) {
+            retryCloseTrades.push(`${targetContract.toLowerCase().trim()}_${optionId.toString()}`);
           }
         }
       }
 
       // retry when excuteOption close trade
-      if (retryTx.length) {
-        const trades = await this.tradeService.getAllTradesClosed(retryTx);
-        const _trades = trades
-          .filter((trade) => trade.user.wallet && trade.user.wallet.privateKey)
-          .map((trade) => {
-            return {
+      if (retryCloseTrades.length) {
+        const trades = await this.tradeService.getAllTradesClosed(retryCloseTrades);
+        trades.filter((trade) => trade.user.wallet && trade.user.wallet.privateKey)
+          .forEach((trade) => {
+            const _trade = {
               ...trade,
               oneCT: trade.user.oneCT,
               privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
             };
+            if (_trade.closingTIme) {
+              this.jobTradeService.queueCloseAnytime.push(_trade);
+            } else {
+              this.jobTradeService.listActives.push(_trade);
+            }
           });
-        this.jobTradeService.listActives.push(..._trades);
       }
 
       // save to db

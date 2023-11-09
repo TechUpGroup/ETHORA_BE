@@ -109,6 +109,10 @@ class Config {
     return 10;
   }
 
+  get maximumRetry() {
+    return 5;
+  }
+
   get network_supported() {
     const networks = this.getArray<Network>("network_supported");
     const allNetworks = Object.values(Network);
