@@ -1,4 +1,4 @@
-query ($address: String!) {
+query ($address: String!, $timestampDaily: String!, $timestampWeekly: String!) {
   # ------------------
   # Daily
   userStatsDaily: leaderboards(
@@ -6,7 +6,7 @@ query ($address: String!) {
     orderDirection: desc
     first: 100
     where: {
-      timestamp: "19627"
+      timestamp: $timestampDaily
       totalTrades_gte: 5
       user_not_in: [
         "0x361e9013d7e4f2e4a035ba97fdb42cb7d2540259"
@@ -46,7 +46,7 @@ query ($address: String!) {
     orderDirection: desc
     first: 100
     where: {
-      timestamp: "2803"
+      timestamp: $timestampWeekly
       totalTrades_gte: 5
       user_not_in: [
         "0x361e9013d7e4f2e4a035ba97fdb42cb7d2540259"
