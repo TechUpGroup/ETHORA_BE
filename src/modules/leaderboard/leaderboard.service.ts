@@ -36,15 +36,27 @@ export class LeaderboardService {
     };
   }
 
-  getSummary(network: Network, type: LeaderboardType, data: LeaderboardGqlDto): LeaderboardSummaryResponse {
+  getSummary(
+    network: Network,
+    type: LeaderboardType,
+    data: LeaderboardGqlDto,
+    // query: LeaderboardRequest,
+  ): LeaderboardSummaryResponse {
     const endDateTime = type === LeaderboardType.DAILY ? getTimeLeftOfDay() : getTimeLeftOfWeek();
-    const configValue = type === LeaderboardType.DAILY ? DailyTournamentConfig[network] : WeeklyTournamentConfig[network];
+    const configValue =
+      type === LeaderboardType.DAILY ? DailyTournamentConfig[network] : WeeklyTournamentConfig[network];
+    // calc endDate
+    // const _offset =
+    //   (type === LeaderboardType.DAILY ? getCurrentDayIndex(network, 0) : getCurrentWeekIndex(network, 0)) -
+    //   query.offset;
+    const endDate = new Date(endDateTime.date);
+    // endDate.setDate(endDate.getDate() - (type === LeaderboardType.DAILY ? _offset : 7 * _offset));
     // calc summary
     const summary: LeaderboardSummaryResponse["summary"] = {
       // TODO: calc totalRewardPool
       totalRewardPool: "0",
       timeLeftByMs: endDateTime.ms,
-      endDate: endDateTime.date,
+      endDate: endDate,
       totalUserTrades: 0,
       totalTrades: 0,
       totalVolume: "0",
