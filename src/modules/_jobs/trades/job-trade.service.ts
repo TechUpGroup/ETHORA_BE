@@ -877,7 +877,7 @@ export class JobTradeService {
       const _tradeRetry = trades.filter((trade) => trade.call_close <= config.maximumRetry);
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
         const _trades = _tradeRetry.map((trade) => {
-          return { ...trade, call: trade.call_close + 1 };
+          return { ...trade, call_close: trade.call_close + 1 };
         });
         this.listActives.push(..._trades);
       } else {
@@ -1009,7 +1009,7 @@ export class JobTradeService {
       const _tradeRetry = trades.filter((trade) => trade.call_close <= config.maximumRetry);
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
         const _trades = _tradeRetry.map((trade) => {
-          return { ...trade, call: trade.call_close + 1 };
+          return { ...trade, call_close: trade.call_close + 1 };
         });
         this.queueCloseAnytime.push(..._trades);
       } else {
