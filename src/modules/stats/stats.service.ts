@@ -97,12 +97,11 @@ export class StatsService {
     const totalPoolDelta = poolStats.data?.[poolStats.data?.length - 1]?.glpSupplyChange || 0;
 
     // res overview
-
     const dataOverview = {
       totalVolume: USDCstats?.totalVolume / 1e6,
-      totalVolumeDelta: USDC24hrsStats?.amount,
+      totalVolumeDelta: USDC24hrsStats?.amount / 1e6,
       totalFees: USDCstats?.totalSettlementFees / 1e6,
-      totalFeesDelta: USDC24hrsStats?.settlementFee,
+      totalFeesDelta: USDC24hrsStats?.settlementFee / 1e6,
       totalPool,
       totalPoolDelta,
       totalUsers,
@@ -144,7 +143,7 @@ export class StatsService {
         ret.all = all;
         ret.liquidation = item.marginAndLiquidation - item.margin;
         // ret.all = PROPS.reduce((memo, prop) => memo + ret[prop], 0)
-        console.log(ret, "ret");
+        // console.log(ret, "ret");
         return ret;
       });
 
