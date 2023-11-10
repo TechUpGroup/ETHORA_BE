@@ -761,7 +761,8 @@ export class JobTradeService {
           this.queuesMarket.push(..._trades);
         }
         this.logsService.createLog("openTradeContract => retry", e);
-      } else if (_tradeCancelled.length) {
+      }
+      if (_tradeCancelled.length) {
         this.tradesModel.bulkWrite(
           _tradeCancelled.map((item) => ({
             updateOne: {

@@ -345,7 +345,7 @@ export class TradesService {
       {
         $match: {
           contractOption: { $in: optionIds },
-          call_close: { $lte: config.quantityTxTrade }
+          call_close: { $lte: config.maximumRetry }
         },
       },
       {
