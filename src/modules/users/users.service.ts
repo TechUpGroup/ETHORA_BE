@@ -14,6 +14,7 @@ import { randomBytes } from "crypto";
 import { encryptAES } from "common/utils/encrypt";
 import { Network } from "common/enums/network.enum";
 import { ContractName } from "common/constants/contract";
+import { getCurrentDayIndex, getDayTimestamp, getWeekTimestamp } from "common/utils/date";
 
 @Injectable()
 export class UsersService {
@@ -209,7 +210,13 @@ export class UsersService {
 
     const metricsGql = readFile("./graphql/stats.gql", __dirname);
     const graphql = config.getGraphql(network);
-    const data: MetricsGql = await request<MetricsGql>(graphql.uri, metricsGql, { address }).catch((error) => {
+    const timestampDaily = getDayTimestamp(network, getCurrentDayIndex(network, 0));
+    const timestampWeekly = getWeekTimestamp(network, getCurrentDayIndex(network, 0));
+    const data: MetricsGql = await request<MetricsGql>(graphql.uri, metricsGql, {
+      address,
+      timestampDaily,
+      timestampWeekly,
+    }).catch((error) => {
       console.error(error);
       return {} as MetricsGql;
     });
