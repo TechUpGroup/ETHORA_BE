@@ -749,7 +749,7 @@ export class JobTradeService {
       const _tradeCancelled = trades.filter((trade) => trade.call_open > config.maximumRetry);
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
         const _trades = _tradeRetry.map((trade) => {
-          return { ...trade, call: trade.call_open + 1 };
+          return { ...trade, call_open: trade.call_open + 1 };
         });
         if (trades[0].isLimitOrder) {
           this.queuesLimitOrder.push(..._trades);
