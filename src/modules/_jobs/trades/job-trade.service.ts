@@ -307,6 +307,7 @@ export class JobTradeService {
             ...item,
             openDate: now,
             price: entryPrice || 0,
+            call_open: item.call_open + 1,
           };
         });
 
@@ -376,7 +377,7 @@ export class JobTradeService {
         // filter price with pair
         const indexes: number[] = [];
         const trades: any[] = [];
-        this.queuesLimitOrder.forEach((item, index) => {
+        this.queuesLimitOrder.forEach((item: any, index) => {
           const pricePair = item.pair
             ? pairPrice[FEED_IDS[item.pair.replace("-", "").toUpperCase()].replace("0x", "")]
             : [];
@@ -391,6 +392,7 @@ export class JobTradeService {
               ...item,
               openDate: now,
               price: entryPrice || 0,
+              call_open: item.call_open + 1,
             });
           }
         });
@@ -454,7 +456,7 @@ export class JobTradeService {
         const indexes: number[] = [];
         const trades: any[] = [];
         // filter price with pair
-        this.listActives.forEach((item, index) => {
+        this.listActives.forEach((item: any, index) => {
           if (
             new Date(item.openDate.getTime() + item.period * 1000) <= now &&
             indexes.length < config.quantityTxTrade
@@ -466,6 +468,7 @@ export class JobTradeService {
             trades.push({
               ...item,
               price: prices[prices.length - 1].price || 0,
+              call_close: item.call_close + 1,
             });
           }
         });
@@ -547,6 +550,7 @@ export class JobTradeService {
           return {
             ...item,
             price: prices[prices.length - 1].price || 0,
+            call_close: item.call_close + 1
           };
         });
 
