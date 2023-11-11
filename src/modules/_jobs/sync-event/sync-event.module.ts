@@ -4,14 +4,12 @@ import { JobSyncRouterService } from "./services/sync-router.service";
 import { HelperService } from "./services/_helper.service";
 import { HistoryModule } from "modules/history/history.module";
 import { TradesModule } from "modules/trades/trades.module";
-import { JobTradeModule } from "../trades/job-trade.module";
 
 @Module({
   imports: [
     ContractsModule,
     HistoryModule,
     TradesModule,
-    JobTradeModule
   ],
   providers: [HelperService, JobSyncRouterService],
 })

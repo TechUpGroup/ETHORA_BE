@@ -160,8 +160,8 @@ export class TradesService {
         },
       },
       {
-        new: true
-      }
+        new: true,
+      },
     );
 
     return result;
@@ -188,7 +188,7 @@ export class TradesService {
         this.jobTradeService.listActives.splice(i, 1);
         this.jobTradeService.queueCloseAnytime.push({
           ...a,
-          closingTime: data.closingTime
+          closingTime: data.closingTime,
         } as any);
       }
     });
@@ -208,8 +208,8 @@ export class TradesService {
         },
       },
       {
-        new: true
-      }
+        new: true,
+      },
     );
 
     return result;
@@ -239,8 +239,8 @@ export class TradesService {
         },
       },
       {
-        new: true
-      }
+        new: true,
+      },
     );
 
     return result;
@@ -345,7 +345,7 @@ export class TradesService {
       {
         $match: {
           contractOption: { $in: optionIds },
-          call_close: { $lte: config.maximumRetry }
+          call_close: { $lte: config.maximumRetry },
         },
       },
       {
@@ -428,6 +428,12 @@ export class TradesService {
     await this.model.bulkWrite(bw);
   }
 
+  findTradeByState(state: TRADE_STATE) {
+    return this.model.find({
+      state,
+    });
+  }
+
   // TODO: remove
   // @Timeout(1000)
   // async insertDataTest() {
@@ -436,6 +442,167 @@ export class TradesService {
   //   await this.model.insertMany(tradesHistories);
   //   console.log("Done inserted trades history.");
   // }
+
+  async loadActiveTrades() {
+    let trades = await this.model.aggregate([
+      {
+        $match: {
+          state: TRADE_STATE.OPENED,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userAddress",
+          foreignField: "address",
+          as: "user",
+          pipeline: [
+            {
+              $lookup: {
+                from: "wallets",
+                localField: "_id",
+                foreignField: "userId",
+                as: "wallet",
+              },
+            },
+            {
+              $unwind: {
+                path: "$wallet",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$user",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
+    if (trades.length) {
+      console.log("[ActiveTrade] Loaded", trades.length, "activeTrade to listActives");
+      trades = trades
+        .filter((trade) => trade.user.wallet && trade.user.wallet.privateKey)
+        .map((trade) => {
+          return {
+            ...trade,
+            oneCT: trade.user.oneCT,
+            privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
+          };
+        });
+      this.jobTradeService.listActives.push(...trades);
+    }
+  }
+
+  async loadTradesMarket() {
+    let trades = await this.model.aggregate([
+      {
+        $match: {
+          state: TRADE_STATE.QUEUED,
+          isLimitOrder: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userAddress",
+          foreignField: "address",
+          as: "user",
+          pipeline: [
+            {
+              $lookup: {
+                from: "wallets",
+                localField: "_id",
+                foreignField: "userId",
+                as: "wallet",
+              },
+            },
+            {
+              $unwind: {
+                path: "$wallet",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$user",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
+    if (trades.length) {
+      console.log("[TradeMarket] Loaded", trades.length, "tradesMarket to queues");
+      trades = trades
+        .filter((trade) => trade.user.wallet && trade.user.wallet.privateKey)
+        .map((trade) => {
+          return {
+            ...trade,
+            oneCT: trade.user.oneCT,
+            privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
+          };
+        });
+      this.jobTradeService.queuesMarket.push(...trades);
+    }
+  }
+
+  async loadTradesLimitOrder() {
+    let trades = await this.model.aggregate([
+      {
+        $match: {
+          state: TRADE_STATE.QUEUED,
+          isLimitOrder: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userAddress",
+          foreignField: "address",
+          as: "user",
+          pipeline: [
+            {
+              $lookup: {
+                from: "wallets",
+                localField: "_id",
+                foreignField: "userId",
+                as: "wallet",
+              },
+            },
+            {
+              $unwind: {
+                path: "$wallet",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$user",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
+    if (trades.length) {
+      console.log("[TradeLimit] Loaded", trades.length, "tradesLimit to queues");
+      trades = trades
+        .filter((trade) => trade.user.wallet && trade.user.wallet.privateKey)
+        .map((trade) => {
+          return {
+            ...trade,
+            oneCT: trade.user.oneCT,
+            privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
+          };
+        });
+      this.jobTradeService.queuesLimitOrder.push(...trades);
+    }
+  }
 
   queue() {
     return {

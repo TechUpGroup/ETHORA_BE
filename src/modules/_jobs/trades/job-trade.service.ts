@@ -1,5 +1,4 @@
-import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
+import { Inject, Injectable, forwardRef } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import BigNumber from "bignumber.js";
 import { BtcusdBinaryOptions__factory, RouterAbi__factory } from "common/abis/types";
@@ -11,9 +10,8 @@ import { TRADE_STATE } from "common/enums/trades.enum";
 import { EthersService } from "modules/_shared/services/ethers.service";
 import { SocketPriceService } from "modules/_shared/services/socket-price.service";
 import { LogsService } from "modules/logs/logs.service";
-import { TRADES_MODEL, TradesDocument } from "modules/trades/schemas/trades.schema";
+import { TradesDocument } from "modules/trades/schemas/trades.schema";
 import { AddressZero } from "@ethersproject/constants";
-import { PaginateModel } from "mongoose";
 import {
   CloseAnytimeSignature,
   MarketDirectionSignature,
@@ -24,9 +22,9 @@ import {
   generateMessage,
 } from "common/utils/signature";
 import { SignerType } from "common/enums/signer.enum";
-import { decryptAES } from "common/utils/encrypt";
 import { ERROR_RETRY } from "common/constants/event";
 import { JOB_TIME } from "common/constants/trades";
+import { TradesService } from "modules/trades/trades.service";
 
 @Injectable()
 export class JobTradeService {
@@ -41,11 +39,11 @@ export class JobTradeService {
   private isExcuteOption = false;
 
   constructor(
-    @InjectModel(TRADES_MODEL)
-    private readonly tradesModel: PaginateModel<TradesDocument>,
     private readonly socketPriceService: SocketPriceService,
     private readonly ethersService: EthersService,
     private readonly logsService: LogsService,
+    @Inject(forwardRef(() => TradesService))
+    private readonly tradesService: TradesService,
   ) {
     this.listActives = [];
     this.queueCloseAnytime = [];
@@ -59,178 +57,15 @@ export class JobTradeService {
     await Promise.all([
       this.syncMaxOI(),
       this.cancelTrade(),
-      this.loadActiveTrades(),
-      this.loadTradesMarket(),
-      this.loadTradesLimitOrder(),
+      this.tradesService.loadActiveTrades(),
+      this.tradesService.loadTradesMarket(),
+      this.tradesService.loadTradesLimitOrder(),
     ]);
   }
 
-  private async loadActiveTrades() {
-    let trades = await this.tradesModel.aggregate([
-      {
-        $match: {
-          state: TRADE_STATE.OPENED,
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "userAddress",
-          foreignField: "address",
-          as: "user",
-          pipeline: [
-            {
-              $lookup: {
-                from: "wallets",
-                localField: "_id",
-                foreignField: "userId",
-                as: "wallet",
-              },
-            },
-            {
-              $unwind: {
-                path: "$wallet",
-                preserveNullAndEmptyArrays: true,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $unwind: {
-          path: "$user",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-    ]);
-    if (trades.length) {
-      console.log("[ActiveTrade] Loaded", trades.length, "activeTrade to listActives");
-      trades = trades
-        .filter((trade) => trade.user.wallet && trade.user.wallet.privateKey)
-        .map((trade) => {
-          return {
-            ...trade,
-            oneCT: trade.user.oneCT,
-            privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
-          };
-        });
-      this.listActives.push(...trades);
-    }
-  }
-
-  private async loadTradesMarket() {
-    let trades = await this.tradesModel.aggregate([
-      {
-        $match: {
-          state: TRADE_STATE.QUEUED,
-          isLimitOrder: false,
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "userAddress",
-          foreignField: "address",
-          as: "user",
-          pipeline: [
-            {
-              $lookup: {
-                from: "wallets",
-                localField: "_id",
-                foreignField: "userId",
-                as: "wallet",
-              },
-            },
-            {
-              $unwind: {
-                path: "$wallet",
-                preserveNullAndEmptyArrays: true,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $unwind: {
-          path: "$user",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-    ]);
-    if (trades.length) {
-      console.log("[TradeMarket] Loaded", trades.length, "tradesMarket to queues");
-      trades = trades
-        .filter((trade) => trade.user.wallet && trade.user.wallet.privateKey)
-        .map((trade) => {
-          return {
-            ...trade,
-            oneCT: trade.user.oneCT,
-            privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
-          };
-        });
-      this.queuesMarket.push(...trades);
-    }
-  }
-
-  private async loadTradesLimitOrder() {
-    let trades = await this.tradesModel.aggregate([
-      {
-        $match: {
-          state: TRADE_STATE.QUEUED,
-          isLimitOrder: true,
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "userAddress",
-          foreignField: "address",
-          as: "user",
-          pipeline: [
-            {
-              $lookup: {
-                from: "wallets",
-                localField: "_id",
-                foreignField: "userId",
-                as: "wallet",
-              },
-            },
-            {
-              $unwind: {
-                path: "$wallet",
-                preserveNullAndEmptyArrays: true,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $unwind: {
-          path: "$user",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-    ]);
-    if (trades.length) {
-      console.log("[TradeMarket] Loaded", trades.length, "tradesMarket to queues");
-      trades = trades
-        .filter((trade) => trade.user.wallet && trade.user.wallet.privateKey)
-        .map((trade) => {
-          return {
-            ...trade,
-            oneCT: trade.user.oneCT,
-            privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
-          };
-        });
-      this.queuesLimitOrder.push(...trades);
-    }
-  }
-
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  @Cron(CronExpression.EVERY_5_SECONDS, { name: "cancelTrade" })
   private async cancelTrade() {
-    const trades = await this.tradesModel.find({
-      state: TRADE_STATE.QUEUED,
-    });
+    const trades = await this.tradesService.findTradeByState(TRADE_STATE.QUEUED);
     console.log(">>> Trades QUEUED: " + trades.length);
 
     // cancel expired trades
@@ -262,11 +97,11 @@ export class JobTradeService {
     //
     if (tradesExpired.length > 0) {
       console.log(">>> Trades change to CANCELED: " + tradesExpired.length);
-      this.tradesModel.bulkWrite(tradesExpired);
+      this.tradesService.bulkWrite(tradesExpired);
     }
   }
 
-  @Cron(JOB_TIME.EVERY_3_SECONDS)
+  @Cron(JOB_TIME.EVERY_3_SECONDS, { name: "TradeMarket" })
   private async processTradeMarket() {
     if (this.isProcessingTradeMarket) {
       console.log("[TradeMarket] Waiting for last job to finish...");
@@ -333,7 +168,7 @@ export class JobTradeService {
         this.openTradeContract(trades);
 
         // update db
-        this.tradesModel.bulkWrite(
+        this.tradesService.bulkWrite(
           trades.map((item) => ({
             updateOne: {
               filter: {
@@ -358,7 +193,7 @@ export class JobTradeService {
     this.isProcessingTradeMarket = false;
   }
 
-  @Cron(JOB_TIME.EVERY_3_SECONDS)
+  @Cron(JOB_TIME.EVERY_3_SECONDS, { name: "TradeLimit" })
   private async processTradeLimit() {
     if (this.isProcessingTradeLimit) {
       console.log("[TradeLimit] Waiting for last job to finish...");
@@ -432,7 +267,7 @@ export class JobTradeService {
         this.openTradeContract(trades);
 
         // update db
-        this.tradesModel.bulkWrite(
+        this.tradesService.bulkWrite(
           trades.map((item) => ({
             updateOne: {
               filter: {
@@ -457,7 +292,7 @@ export class JobTradeService {
     this.isProcessingTradeLimit = false;
   }
 
-  @Cron(JOB_TIME.EVERY_3_SECONDS)
+  @Cron(JOB_TIME.EVERY_3_SECONDS, { name: "ExcuteOptions" })
   private async excuteOptions() {
     if (this.isExcuteOption) {
       console.log("[ExcuteOptions] Waiting for close last job to finish...");
@@ -532,7 +367,7 @@ export class JobTradeService {
         this.excuteOptionContract(trades);
 
         // update db
-        this.tradesModel.bulkWrite(
+        this.tradesService.bulkWrite(
           trades.map((item) => ({
             updateOne: {
               filter: {
@@ -557,7 +392,7 @@ export class JobTradeService {
     this.isExcuteOption = false;
   }
 
-  @Cron(JOB_TIME.EVERY_3_SECONDS)
+  @Cron(JOB_TIME.EVERY_3_SECONDS, { name: "CloseTradesAnyTime" })
   private async closeTradesAnyTime() {
     if (this.isClosingTradesAnyTime) {
       console.log("[CloseTradesAnyTime] Waiting for close last job to finish...");
@@ -604,7 +439,7 @@ export class JobTradeService {
         this.closeTradeContract(trades);
 
         // update db
-        this.tradesModel.bulkWrite(
+        this.tradesService.bulkWrite(
           trades.map((item) => ({
             updateOne: {
               filter: {
@@ -627,7 +462,7 @@ export class JobTradeService {
     this.isClosingTradesAnyTime = false;
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_5_MINUTES, { name: "syncMaxOI" })
   async syncMaxOI() {
     const network = config.isDevelopment ? Network.goerli : Network.base;
     Object.values(PairContractName).forEach(async (pair) => {
@@ -647,7 +482,7 @@ export class JobTradeService {
     });
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, { name: "syncBalanceOperator" })
   async syncBalanceOperator() {
     try {
       // const operaters = await this.getBalanceOperator();
@@ -810,7 +645,7 @@ export class JobTradeService {
         );
       }
       if (_tradeCancelled.length) {
-        this.tradesModel.bulkWrite(
+        this.tradesService.bulkWrite(
           _tradeCancelled.map((item) => ({
             updateOne: {
               filter: {
