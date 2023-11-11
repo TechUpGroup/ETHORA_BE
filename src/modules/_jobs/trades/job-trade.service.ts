@@ -297,7 +297,7 @@ export class JobTradeService {
 
         //log
         this.logsService.createLog(
-          "queuesMarket",
+          "queuesMarket => before",
           this.queuesMarket.map((e) => e.queueId),
         );
 
@@ -325,7 +325,7 @@ export class JobTradeService {
         }
 
         this.logsService.createLog(
-          "queuesMarket",
+          "queuesMarket => after",
           this.queuesMarket.map((e) => e.queueId),
         );
 
@@ -388,7 +388,7 @@ export class JobTradeService {
         console.log(">>>", currentPrice);
 
         this.logsService.createLog(
-          "queuesLimitOrder",
+          "queuesLimitOrder => before",
           this.queuesLimitOrder.map((e) => e.queueId),
         );
 
@@ -424,7 +424,7 @@ export class JobTradeService {
         this.queuesLimitOrder = this.queuesLimitOrder.filter((item, index) => !indexes.includes(index));
 
         this.logsService.createLog(
-          "queuesLimitOrder",
+          "queuesLimitOrder => after",
           this.queuesLimitOrder.map((e) => e.queueId),
         );
 
@@ -487,7 +487,7 @@ export class JobTradeService {
         const trades: any[] = [];
 
         this.logsService.createLog(
-          "listActives",
+          "listActives => before",
           this.listActives.map((e) => e.queueId),
         );
 
@@ -524,7 +524,7 @@ export class JobTradeService {
         this.listActives = this.listActives.filter((item, index) => !indexes.includes(index));
 
         this.logsService.createLog(
-          "listActives",
+          "listActives => after",
           this.listActives.map((e) => e.queueId),
         );
 
