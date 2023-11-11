@@ -825,7 +825,7 @@ export class JobTradeService {
             totalFee: trade.tradeSize,
             period: trade.period,
             targetContract: trade.targetContract,
-            strike: trade.strike,
+            strike: BigNumber(trade.strike).toFixed(0),
             slippage: trade.slippage,
             allowPartialFill: trade.allowPartialFill || false,
             referralCode: trade.referralCode || "",
