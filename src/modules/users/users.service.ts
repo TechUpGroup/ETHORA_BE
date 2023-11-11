@@ -213,17 +213,17 @@ export class UsersService {
     const timestampDaily = getDayTimestamp(network, getCurrentDayIndex(network, 0));
     const timestampWeekly = getWeekTimestamp(network, getCurrentDayIndex(network, 0));
     const data: MetricsGql = await request<MetricsGql>(graphql.uri, metricsGql, {
-      address,
-      timestampDaily,
-      timestampWeekly,
+      address: address.toLowerCase(),
+      timestampDaily: `${timestampDaily}`,
+      timestampWeekly: `${timestampWeekly}`,
     }).catch((error) => {
       console.error(error);
       return {} as MetricsGql;
     });
 
     // rank
-    const daily = data.userStatsDaily?.findIndex((e) => e.user.toLowerCase() === address) || -1;
-    const weekly = data.userStatsWeekly?.findIndex((e) => e.user.toLowerCase() === address) || -1;
+    const daily = data.userStatsDaily?.findIndex((e) => e.user.toLowerCase() === address.toLowerCase()) + 1 || -1;
+    const weekly = data.userStatsWeekly?.findIndex((e) => e.user.toLowerCase() === address.toLowerCase()) + 1 || -1;
 
     //
     let winTrade = 0;
