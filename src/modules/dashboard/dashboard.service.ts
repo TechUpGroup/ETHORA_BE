@@ -34,7 +34,11 @@ export class DashboardService {
       },
     };
 
-    return { ...data, ...openInterest } as any;
+    return {
+      tradingStartDate: config.trading.startDate,
+      ...data,
+      ...openInterest,
+    } as any;
   }
 
   async getMarkets(network: Network): Promise<DashboardResponse> {
