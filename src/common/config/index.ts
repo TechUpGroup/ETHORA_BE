@@ -131,6 +131,12 @@ class Config {
     return 60 * 60;
   }
 
+  get trading() {
+    return {
+      startDate: new Date(this.getString(`trading.startDate`)),
+    };
+  }
+
   getChainId(network: Network) {
     return this.getNumber(`blockchain.${network}.chain_id`);
   }

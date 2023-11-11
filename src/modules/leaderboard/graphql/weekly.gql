@@ -5,7 +5,7 @@ query ($address: String!, $timestamp: String!, $timestampReward: String!) {
     first: 100
     where: {
       timestamp: $timestamp
-      totalTrades_gte: 5
+      totalTrades_gte: 3
       user_not_in: [
         "0x361e9013d7e4f2e4a035ba97fdb42cb7d2540259"
         "0x6fae0eed696ec28c81269b99240ee960570666f1"
@@ -43,7 +43,7 @@ query ($address: String!, $timestamp: String!, $timestampReward: String!) {
     first: 100
     where: {
       timestamp: $timestamp
-      totalTrades_gte: 5
+      totalTrades_gte: 3
       user_not_in: [
         "0x361e9013d7e4f2e4a035ba97fdb42cb7d2540259"
         "0x6fae0eed696ec28c81269b99240ee960570666f1"
