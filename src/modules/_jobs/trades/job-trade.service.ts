@@ -314,7 +314,7 @@ export class JobTradeService {
 
         if (!this.listActives.length) {
           console.log("[ExcuteOptions] No listActives, stopped...");
-          this.isProcessingTradeLimit = false;
+          this.isExcuteOption = false;
           return;
         }
 
