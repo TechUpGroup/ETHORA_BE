@@ -476,6 +476,13 @@ export class JobTradeService {
           this.isExcuteOption = false;
           return;
         }
+
+        if (!this.listActives.length) {
+          console.log("[ExcuteOptions] No listActives, stopped...");
+          this.isProcessingTradeLimit = false;
+          return;
+        }
+
         const indexes: number[] = [];
         const trades: any[] = [];
 
