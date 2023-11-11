@@ -62,7 +62,7 @@ export class JobTradeService {
       this.loadActiveTrades(),
       this.loadTradesMarket(),
       this.loadTradesLimitOrder(),
-    ])
+    ]);
   }
 
   private async loadActiveTrades() {
@@ -295,6 +295,12 @@ export class JobTradeService {
         const currentPrice = currentPrices[0];
         console.log(">>>", currentPrice);
 
+        //log
+        this.logsService.createLog(
+          "queuesMarket",
+          this.queuesMarket.map((e) => e.queueId),
+        );
+
         // filter price with pair
         const trades = this.queuesMarket.splice(0, config.quantityTxTrade).map((item: any) => {
           const pricePair = item.pair
@@ -317,6 +323,11 @@ export class JobTradeService {
           this.isProcessingTradeMarket = false;
           return;
         }
+
+        this.logsService.createLog(
+          "queuesMarket",
+          this.queuesMarket.map((e) => e.queueId),
+        );
 
         // Call smartcontract
         this.openTradeContract(trades);
@@ -376,6 +387,11 @@ export class JobTradeService {
         const currentPrice = currentPrices[0];
         console.log(">>>", currentPrice);
 
+        this.logsService.createLog(
+          "queuesLimitOrder",
+          this.queuesLimitOrder.map((e) => e.queueId),
+        );
+
         // filter price with pair
         const indexes: number[] = [];
         const trades: any[] = [];
@@ -406,6 +422,11 @@ export class JobTradeService {
 
         // remove trade limit
         this.queuesLimitOrder = this.queuesLimitOrder.filter((item, index) => !indexes.includes(index));
+
+        this.logsService.createLog(
+          "queuesLimitOrder",
+          this.queuesLimitOrder.map((e) => e.queueId),
+        );
 
         // Call smartcontract
         this.openTradeContract(trades);
@@ -457,6 +478,12 @@ export class JobTradeService {
         }
         const indexes: number[] = [];
         const trades: any[] = [];
+
+        this.logsService.createLog(
+          "listActives",
+          this.listActives.map((e) => e.queueId),
+        );
+
         // filter price with pair
         this.listActives.forEach((item: any, index) => {
           if (
@@ -488,6 +515,11 @@ export class JobTradeService {
 
         // remove actives
         this.listActives = this.listActives.filter((item, index) => !indexes.includes(index));
+
+        this.logsService.createLog(
+          "listActives",
+          this.listActives.map((e) => e.queueId),
+        );
 
         // Call smartcontract
         this.excuteOptionContract(trades);
@@ -765,7 +797,10 @@ export class JobTradeService {
         } else {
           this.queuesMarket.push(..._trades);
         }
-        this.logsService.createLog("openTradeContract => retry", e);
+        this.logsService.createLog(
+          "openTradeContract => retry",
+          _tradeRetry.map((e) => e.queueId),
+        );
       }
       if (_tradeCancelled.length) {
         this.tradesModel.bulkWrite(
@@ -783,7 +818,10 @@ export class JobTradeService {
             },
           })),
         );
-        this.logsService.createLog("openTradeContract => cancel", e);
+        this.logsService.createLog(
+          "openTradeContract => cancel",
+          _tradeCancelled.map((e) => e.queueId),
+        );
       }
     }
   }
@@ -792,15 +830,7 @@ export class JobTradeService {
     //log
     this.logsService.createLog(
       "trades => excuteOptionContract",
-      JSON.stringify(
-        trades.map((e) => {
-          return {
-            queueId: e.queueId,
-            optionId: e.optionId || "",
-            expirationDate: e.expirationDate || "",
-          };
-        }),
-      ),
+      trades.map((e) => `${e.queueId}_${e.optionId || ""}`),
     );
 
     // choose operater
@@ -893,9 +923,16 @@ export class JobTradeService {
           return { ...trade, call_close: trade.call_close + 1 };
         });
         this.listActives.push(..._trades);
+        this.logsService.createLog(
+          "excuteOptionContract => retry",
+          _tradeRetry.map((e) => `${e.queueId}_${e.optionId || ""}`),
+        );
       } else {
-        this.logsService.createLog("excuteOptionContract", e);
-        this.logsService.createLog("optionData", JSON.stringify(optionData));
+        this.logsService.createLog(
+          "excuteOptionContract => error",
+          trades.map((e) => `${e.queueId}_${e.optionId || ""}`),
+        );
+        this.logsService.createLog("excuteOptionContract => error", e);
       }
     }
   }
@@ -904,15 +941,7 @@ export class JobTradeService {
     //log
     this.logsService.createLog(
       "trades => closeTradeContract",
-      JSON.stringify(
-        trades.map((e) => {
-          return {
-            queueId: e.queueId,
-            optionId: e.optionId || "",
-            expirationDate: e.expirationDate || "",
-          };
-        }),
-      ),
+      trades.map((e) => `${e.queueId}_${e.optionId || ""}`),
     );
 
     // choose operater
@@ -1028,6 +1057,10 @@ export class JobTradeService {
           return { ...trade, call_close: trade.call_close + 1 };
         });
         this.queueCloseAnytime.push(..._trades);
+        this.logsService.createLog(
+          "closeTradeContract => retry",
+          _tradeRetry.map((e) => `${e.queueId}_${e.optionId || ""}`),
+        );
       } else {
         this.logsService.createLog("closeTradeContract", e);
       }
