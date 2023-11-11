@@ -57,17 +57,7 @@ export class EthersService {
           const blockNumber = await this.getLastBlockNumber(network);
           this.currentBlockNumber.set(network, blockNumber);
         } catch {
-          this.chooseRPC = (this.chooseRPC + 1) % 4;
-          const provider = new JsonRpcBatchProvider(config.listRPC(network)[this.chooseRPC]);
-          const signerTypes = new Map<SignerType, Wallet>();
-          const prkOperator = configPrivate.get<string>(`blockchain.private_key.operator`);
-          const prkSfPublisher = configPrivate.get<string>(`blockchain.private_key.sfPublisher`);
-          const prkPublisher = configPrivate.get<string>(`blockchain.private_key.publisher`);
-          if (prkOperator) signerTypes.set(SignerType.operator, getWallet(prkOperator, provider));
-          if (prkSfPublisher) signerTypes.set(SignerType.sfPublisher, getWallet(prkSfPublisher, provider));
-          if (prkPublisher) signerTypes.set(SignerType.publisher, getWallet(prkPublisher, provider));
-
-          this.ethersMap.set(network, { provider, signers: signerTypes });
+          this.switchRPC(network);
         }
       }),
     );
@@ -81,20 +71,24 @@ export class EthersService {
           const gasPrice = await this.getGasPrice(network);
           this.currentGas.set(network, (formatDecimal(gasPrice) * 2).toFixed(0));
         } catch {
-          this.chooseRPC = (this.chooseRPC + 1) % 4;
-          const provider = new JsonRpcBatchProvider(config.listRPC(network)[this.chooseRPC]);
-          const signerTypes = new Map<SignerType, Wallet>();
-          const prkOperator = configPrivate.get<string>(`blockchain.private_key.operator`);
-          const prkSfPublisher = configPrivate.get<string>(`blockchain.private_key.sfPublisher`);
-          const prkPublisher = configPrivate.get<string>(`blockchain.private_key.publisher`);
-          if (prkOperator) signerTypes.set(SignerType.operator, getWallet(prkOperator, provider));
-          if (prkSfPublisher) signerTypes.set(SignerType.sfPublisher, getWallet(prkSfPublisher, provider));
-          if (prkPublisher) signerTypes.set(SignerType.publisher, getWallet(prkPublisher, provider));
-
-          this.ethersMap.set(network, { provider, signers: signerTypes });
+          this.switchRPC(network);
         }
       }),
     );
+  }
+
+  switchRPC(network: Network) {
+    this.chooseRPC = (this.chooseRPC + 1) % 4;
+    const provider = new JsonRpcBatchProvider(config.listRPC(network)[this.chooseRPC]);
+    const signerTypes = new Map<SignerType, Wallet>();
+    const prkOperator = configPrivate.get<string>(`blockchain.private_key.operator`);
+    const prkSfPublisher = configPrivate.get<string>(`blockchain.private_key.sfPublisher`);
+    const prkPublisher = configPrivate.get<string>(`blockchain.private_key.publisher`);
+    if (prkOperator) signerTypes.set(SignerType.operator, getWallet(prkOperator, provider));
+    if (prkSfPublisher) signerTypes.set(SignerType.sfPublisher, getWallet(prkSfPublisher, provider));
+    if (prkPublisher) signerTypes.set(SignerType.publisher, getWallet(prkPublisher, provider));
+
+    this.ethersMap.set(network, { provider, signers: signerTypes });
   }
 
   getCurrentGas(network: Network) {
@@ -143,8 +137,8 @@ export class EthersService {
     const domain = {
       ...DOMAIN,
       chainId: network,
-      verifyingContract
-    }
+      verifyingContract,
+    };
     return signer._signTypedData(domain, types, values);
   }
 
@@ -153,7 +147,7 @@ export class EthersService {
       ...DOMAIN,
       chainId: network,
       verifyingContract,
-    }
+    };
     return signer._signTypedData(domain, types, values);
   }
 
@@ -162,7 +156,12 @@ export class EthersService {
     return getContract<T>(address, ABI, provider);
   }
 
-  getContractWithProvider<T extends Contract = Contract>(network: Network, address: string, ABI: any, provider: Provider | Signer ) {
+  getContractWithProvider<T extends Contract = Contract>(
+    network: Network,
+    address: string,
+    ABI: any,
+    provider: Provider | Signer,
+  ) {
     return getContract<T>(address, ABI, provider);
   }
 

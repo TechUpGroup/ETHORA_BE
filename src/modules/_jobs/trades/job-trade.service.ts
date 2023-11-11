@@ -52,15 +52,17 @@ export class JobTradeService {
     this.queuesMarket = [];
     this.queuesLimitOrder = [];
     this.currenMaxOI = {};
-    this.start();
-    void this.syncMaxOI();
+    void this.start();
   }
 
   private async start() {
-    await this.cancelTrade();
-    this.loadActiveTrades();
-    this.loadTradesMarket();
-    this.loadTradesLimitOrder();
+    await Promise.all([
+      this.syncMaxOI(),
+      this.cancelTrade(),
+      this.loadActiveTrades(),
+      this.loadTradesMarket(),
+      this.loadTradesLimitOrder(),
+    ])
   }
 
   private async loadActiveTrades() {
@@ -550,7 +552,7 @@ export class JobTradeService {
           return {
             ...item,
             price: prices[prices.length - 1].price || 0,
-            call_close: item.call_close + 1
+            call_close: item.call_close + 1,
           };
         });
 
@@ -752,6 +754,9 @@ export class JobTradeService {
       const _tradeRetry = trades.filter((trade) => trade.call_open <= config.maximumRetry);
       const _tradeCancelled = trades.filter((trade) => trade.call_open > config.maximumRetry);
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
+        //  switch rpc
+        this.ethersService.switchRPC(network);
+
         const _trades = _tradeRetry.map((trade) => {
           return { ...trade, call_open: trade.call_open + 1 };
         });
@@ -881,6 +886,9 @@ export class JobTradeService {
     } catch (e) {
       const _tradeRetry = trades.filter((trade) => trade.call_close <= config.maximumRetry);
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
+        //  switch rpc
+        this.ethersService.switchRPC(network);
+
         const _trades = _tradeRetry.map((trade) => {
           return { ...trade, call_close: trade.call_close + 1 };
         });
@@ -1013,6 +1021,9 @@ export class JobTradeService {
     } catch (e) {
       const _tradeRetry = trades.filter((trade) => trade.call_close <= config.maximumRetry);
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
+        //  switch rpc
+        this.ethersService.switchRPC(network);
+
         const _trades = _tradeRetry.map((trade) => {
           return { ...trade, call_close: trade.call_close + 1 };
         });
