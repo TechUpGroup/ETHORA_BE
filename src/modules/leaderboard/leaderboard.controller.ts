@@ -17,7 +17,7 @@ export class LeaderboardController {
   constructor(private readonly service: LeaderboardService) {}
 
   @Get("offsets")
-  @CacheTTL(60 * 60 * 1000)
+  @CacheTTL(60 * 1000)
   @ApiOperation({ summary: `Get current offset of leaderboard` })
   getOffsets(@Query() query: NetworkDto) {
     return this.service.getOffsets(query.network);
@@ -25,7 +25,7 @@ export class LeaderboardController {
 
   @Get()
   @AuthOptional()
-  @CacheTTL(60 * 60 * 1000)
+  @CacheTTL(60 * 1000)
   @ApiOperation({ summary: `Get data leaderboard` })
   getDaily(@User() user: UsersDocument, @Query() query: LeaderboardRequest) {
     return this.service.getLeaderboard(user?.address || "", query);
