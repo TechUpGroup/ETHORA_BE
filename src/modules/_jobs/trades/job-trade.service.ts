@@ -131,10 +131,10 @@ export class JobTradeService {
         console.log(">>>", currentPrice);
 
         //log
-        this.logsService.createLog(
-          "queuesMarket => before",
-          this.queuesMarket.map((e) => e.queueId),
-        );
+        // this.logsService.createLog(
+        //   "queuesMarket => before",
+        //   this.queuesMarket.map((e) => e.queueId),
+        // );
 
         // filter price with pair
         const trades = this.queuesMarket.splice(0, config.quantityTxTrade).map((item: any) => {
@@ -159,10 +159,10 @@ export class JobTradeService {
           return;
         }
 
-        this.logsService.createLog(
-          "queuesMarket => after",
-          this.queuesMarket.map((e) => e.queueId),
-        );
+        // this.logsService.createLog(
+        //   "queuesMarket => after",
+        //   this.queuesMarket.map((e) => e.queueId),
+        // );
 
         // Call smartcontract
         this.openTradeContract(trades);
@@ -222,10 +222,10 @@ export class JobTradeService {
         const currentPrice = currentPrices[0];
         console.log(">>>", currentPrice);
 
-        this.logsService.createLog(
-          "queuesLimitOrder => before",
-          this.queuesLimitOrder.map((e) => e.queueId),
-        );
+        // this.logsService.createLog(
+        //   "queuesLimitOrder => before",
+        //   this.queuesLimitOrder.map((e) => e.queueId),
+        // );
 
         // filter price with pair
         const indexes: number[] = [];
@@ -258,10 +258,10 @@ export class JobTradeService {
         // remove trade limit
         this.queuesLimitOrder = this.queuesLimitOrder.filter((item, index) => !indexes.includes(index));
 
-        this.logsService.createLog(
-          "queuesLimitOrder => after",
-          this.queuesLimitOrder.map((e) => e.queueId),
-        );
+        // this.logsService.createLog(
+        //   "queuesLimitOrder => after",
+        //   this.queuesLimitOrder.map((e) => e.queueId),
+        // );
 
         // Call smartcontract
         this.openTradeContract(trades);
@@ -321,10 +321,10 @@ export class JobTradeService {
         const indexes: number[] = [];
         const trades: any[] = [];
 
-        this.logsService.createLog(
-          "listActives => before",
-          this.listActives.map((e) => e.queueId),
-        );
+        // this.logsService.createLog(
+        //   "listActives => before",
+        //   this.listActives.map((e) => e.queueId),
+        // );
 
         // filter price with pair
         this.listActives.forEach((item: any, index) => {
@@ -358,10 +358,10 @@ export class JobTradeService {
         // remove actives
         this.listActives = this.listActives.filter((item, index) => !indexes.includes(index));
 
-        this.logsService.createLog(
-          "listActives => after",
-          this.listActives.map((e) => e.queueId),
-        );
+        // this.logsService.createLog(
+        //   "listActives => after",
+        //   this.listActives.map((e) => e.queueId),
+        // );
 
         // Call smartcontract
         this.excuteOptionContract(trades);
