@@ -143,7 +143,7 @@ class Config {
     return network === Network.goerli
       ? [
           "https://arbitrum-goerli.publicnode.com",
-          "https://arbitrum-goerli.public.blastapi.io",
+          "https://compatible-intensive-theorem.arbitrum-goerli.quiknode.pro/d5c04dc63c58fbda8e2490faad3cb764ad4fda68/",
           "https://goerli-rollup.arbitrum.io/rpc",
           "https://newest-patient-choice.arbitrum-goerli.discover.quiknode.pro/4253d8f64f144dcf08e74bd508dfc3e7adcfa13a/",
         ]
