@@ -643,6 +643,7 @@ export class JobTradeService {
           "openTradeContract => retry",
           _tradeRetry.map((e) => e.queueId),
         );
+        this.logsService.createLog("openTradeContract => error", e);
       }
       if (_tradeCancelled.length) {
         this.tradesService.bulkWrite(
