@@ -3,7 +3,7 @@ import { StatsRequest } from "./dto/stats.dto";
 import config from "common/config";
 import { readFile } from "common/utils/string";
 import request from "graphql-request";
-import { getLinuxTimestampBefore24Hours } from "common/utils/date";
+import { getDates, getLinuxTimestampBefore24Hours } from "common/utils/date";
 import { chain, maxBy, minBy, sortBy, sumBy } from "lodash";
 import { fillNa } from "common/utils";
 
@@ -17,6 +17,8 @@ export class StatsService {
   async getStats(query: StatsRequest): Promise<any> {
     const { network, start, end } = query;
     const graphql = config.getGraphql(network);
+
+    const dateArr = getDates(new Date(query.start * 1000), new Date(query.end * 1000), { onlyDate: true });
 
     // stats data
     const statsGql = readFile("./graphql/stats.gql", __dirname);
@@ -111,16 +113,49 @@ export class StatsService {
       payoutDelta,
     };
 
+    const _tradingStats = this.calcTradersData(tradingStats);
     return {
       USDC24stats,
-      volumeStats: this.calcVolumesData(volumeStats),
-      burnedETRs: this.calcBurned(start, dataBurned?.burnedBFRs || []),
+      volumeStats: this.mappingDateArray(this.calcVolumesData(volumeStats), dateArr),
+      burnedETRs: this.mappingDateArray(this.calcBurned(start, dataBurned?.burnedBFRs || []), dateArr),
       overviewStats: dataOverview,
-      poolStats,
-      feeStats: this.calcFeesData(start, feeStats),
-      tradingStats: this.calcTradersData(tradingStats),
-      userStats,
+      poolStats: {
+        stats: poolStats.stats,
+        data: this.mappingDateArray(poolStats.data, dateArr),
+      },
+      feeStats: this.mappingDateArray(this.calcFeesData(start, feeStats), dateArr),
+      tradingStats: _tradingStats
+        ? {
+            stats: _tradingStats.stats,
+            data: this.mappingDateArray(_tradingStats.data, dateArr),
+          }
+        : null,
+      userStats: this.mappingDateArray(userStats, dateArr),
     } as any;
+  }
+
+  private mappingDateArray(data: any[], dateArr: Date[]) {
+    if (!data || !data.length) return [];
+    return dateArr.map((date) => {
+      const _data = data.filter((item) => {
+        const timestamp = new Date(new Date(item.timestamp * 1000).toISOString().split("T")[0]);
+        return timestamp.getTime() === date.getTime();
+      });
+      console.log(_data);
+      return _data && _data.length
+        ? {
+            ..._data.reduce(
+              (pre, current) =>
+                Object.assign({}, ...Object.keys(pre).map((e) => ({ [e]: Number(pre[e]) + Number(current[e]) }))),
+              _data[0],
+            ),
+            timestamp: Math.round(date.getTime() / 1000),
+          }
+        : {
+            ...Object.assign({}, ...Object.keys(data[0]).map((e) => ({ [e]: 0 }))),
+            timestamp: Math.round(date.getTime() / 1000),
+          };
+    });
   }
 
   private calcBurned(from: any, _data: any) {
@@ -128,7 +163,7 @@ export class StatsService {
       const PROPS = "amount".split(" ");
 
       if (!_data) {
-        return null;
+        return [];
       }
 
       const chartData = sortBy(_data, "timestamp").map((item) => {
@@ -177,7 +212,7 @@ export class StatsService {
 
     const feesChartData = (() => {
       if (!_data) {
-        return null;
+        return [];
       }
 
       const chartData = sortBy(_data, "timestamp").map((item) => {
@@ -299,7 +334,7 @@ export class StatsService {
               currentProfitCumulative,
             };
           })
-        : null;
+        : [];
 
     if (data) {
       // console.log(data,'data')

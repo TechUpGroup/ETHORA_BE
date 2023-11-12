@@ -3,6 +3,23 @@ import { Network } from "common/enums/network.enum";
 
 const MSINWEEK = 604800000;
 
+(Date as any).prototype.addDays = function (days: any) {
+  const date = new Date(this.valueOf());
+  date.setDate(date.getDate() + days);
+  return date;
+};
+
+export function getDates(startDate: any, endDate: any, options: { onlyDate: boolean } = {} as any) {
+  const dateArray: any = [];
+  let currentDate = startDate;
+  while (currentDate <= endDate) {
+    const cDate = new Date(currentDate);
+    dateArray.push(options.onlyDate ? new Date(cDate.toISOString().split("T")[0]) : cDate);
+    currentDate = currentDate.addDays(1);
+  }
+  return dateArray;
+}
+
 export const getTimeLeftOfDay = () => {
   const now = new Date();
   const currentDate = now.toISOString().split("T")[0];
