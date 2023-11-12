@@ -321,10 +321,10 @@ export class JobTradeService {
         const indexes: number[] = [];
         const trades: any[] = [];
 
-        // this.logsService.createLog(
-        //   "listActives => before",
-        //   this.listActives.map((e) => e.queueId),
-        // );
+        this.logsService.createLog(
+          "listActives => before",
+          this.listActives.map((e) => e.queueId),
+        );
 
         // filter price with pair
         this.listActives.forEach((item: any, index) => {
@@ -358,10 +358,10 @@ export class JobTradeService {
         // remove actives
         this.listActives = this.listActives.filter((item, index) => !indexes.includes(index));
 
-        // this.logsService.createLog(
-        //   "listActives => after",
-        //   this.listActives.map((e) => e.queueId),
-        // );
+        this.logsService.createLog(
+          "listActives => after",
+          this.listActives.map((e) => e.queueId),
+        );
 
         // Call smartcontract
         this.excuteOptionContract(trades);
@@ -514,11 +514,12 @@ export class JobTradeService {
 
       const openTxn: any[] = [];
       await Promise.all(
-        trades.map(async (trade) => {
+        trades.map(async (trade, index) => {
+          const timestamp = Math.floor(now.getTime() / 1000) - index;
           //
           const messageSettlementFeeSignature = {
             assetPair: trade.pair.replace("-", "").toUpperCase(),
-            expiryTimestamp: Math.floor(86400 + now.getTime() / 1000),
+            expiryTimestamp: timestamp + 86400,
             settlementFee: trade.settlementFee,
           };
 
@@ -532,7 +533,7 @@ export class JobTradeService {
             slippage: trade.slippage,
             allowPartialFill: trade.allowPartialFill || false,
             referralCode: trade.referralCode || "",
-            timestamp: Math.floor(now.getTime() / 1000),
+            timestamp,
           };
           if (!trade.isLimitOrder) {
             messageUserPartialSignature = {
@@ -544,7 +545,7 @@ export class JobTradeService {
           //userFullSignature
           const userFullMessage = generateMessage(
             trade.pair.replace("-", "").toUpperCase(),
-            Math.floor(now.getTime() / 1000).toString(),
+            timestamp.toString(),
             BigNumber(trade.price).toFixed(0),
           );
 
@@ -580,18 +581,18 @@ export class JobTradeService {
               price: BigNumber(trade.price).toFixed(0),
               settlementFee: trade.settlementFee,
               isLimitOrder: trade.isLimitOrder,
-              limitOrderExpiry: trade.isLimitOrder ? Math.floor(now.getTime() / 1000 + 86400) : 0,
+              limitOrderExpiry: trade.isLimitOrder ? timestamp + 86400 : 0,
               userSignedSettlementFee: 500,
               settlementFeeSignInfo: {
-                timestamp: Math.floor(86400 + now.getTime() / 1000),
+                timestamp: timestamp + 86400,
                 signature: settlementFeeSignature,
               },
               userSignInfo: {
-                timestamp: Math.floor(now.getTime() / 1000),
+                timestamp: timestamp,
                 signature: userPartialSignature,
               },
               publisherSignInfo: {
-                timestamp: Math.floor(now.getTime() / 1000),
+                timestamp: timestamp,
                 signature: userFullSignature,
               },
             },
@@ -643,7 +644,7 @@ export class JobTradeService {
           "openTradeContract => retry",
           _tradeRetry.map((e) => e.queueId),
         );
-        this.logsService.createLog("openTradeContract => error", e);
+        this.logsService.createLog("openTradeContract => gasPrice", this.ethersService.getCurrentGas(network));
       }
       if (_tradeCancelled.length) {
         this.tradesService.bulkWrite(
