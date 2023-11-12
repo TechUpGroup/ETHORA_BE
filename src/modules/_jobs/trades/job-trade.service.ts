@@ -645,7 +645,7 @@ export class JobTradeService {
           _tradeRetry.map((e) => e.queueId),
         );
       }
-      if (_tradeCancelled.length) {
+      if (_tradeCancelled.length || (e.reason && !Object.values(ERROR_RETRY).includes(e.reason))) {
         this.tradesService.bulkWrite(
           _tradeCancelled.map((item) => ({
             updateOne: {
@@ -665,6 +665,7 @@ export class JobTradeService {
           "openTradeContract => cancel",
           _tradeCancelled.map((e) => e.queueId),
         );
+        this.logsService.createLog("openTradeContract => error", e);
       }
     }
   }
