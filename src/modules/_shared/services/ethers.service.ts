@@ -78,7 +78,7 @@ export class EthersService {
   }
 
   switchRPC(network: Network) {
-    this.chooseRPC = (this.chooseRPC + 1) % 4;
+    this.chooseRPC = (this.chooseRPC + 1) % 3;
     const provider = new JsonRpcBatchProvider(config.listRPC(network)[this.chooseRPC]);
     const signerTypes = new Map<SignerType, Wallet>();
     const prkOperator = configPrivate.get<string>(`blockchain.private_key.operator`);
@@ -116,6 +116,10 @@ export class EthersService {
 
   getProviderSyncBlock(network: Network) {
     return new JsonRpcBatchProvider(config.listRPC(network)[config.listRPC(network).length - 1]);
+  }
+
+  getProviderSyncEvent(network: Network) {
+    return new JsonRpcBatchProvider(config.listRPC(network)[config.listRPC(network).length - 2]);
   }
 
   private getSigner(network: Network, type: SignerType) {
@@ -162,6 +166,11 @@ export class EthersService {
     ABI: any,
     provider: Provider | Signer,
   ) {
+    return getContract<T>(address, ABI, provider);
+  }
+
+  getContractSyncEvent<T extends Contract = Contract>(network: Network, address: string, ABI: any) {
+    const provider = this.getProviderSyncEvent(network);
     return getContract<T>(address, ABI, provider);
   }
 

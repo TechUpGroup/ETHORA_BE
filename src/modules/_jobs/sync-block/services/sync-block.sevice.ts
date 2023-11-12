@@ -29,7 +29,7 @@ export class JobSyncBlockService {
   ) {}
   private isRunning = false;
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   private async start() {
     const network = config.isDevelopment ? Network.goerli : Network.base;
     const block = await this.blocksService.getBlockByNetwork(network);

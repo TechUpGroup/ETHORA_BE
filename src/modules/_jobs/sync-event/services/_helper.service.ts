@@ -46,7 +46,7 @@ export class HelperService {
 
   private getEvents = async ({ contract, network, ABI, acceptEvents }: ContractParams) => {
     const { blocknumber_synced, contract_address } = contract;
-    const contractInst = this.etherService.getContract(network, contract_address, ABI);
+    const contractInst = this.etherService.getContractSyncEvent(network, contract_address, ABI);
     const blocknumber = await this.etherService.getBlockNumber(network);
     const nextBlock = blocknumber_synced + 1000;
     const fromBlock = blocknumber_synced - 10;
