@@ -1,4 +1,17 @@
 query ($timestamp_start: Int!, $timestamp_end: Int!) {
+  poolStatsAllTime: poolStats(
+    orderBy: timestamp
+    orderDirection: desc
+    where: { period: daily }
+    subgraphError: allow
+  ) {
+    timestamp
+    amount
+    period
+    timestamp
+    rate
+    id
+  }
   poolStats(
     orderBy: timestamp
     orderDirection: desc
