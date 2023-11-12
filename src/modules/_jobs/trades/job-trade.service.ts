@@ -621,7 +621,7 @@ export class JobTradeService {
       // write contract
       await contract.openTrades(openTxn, {
         gasPrice: this.ethersService.getCurrentGas(network),
-        gasLimit: BigNumber(gasLimit.toString()).multipliedBy(3).toFixed(0),
+        gasLimit: gasLimit ? BigNumber(gasLimit.toString()).multipliedBy(3).toFixed(0) : "10000000",
       });
 
       this.listActives.push(...trades);
@@ -644,7 +644,6 @@ export class JobTradeService {
           "openTradeContract => retry",
           _tradeRetry.map((e) => e.queueId),
         );
-        this.logsService.createLog("openTradeContract => gasPrice", this.ethersService.getCurrentGas(network));
       }
       if (_tradeCancelled.length) {
         this.tradesService.bulkWrite(
