@@ -646,8 +646,9 @@ export class JobTradeService {
         );
       }
       if (_tradeCancelled.length || (e.reason && !Object.values(ERROR_RETRY).includes(e.reason))) {
+        const _trades = e.reason && !Object.values(ERROR_RETRY).includes(e.reason) ? trades : _tradeCancelled;
         this.tradesService.bulkWrite(
-          _tradeCancelled.map((item) => ({
+          _trades.map((item) => ({
             updateOne: {
               filter: {
                 _id: item._id,
