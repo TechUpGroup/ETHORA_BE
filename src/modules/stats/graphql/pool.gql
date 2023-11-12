@@ -1,5 +1,10 @@
-{
-  poolStats(orderBy: timestamp, orderDirection: desc, where: { period: daily }, subgraphError: allow) {
+query ($timestamp_start: Int!, $timestamp_end: Int!) {
+  poolStats(
+    orderBy: timestamp
+    orderDirection: desc
+    where: { period: daily, timestamp_gte: $timestamp_start, timestamp_lte: $timestamp_end }
+    subgraphError: allow
+  ) {
     timestamp
     amount
     period
