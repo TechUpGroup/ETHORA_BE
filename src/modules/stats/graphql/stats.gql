@@ -1,5 +1,11 @@
 query ($timestamp_start: Int!, $timestamp_end: Int!, $timestamp_24h: Int!) {
-  tradingStatsOverview: tradingStats(orderBy: timestamp, orderDirection: desc, first: 1000, where: { period: daily }, subgraphError: allow) {
+  tradingStatsOverview: tradingStats(
+    orderBy: timestamp
+    orderDirection: desc
+    first: 1000
+    where: { period: daily }
+    subgraphError: allow
+  ) {
     loss
     profit
     profitCumulative
@@ -37,6 +43,18 @@ query ($timestamp_start: Int!, $timestamp_end: Int!, $timestamp_24h: Int!) {
     orderBy: timestamp
     orderDirection: desc
     where: { period: daily, timestamp_gte: $timestamp_start, timestamp_lte: $timestamp_end }
+    subgraphError: allow
+  ) {
+    existingCount
+    uniqueCount
+    uniqueCountCumulative
+    timestamp
+  }
+  userStatsAllTime: userStats(
+    first: 1000
+    orderBy: timestamp
+    orderDirection: desc
+    where: { period: daily }
     subgraphError: allow
   ) {
     existingCount
