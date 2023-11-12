@@ -47,17 +47,17 @@ export function IsGTE(property: string, validationOptions?: ValidationOptions) {
 export function IsTimestamp(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
-      name: "isGTE",
+      name: "IsTimestamp",
       target: object.constructor,
       propertyName: propertyName,
       constraints: [],
       options: {
-        message: `Timestamp is not valid or in the future`,
+        message: `Timestamp is not correctly`,
         ...validationOptions,
       },
       validator: {
         validate(value: any) {
-          return typeof value === "number" && value > 0 && Math.round(Date.now() / 1000) - value >= 0;
+          return typeof value === "number" && value > 0;
         },
       },
     });
