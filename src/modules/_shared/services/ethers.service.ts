@@ -15,6 +15,7 @@ import { formatDecimal } from "common/utils/mongoose";
 import type { Provider } from "@ethersproject/providers";
 import type { Signer } from "@ethersproject/abstract-signer";
 import { DOMAIN } from "common/utils/signature";
+import { LogsService } from "modules/logs/logs.service";
 
 interface EtherProvider {
   provider: JsonRpcBatchProvider;
@@ -28,7 +29,9 @@ export class EthersService {
   private readonly currentGas: Map<Network, string>;
   private chooseRPC = 0;
 
-  constructor() {
+  constructor(
+    private readonly logsService: LogsService,
+  ) {
     this.ethersMap = new Map<Network, EtherProvider>();
     this.currentBlockNumber = new Map<Network, number>();
     this.currentGas = new Map<Network, string>();
@@ -89,6 +92,7 @@ export class EthersService {
     if (prkPublisher) signerTypes.set(SignerType.publisher, getWallet(prkPublisher, provider));
 
     this.ethersMap.set(network, { provider, signers: signerTypes });
+    this.logsService.createLog("chooseRPC", provider);
   }
 
   getCurrentGas(network: Network) {

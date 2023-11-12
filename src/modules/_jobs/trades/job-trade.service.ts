@@ -321,11 +321,6 @@ export class JobTradeService {
         const indexes: number[] = [];
         const trades: any[] = [];
 
-        this.logsService.createLog(
-          "listActives => before",
-          this.listActives.map((e) => e.queueId),
-        );
-
         // filter price with pair
         this.listActives.forEach((item: any, index) => {
           if (
@@ -357,11 +352,6 @@ export class JobTradeService {
 
         // remove actives
         this.listActives = this.listActives.filter((item, index) => !indexes.includes(index));
-
-        this.logsService.createLog(
-          "listActives => after",
-          this.listActives.map((e) => e.queueId),
-        );
 
         // Call smartcontract
         this.excuteOptionContract(trades);
