@@ -141,7 +141,6 @@ export class StatsService {
         const timestamp = new Date(new Date(item.timestamp * 1000).toISOString().split("T")[0]);
         return timestamp.getTime() === date.getTime();
       });
-      console.log(_data);
       return _data && _data.length
         ? {
             ..._data.reduce(
@@ -334,7 +333,7 @@ export class StatsService {
               currentProfitCumulative,
             };
           })
-        : [];
+        : null;
 
     if (data) {
       // console.log(data,'data')
