@@ -8,6 +8,8 @@ import { BlocksDocument } from "modules/blocks/schemas/blocks.schema";
 import { isNil } from "lodash";
 import { messageErr } from "common/constants/event";
 import { BlocksService } from "modules/blocks/blocks.service";
+import { ContractsService } from "modules/contracts/contracts.service";
+import { ContractName } from "common/constants/contract";
 
 @Injectable()
 export class HelperService {
@@ -15,6 +17,7 @@ export class HelperService {
   constructor(
     private readonly ethersService: EthersService,
     private readonly blocksService: BlocksService,
+    private readonly contractsService: ContractsService,
     ) {}
 
   filterEvents(events: Log[], txsHashExists: string[]) {
@@ -26,10 +29,11 @@ export class HelperService {
 
   async getLogs({ network, blocknumber_synced }: BlocksDocument) {
     try {
+      const router = await this.contractsService.getContractByName(ContractName.ROUTER);
       if (isNil(this.syncBlock[network])) {
         this.syncBlock[network] = 30;
       }
-      const blockNumber = this.ethersService.getBlockNumber(network);
+      const blockNumber = router?.blocknumber_synced || 0;
       const provider = this.ethersService.getProviderSyncBlock(network);
       const fromBlock = blocknumber_synced - 5;
       const nextBlock = blocknumber_synced + this.syncBlock[network];
