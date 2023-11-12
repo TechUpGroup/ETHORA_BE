@@ -22,7 +22,7 @@ export class StatsService {
 
     // stats data
     const statsGql = readFile("./graphql/stats.gql", __dirname);
-    const { userStats, USDCstats, USDC24stats, tradingStatsOverview, tradingStats, volumeStats, feeStats }: any =
+    const { userStats, userStatsAllTime, USDCstats, USDC24stats, tradingStatsOverview, tradingStats, volumeStats, feeStats }: any =
       await request<any>(graphql.uri, statsGql, {
         timestamp_start: start,
         timestamp_end: end,
@@ -47,8 +47,8 @@ export class StatsService {
     // user
     const usersData = (() => {
       let cumulativeNewUserCount = 0;
-      return userStats
-        ? sortBy(userStats, "timestamp").map((item) => {
+      return userStatsAllTime
+        ? sortBy(userStatsAllTime, "timestamp").map((item) => {
             cumulativeNewUserCount += item.uniqueCount;
             const oldCount = item.existingCount;
             const totalCount = item.uniqueCount + oldCount;
@@ -87,16 +87,17 @@ export class StatsService {
     // calc pool
     const poolGql = readFile("./graphql/pool.gql", __dirname);
     const dataPool: any = await request<any>(graphql.mainnetDummyUri, poolGql, {
-      timestamp_start: start,
+      timestamp_start: 0,
       timestamp_end: end,
     }).catch((error) => {
       console.error(error);
       return {} as any;
     });
-    const poolStats = this.calcPoolStats(dataPool || { poolStats: [] });
+    const poolStats = this.calcPoolStats(dataPool.poolStats || []);
+    const poolStatsAllTime = this.calcPoolStats(dataPool.poolStatsAllTime || []);
     // calc pool
-    const totalPool = poolStats.data?.[poolStats.data?.length - 1]?.glpSupply || 0;
-    const totalPoolDelta = poolStats.data?.[poolStats.data?.length - 1]?.glpSupplyChange || 0;
+    const totalPool = poolStatsAllTime.data?.[poolStatsAllTime.data?.length - 1]?.glpSupply || 0;
+    const totalPoolDelta = poolStatsAllTime.data?.[poolStatsAllTime.data?.length - 1]?.glpSupplyChange || 0;
 
     // res overview
     const dataOverview = {
@@ -437,13 +438,13 @@ export class StatsService {
     const timestampProp = "timestamp";
 
     const data: any = (() => {
-      if (!_data) {
+      if (!_data || !_data.length) {
         return null;
       }
 
       let prevGlpSupply;
       let prevAum;
-      let ret = sortBy(_data.poolStats, (item) => item[timestampProp])
+      let ret = sortBy(_data, (item) => item[timestampProp])
         .reduce((memo, item) => {
           const last = memo[memo.length - 1];
 
