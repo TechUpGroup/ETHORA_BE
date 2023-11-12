@@ -36,7 +36,7 @@ export class EthersService {
     this.currentBlockNumber = new Map<Network, number>();
     this.currentGas = new Map<Network, string>();
     for (const network of allNetworks) {
-      const provider = new JsonRpcBatchProvider(config.getEthereumProvider(network));
+      const provider = new JsonRpcBatchProvider(config.listRPC(network)[2]);
 
       const signerTypes = new Map<SignerType, Wallet>();
       const prkOperator = configPrivate.get<string>(`blockchain.private_key.operator`);
@@ -92,7 +92,7 @@ export class EthersService {
     if (prkPublisher) signerTypes.set(SignerType.publisher, getWallet(prkPublisher, provider));
 
     this.ethersMap.set(network, { provider, signers: signerTypes });
-    this.logsService.createLog("chooseRPC", provider);
+    this.logsService.createLog("chooseRPC", config.listRPC(network)[this.chooseRPC]);
   }
 
   getCurrentGas(network: Network) {
