@@ -73,7 +73,7 @@ export class TradesService {
       maxOI &&
       (BigNumber(totalTrade).gte(maxOI) || (!allowPartialFill && BigNumber(totalTrade).plus(tradeSize).gte(maxOI)))
     ) {
-      throw new BadRequestException("Max OI");
+      throw new BadRequestException("Invalid liquidity");
     }
 
     if (!wallet.isApproved) {
@@ -235,7 +235,7 @@ export class TradesService {
           state: TRADE_STATE.CANCELLED,
           isCancelled: true,
           cancellationDate: new Date(),
-          cancellationReason: "User cancelled",
+          cancellationReason: "Cancelled by user",
         },
       },
       {
