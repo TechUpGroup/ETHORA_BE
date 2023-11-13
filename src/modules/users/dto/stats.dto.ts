@@ -34,6 +34,7 @@ export interface MetricsGql {
     expirationTime: any;
   }>;
   referralDatas: Array<{
+    referrers: string[];
     totalTradesReferred: any;
     totalVolumeOfReferredTrades: any;
     totalRebateEarned: any;
