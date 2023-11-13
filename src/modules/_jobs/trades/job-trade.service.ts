@@ -620,7 +620,7 @@ export class JobTradeService {
       const _tradeCancelled = trades.filter((trade) => trade.call_open > config.maximumRetry);
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
         //  switch rpc
-        this.ethersService.switchRPC(network);
+        // this.ethersService.switchRPC(network);
 
         const _trades = _tradeRetry.map((trade) => {
           return { ...trade, call_open: trade.call_open + 1 };
@@ -752,7 +752,7 @@ export class JobTradeService {
       const _tradeRetry = trades.filter((trade) => trade.call_close <= config.maximumRetry);
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
         //  switch rpc
-        this.ethersService.switchRPC(network);
+        // this.ethersService.switchRPC(network);
 
         const _trades = _tradeRetry.map((trade) => {
           return { ...trade, call_close: trade.call_close + 1 };
@@ -886,7 +886,7 @@ export class JobTradeService {
       const _tradeRetry = trades.filter((trade) => trade.call_close <= config.maximumRetry);
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
         //  switch rpc
-        this.ethersService.switchRPC(network);
+        // this.ethersService.switchRPC(network);
 
         const _trades = _tradeRetry.map((trade) => {
           return { ...trade, call_close: trade.call_close + 1 };
