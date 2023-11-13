@@ -605,13 +605,13 @@ export class JobTradeService {
       );
 
       // gas estimate
-      const gasLimit = await contract.estimateGas.openTrades(openTxn, {
-        gasPrice: this.ethersService.getCurrentGas(network),
-      });
+      // const gasLimit = await contract.estimateGas.openTrades(openTxn, {
+      //   gasPrice: this.ethersService.getCurrentGas(network),
+      // });
       // write contract
       await contract.openTrades(openTxn, {
         gasPrice: this.ethersService.getCurrentGas(network),
-        gasLimit: gasLimit ? BigNumber(gasLimit.toString()).multipliedBy(3).toFixed(0) : "10000000",
+        gasLimit: "10000000",
       });
 
       this.listActives.push(...trades);
@@ -620,7 +620,7 @@ export class JobTradeService {
       const _tradeCancelled = trades.filter((trade) => trade.call_open > config.maximumRetry);
       if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
         //  switch rpc
-        // this.ethersService.switchRPC(network);
+        this.ethersService.switchRPC(network);
 
         const _trades = _tradeRetry.map((trade) => {
           return { ...trade, call_open: trade.call_open + 1 };
