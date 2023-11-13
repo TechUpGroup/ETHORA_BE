@@ -274,7 +274,7 @@ export class UsersService {
       metrics["referral"] = {
         totalRebateEarned: referralData.totalRebateEarned,
         totalVolumeTrades: referralData.totalVolumeOfReferredTrades,
-        totalTrades: referralData.totalTradesReferred,
+        totalTrades: referralData.referrers.length,
         tier: 1,
       };
     }
