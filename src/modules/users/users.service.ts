@@ -269,6 +269,15 @@ export class UsersService {
     data.activeData?.forEach((e) => (metrics[e.optionContract.token].openInterest += +e.totalFee));
 
     // referral
+    const referralData = data.referralDatas[0];
+    if (referralData) {
+      metrics["referral"] = {
+        totalRebateEarned: referralData.totalRebateEarned,
+        totalVolumeTrades: referralData.totalVolumeOfReferredTrades,
+        totalTrades: referralData.totalTradesReferred,
+        tier: 1,
+      };
+    }
 
     return {
       stats: {
