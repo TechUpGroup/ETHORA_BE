@@ -80,8 +80,8 @@ export class TradesService {
       throw new BadRequestException("Not approve");
     }
 
-    if (BigNumber(tradeSize).gt("100000000")) {
-      throw new BadRequestException("Trade size over 100 USDC");
+    if (BigNumber(tradeSize).gt("1000000000")) {
+      throw new BadRequestException("Trade size over 1000 USDC");
     }
 
     if (period < 180 || period > 14400) {

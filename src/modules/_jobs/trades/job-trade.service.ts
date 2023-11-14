@@ -418,6 +418,11 @@ export class JobTradeService {
 
         console.log("[CloseTradesAnyTIme] Processing");
 
+        this.logsService.createLog(
+          "CloseTradesAnyTIme => before",
+          this.queueCloseAnytime.map((e) => `${e.queueId}_${e.optionId || ""}`),
+        );
+
         // filter price with pair
         const trades = this.queueCloseAnytime.splice(0, config.quantityTxTrade).map((item: any) => {
           const prices = item.pair
@@ -434,6 +439,11 @@ export class JobTradeService {
           this.isClosingTradesAnyTime = false;
           return;
         }
+
+        this.logsService.createLog(
+          "CloseTradesAnyTIme => after",
+          this.queueCloseAnytime.map((e) => `${e.queueId}_${e.optionId || ""}`),
+        );
 
         // Call smartcontract
         this.closeTradeContract(trades);
