@@ -154,7 +154,7 @@ class Config {
           "https://compatible-intensive-theorem.arbitrum-goerli.quiknode.pro/d5c04dc63c58fbda8e2490faad3cb764ad4fda68/",
           "https://newest-patient-choice.arbitrum-goerli.discover.quiknode.pro/4253d8f64f144dcf08e74bd508dfc3e7adcfa13a/",
         ]
-      : ["https://base.publicnode.com", "https://base.meowrpc.com", "https://1rpc.io/base", "https://base.drpc.org"];
+      : ["https://base.publicnode.com", "https://base.publicnode.com", "https://base.publicnode.com", "https://base.publicnode.com"];
   }
 
   get listOperater() {
