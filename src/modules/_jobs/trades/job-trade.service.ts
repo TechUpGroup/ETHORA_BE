@@ -319,7 +319,7 @@ export class JobTradeService {
         }
 
         this.logsService.createLog(
-          "listActives",
+          "listActives => before",
           this.listActives.map((e) => `${e.queueId}_${e.optionId || ""}`),
         );
 
@@ -359,7 +359,7 @@ export class JobTradeService {
         this.listActives = this.listActives.filter((item, index) => !indexes.includes(index));
 
         this.logsService.createLog(
-          "listActives",
+          "listActives => after",
           this.listActives.map((e) => `${e.queueId}_${e.optionId || ""}`),
         );
 
@@ -628,7 +628,11 @@ export class JobTradeService {
     } catch (e) {
       const _tradeRetry = trades.filter((trade) => trade.call_open <= config.maximumRetry);
       const _tradeCancelled = trades.filter((trade) => trade.call_open > config.maximumRetry);
-      if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
+      if (
+        ((e.code && e.code === ERROR_RETRY.NETWORK_ERROR) ||
+          (e.reason && Object.values(ERROR_RETRY).includes(e.reason))) &&
+        _tradeRetry.length
+      ) {
         //  switch rpc
         this.ethersService.switchRPC(network);
 
@@ -760,7 +764,11 @@ export class JobTradeService {
       });
     } catch (e) {
       const _tradeRetry = trades.filter((trade) => trade.call_close <= config.maximumRetry);
-      if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
+      if (
+        ((e.code && e.code === ERROR_RETRY.NETWORK_ERROR) ||
+          (e.reason && Object.values(ERROR_RETRY).includes(e.reason))) &&
+        _tradeRetry.length
+      ) {
         //  switch rpc
         // this.ethersService.switchRPC(network);
 
@@ -894,7 +902,11 @@ export class JobTradeService {
       });
     } catch (e) {
       const _tradeRetry = trades.filter((trade) => trade.call_close <= config.maximumRetry);
-      if (e.reason && Object.values(ERROR_RETRY).includes(e.reason) && _tradeRetry.length) {
+      if (
+        ((e.code && e.code === ERROR_RETRY.NETWORK_ERROR) ||
+          (e.reason && Object.values(ERROR_RETRY).includes(e.reason))) &&
+        _tradeRetry.length
+      ) {
         //  switch rpc
         // this.ethersService.switchRPC(network);
 

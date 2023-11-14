@@ -26,6 +26,7 @@ export const REASON_FAIL_RETRY = [
 export const ERROR_RETRY = {
   UNPREDICTABLE_GAS_LIMIT: "execution reverted",
   NONCE_EXPIRED: "nonce has already been used",
+  NETWORK_ERROR: "NETWORK_ERROR"
 };
 
 export const messageErr = "query returned more than 10000 results";
