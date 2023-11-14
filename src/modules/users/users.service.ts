@@ -260,9 +260,9 @@ export class UsersService {
       if (e.payout > 0) {
         winTrade++;
         metrics[token].totalPayout += +e.payout;
-        metrics[token].netPnl += e.payout - e.totalFee;
-        metrics[token].volume += +e.totalFee;
       }
+      metrics[token].volume += +e.totalFee;
+      metrics[token].netPnl += e.payout > 0 ? e.payout - e.totalFee : -e.amount;
     });
 
     // interest

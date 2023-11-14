@@ -29,6 +29,7 @@ export interface MetricsGql {
       token: any;
       asset: any;
     };
+    amount: any
     payout: any;
     totalFee: any;
     expirationTime: any;
