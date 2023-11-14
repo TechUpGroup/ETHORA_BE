@@ -96,6 +96,7 @@ query ($address: String!, $timestampDaily: String!, $timestampWeekly: String!) {
       token
       asset
     }
+    amount
     payout
     totalFee
     expirationTime
