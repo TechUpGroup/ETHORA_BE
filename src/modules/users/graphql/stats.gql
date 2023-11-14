@@ -106,6 +106,7 @@ query ($address: String!, $timestampDaily: String!, $timestampWeekly: String!) {
   #
   # ------------------
   referralDatas(where: { id: $address }) {
+    referrers
     totalTradesReferred
     totalVolumeOfReferredTrades
     totalRebateEarned
