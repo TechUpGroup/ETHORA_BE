@@ -18,7 +18,7 @@ export class StatsService {
     const { network, start, end } = query;
     const graphql = config.getGraphql(network);
 
-    const dateArr = getDates(new Date(query.start * 1000), new Date(query.end * 1000), { onlyDate: true });
+    const dateArr = getDates(new Date(query.start * 1000), new Date(query.end * 1000));
 
     // stats data
     const statsGql = readFile("./graphql/stats.gql", __dirname);
