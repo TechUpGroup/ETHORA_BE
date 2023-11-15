@@ -12,7 +12,7 @@ export const DailyTournamentConfig: {
     minTradesToQualifyPNL: 5,
   },
   [Network.goerli]: {
-    startTimestamp: 1675958400000,
+    startTimestamp: 1696982400000,
     endDay: 12,
     rewardFixedAmount: "0",
     poolPercent: "5",
@@ -34,7 +34,7 @@ export const WeeklyTournamentConfig: {
     minVolumeToQualifyWinrate: "100000000",
   },
   [Network.goerli]: {
-    startTimestamp: 1676908800000,
+    startTimestamp: 1696982400000,
     endDay: 9,
     rewardFixedAmount: "1000",
     poolPercent: "5",
