@@ -257,7 +257,7 @@ export class UsersService {
           volume: 0,
         };
       }
-      if (e.payout > 0) {
+      if (e.payout > e.totalFee) {
         winTrade++;
         metrics[token].totalPayout += +e.payout;
       }
