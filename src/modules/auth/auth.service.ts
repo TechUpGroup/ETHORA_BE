@@ -154,7 +154,7 @@ export class AuthService {
   }
 
   async approve(userId: string, dto: ApproveDto) {
-    const { network, permit } = dto;
+    const { network, permit, isApprove } = dto;
     // call contract
     const user = await this.userService.findUserById(userId);
     const wallet = await this.userService.findWalletByNetworkAndId(network, user._id);
@@ -177,45 +177,76 @@ export class AuthService {
       SignerType.operator,
     );
 
-    // process action
-    try {
-      const maxApprove = new BigNumber("115792089237316195423570985008687907853269984665640564039457584007913129639935").toFixed(0).toString();
-      const tuple = {
-        value: maxApprove,
-        deadline: permit.deadline,
-        v: permit.v,
-        r: permit.r,
-        s: permit.s,
-        shouldApprove: true,
-      };
-      await contract.estimateGas.approveViaSignature(
-        ctr.contract_address,
-        address,
-        new Date().getTime(),
-        tuple,
-        {
+    if (!isApprove) {
+      if (!wallet.isApproved) {
+        throw new BadRequestException("Not approved");
+      }
+      try {
+        const maxApprove = new BigNumber(
+          "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        )
+          .toFixed(0)
+          .toString();
+        const tuple = {
+          value: maxApprove,
+          deadline: permit.deadline,
+          v: permit.v,
+          r: permit.r,
+          s: permit.s,
+          shouldApprove: true,
+        };
+        const revokeParams = [
+          {
+            tokenX: ctr.contract_address,
+            user: address,
+            permit: tuple,
+          },
+        ];
+        await contract.estimateGas.revokeApprovals(revokeParams, {
           gasPrice: this.ethersService.getCurrentGas(network),
-        },
-      );
-      await contract.approveViaSignature(
-        ctr.contract_address,
-        address,
-        new Date().getTime(),
-        tuple,
-        {
+        });
+        await contract.revokeApprovals(revokeParams, {
           gasPrice: this.ethersService.getCurrentGas(network),
-        },
-      );
-    } catch (e) {
-      throw new BadRequestException(e);
+        });
+      } catch (e) {
+        throw new BadRequestException(e);
+      }
+
+      wallet.isApproved = false;
+      wallet.lastRevokeDate = new Date();
+    } else {
+      if (wallet.isApproved) {
+        throw new BadRequestException("Already approved");
+      }
+
+      // process action
+      try {
+        const maxApprove = new BigNumber(
+          "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        )
+          .toFixed(0)
+          .toString();
+        const tuple = {
+          value: maxApprove,
+          deadline: permit.deadline,
+          v: permit.v,
+          r: permit.r,
+          s: permit.s,
+          shouldApprove: true,
+        };
+        await contract.estimateGas.approveViaSignature(ctr.contract_address, address, new Date().getTime(), tuple, {
+          gasPrice: this.ethersService.getCurrentGas(network),
+        });
+        await contract.approveViaSignature(ctr.contract_address, address, new Date().getTime(), tuple, {
+          gasPrice: this.ethersService.getCurrentGas(network),
+        });
+      } catch (e) {
+        throw new BadRequestException(e);
+      }
+      wallet.isApproved = true;
+      wallet.lastApproveDate = new Date();
     }
-
-    // TODO: approve before trade
-    wallet.isApproved = true;
-    wallet.lastApproveDate = new Date();
     await wallet.save();
-
-    //
     return true;
   }
 

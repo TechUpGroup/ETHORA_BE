@@ -52,4 +52,8 @@ export class Permit {
 export class ApproveDto extends NetworkDto {
   @ApiProperty()
   permit: Permit;
+
+  @ApiProperty({ default: true })
+  @IsBoolean()
+  isApprove: boolean;
 }

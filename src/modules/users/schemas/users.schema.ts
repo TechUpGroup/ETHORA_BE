@@ -82,6 +82,9 @@ export class Wallets {
   @Prop({ type: Date, required: false, default: null })
   lastApproveDate: Date | null;
 
+  @Prop({ type: Date, required: false, default: null })
+  lastRevokeDate: Date | null;
+
   @Prop({ required: false, default: null })
   permit: SchemaMongoDB.Types.Mixed;
 }
