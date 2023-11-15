@@ -178,13 +178,8 @@ export class AuthService {
         throw new BadRequestException("Not approved");
       }
       try {
-        const maxApprove = new BigNumber(
-          "115792089237316195423570985008687907853269984665640564039457584007913129639935",
-        )
-          .toFixed(0)
-          .toString();
         const tuple = {
-          value: maxApprove,
+          value: "0",
           deadline: permit.deadline,
           v: permit.v,
           r: permit.r,
