@@ -30,7 +30,7 @@ export class UsersController {
 
   @Get("stats")
   @AuthOptional()
-  @CacheTTL(60 * 1000)
+  @CacheTTL(10 * 1000)
   @ApiOperation({ summary: `Get stats of user in profile` })
   getStats(@User() user: UsersDocument, @Query() query: UserStatsRequest) {
     return this.service.getStats(query?.userAddress || user?.address || "", query.network);

@@ -22,15 +22,23 @@ export class StatsService {
 
     // stats data
     const statsGql = readFile("./graphql/stats.gql", __dirname);
-    const { userStats, userStatsAllTime, USDCstats, USDC24stats, tradingStatsOverview, tradingStats, volumeStats, feeStats }: any =
-      await request<any>(graphql.uri, statsGql, {
-        timestamp_start: start,
-        timestamp_end: end,
-        timestamp_24h: getLinuxTimestampBefore24Hours(),
-      }).catch((error) => {
-        console.error(error);
-        return {} as any;
-      });
+    const {
+      userStats,
+      userStatsAllTime,
+      USDCstats,
+      USDC24stats,
+      tradingStatsOverview,
+      tradingStats,
+      volumeStats,
+      feeStats,
+    }: any = await request<any>(graphql.uri, statsGql, {
+      timestamp_start: start,
+      timestamp_end: end,
+      timestamp_24h: getLinuxTimestampBefore24Hours(),
+    }).catch((error) => {
+      console.error(error);
+      return {} as any;
+    });
 
     // fees
     const USDC24hrsStats = {
@@ -117,26 +125,78 @@ export class StatsService {
     const _tradingStats = this.calcTradersData(tradingStats);
     return {
       USDC24stats,
-      volumeStats: this.mappingDateArray(this.calcVolumesData(volumeStats), dateArr),
-      burnedETRs: this.mappingDateArray(this.calcBurned(start, dataBurned?.burnedBFRs || []), dateArr),
+      volumeStats: this.mappingDateArray(this.calcVolumesData(volumeStats), dateArr, {
+        movingAverageAll: 0,
+        cumulative: 0,
+        timestamp: 0,
+        amount: 0,
+        VolumeUSDC: 0,
+        all: 0,
+      }),
+      burnedETRs: this.mappingDateArray(this.calcBurned(start, dataBurned?.burnedBFRs || []), dateArr, {
+        timestamp: 0,
+        cumulative: 0,
+        amount: 0,
+      }),
       overviewStats: dataOverview,
       poolStats: {
-        stats: poolStats.stats,
-        data: this.mappingDateArray(poolStats.data, dateArr),
+        stats: poolStats.stats || {
+          maxGlpAmount: 0,
+          minGlpAmount: 0,
+          maxRate: 0,
+          minRate: 0,
+        },
+        data: this.mappingDateArray(poolStats.data, dateArr, {
+          timestamp: 0,
+          rate: 0,
+          glpSupply: 0,
+          cumulativeGlpSupply: 0,
+          glpSupplyChange: 0,
+          aumChange: 0,
+        }),
       },
-      feeStats: this.mappingDateArray(this.calcFeesData(start, feeStats), dateArr),
-      tradingStats: _tradingStats
-        ? {
-            stats: _tradingStats.stats,
-            data: this.mappingDateArray(_tradingStats.data, dateArr),
-          }
-        : null,
-      userStats: this.mappingDateArray(userStats, dateArr),
+      feeStats: this.mappingDateArray(this.calcFeesData(start, feeStats) || [], dateArr, {
+        timestamp: 0,
+        all: 0,
+        cumulative: 0,
+        movingAverageAll: 0,
+        fee: 0,
+      }),
+      tradingStats: {
+        stats: _tradingStats?.stats || {
+          maxProfit: 0,
+          maxLoss: 0,
+          maxProfitLoss: 0,
+          currentProfitCumulative: 0,
+          currentLossCumulative: 0,
+          maxCurrentCumulativeProfitLoss: 0,
+          maxAbsPnl: 0,
+          maxAbsCumulativePnl: 0,
+        },
+        data: this.mappingDateArray(_tradingStats?.data || [], dateArr, {
+          profit: 0,
+          loss: 0,
+          profitCumulative: 0,
+          lossCumulative: 0,
+          pnl: 0,
+          pnlCumulative: 0,
+          timestamp: 0,
+          currentPnlCumulative: 0,
+          currentLossCumulative: 0,
+          currentProfitCumulative: 0,
+        }),
+      },
+      userStats: this.mappingDateArray(userStats, dateArr, {
+        existingCount: 0,
+        uniqueCount: 0,
+        uniqueCountCumulative: 0,
+        timestamp: 0,
+      }),
     } as any;
   }
 
-  private mappingDateArray(data: any[], dateArr: Date[]) {
-    if (!data || !data.length) return [];
+  private mappingDateArray(data: any[], dateArr: Date[], defaultValue: any) {
+    if (!data || !data.length) data = [];
     return dateArr.map((date) => {
       const _data = data.filter((item) => {
         const timestamp = new Date(new Date(item.timestamp * 1000).toISOString().split("T")[0]);
@@ -147,12 +207,12 @@ export class StatsService {
             ..._data.reduce(
               (pre, current) =>
                 Object.assign({}, ...Object.keys(pre).map((e) => ({ [e]: Number(pre[e]) + Number(current[e]) }))),
-              _data[0],
+              defaultValue,
             ),
             timestamp: Math.round(date.getTime() / 1000),
           }
         : {
-            ...Object.assign({}, ...Object.keys(data[0]).map((e) => ({ [e]: 0 }))),
+            ...Object.assign({}, ...Object.keys(defaultValue).map((e) => ({ [e]: 0 }))),
             timestamp: Math.round(date.getTime() / 1000),
           };
     });
