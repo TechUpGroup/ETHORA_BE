@@ -163,10 +163,6 @@ export class AuthService {
       throw new NotFoundException("Token address not found");
     }
     const { address } = user;
-
-    if (wallet.isApproved) {
-      throw new BadRequestException("Already approved");
-    }
     wallet.permit = permit as any;
 
     //
