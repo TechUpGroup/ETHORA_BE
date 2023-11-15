@@ -149,10 +149,10 @@ class Config {
     return network === Network.goerli
       ? [
           "https://arbitrum-goerli.publicnode.com",
-          "https://fittest-chaotic-liquid.arbitrum-goerli.quiknode.pro/fbe8d1ff6f9e2a471ff2d09679624d13152f6892/",
-          "https://newest-spring-paper.arbitrum-goerli.quiknode.pro/f7111cc1edaf4f2954028793cf0322bfea9b7ec9/",
-          "https://compatible-intensive-theorem.arbitrum-goerli.quiknode.pro/d5c04dc63c58fbda8e2490faad3cb764ad4fda68/",
-          "https://newest-patient-choice.arbitrum-goerli.discover.quiknode.pro/4253d8f64f144dcf08e74bd508dfc3e7adcfa13a/",
+          "https://arb-goerli.g.alchemy.com/v2/SZT3tJP017dh6zhBfoPLXrsATj1Y7OYP",
+          "https://arb-goerli.g.alchemy.com/v2/SZT3tJP017dh6zhBfoPLXrsATj1Y7OYP",
+          "https://arb-goerli.g.alchemy.com/v2/SZT3tJP017dh6zhBfoPLXrsATj1Y7OYP",
+          "https://arb-goerli.g.alchemy.com/v2/SZT3tJP017dh6zhBfoPLXrsATj1Y7OYP",
         ]
       : ["https://base.publicnode.com", "https://base.publicnode.com", "https://base.publicnode.com", "https://base.publicnode.com"];
   }
