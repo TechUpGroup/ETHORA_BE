@@ -87,7 +87,12 @@ export class Trades {
 
   @Prop({
     required: false,
-    default: 0,
+    default: function () {
+      const { tradeSize } = this;
+      if (tradeSize) {
+        return -Number(tradeSize);
+      }
+    },
   })
   pnl?: number;
 
