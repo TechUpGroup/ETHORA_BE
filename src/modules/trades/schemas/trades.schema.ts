@@ -23,7 +23,7 @@ export class Trades {
   @Prop({ required: true })
   strike: number;
 
-  @Prop({ required: true, default: function () {
+  @Prop({ required: false, default: function () {
     const { strike } = this;
     if (isNil(strike)) {
       return strike;
