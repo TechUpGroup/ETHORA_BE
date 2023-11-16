@@ -109,6 +109,7 @@ export class TradesService {
       settlementFee,
       lockedAmount,
       payout: lockedAmount,
+      strikeOld: data.strike
     };
 
     // save
@@ -145,6 +146,7 @@ export class TradesService {
     this.jobTradeService.queuesLimitOrder[index] = {
       ...(this.jobTradeService.queuesLimitOrder[index] as any),
       ...data,
+      strikeOld: data.strike,
       limitOrderExpirationDate: new Date(data.limitOrderDuration * 1000 + now.getTime()),
     };
 
@@ -156,6 +158,7 @@ export class TradesService {
       {
         $set: {
           ...data,
+          strikeOld: data.strike,
           limitOrderExpirationDate: new Date(data.limitOrderDuration * 1000 + now.getTime()),
         },
       },
