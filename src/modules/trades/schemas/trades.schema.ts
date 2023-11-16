@@ -4,6 +4,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { TRADE_STATE, TRADE_STATUS, TRADE_TOKEN } from "common/enums/trades.enum";
 import { Exclude } from "class-transformer";
 import { Network } from "common/enums/network.enum";
+import { isNil } from "lodash";
 
 export const TRADES_MODEL = "trades";
 
@@ -21,6 +22,14 @@ export class Trades {
 
   @Prop({ required: true })
   strike: number;
+
+  @Prop({ required: true, default: function () {
+    const { strike } = this;
+    if (isNil(strike)) {
+      return strike;
+    }
+  }, })
+  strikeOld?: number;
 
   @Prop({ required: true })
   strikeDate: Date;
