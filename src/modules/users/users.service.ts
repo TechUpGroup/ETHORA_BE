@@ -257,10 +257,10 @@ export class UsersService {
           volume: 0,
         };
       }
-      if (e.payout > e.totalFee) {
+      if (+e.payout > +e.totalFee) {
         winTrade++;
-        metrics[token].totalPayout += +e.payout;
       }
+      metrics[token].totalPayout += +e.payout;
       metrics[token].volume += +e.totalFee;
       metrics[token].netPnl += e.payout > 0 ? e.payout - e.totalFee : -e.amount;
     });
@@ -272,11 +272,11 @@ export class UsersService {
         return token in accumulator
           ? {
               ...accumulator,
-              [token]: accumulator[token] + currentValue.totalFee,
+              [token]: accumulator[token] + Number(currentValue.totalFee),
             }
           : {
               ...accumulator,
-              [token]: currentValue.totalFee,
+              [token]: Number(currentValue.totalFee),
             };
       },
       {} as Record<string, string>,
@@ -303,7 +303,10 @@ export class UsersService {
         weekly,
         winTrade,
         totalTrade,
-        mostTradedContract: Object.keys(tmpMostAssets).sort((a, b) => tmpMostAssets[a] - tmpMostAssets[b])[0] || null,
+        mostTradedContract:
+          Object.keys(tmpMostAssets)
+            .sort((a, b) => tmpMostAssets[a] - tmpMostAssets[b])[0]
+            ?.replace("USD", "-USD") || null,
       },
       metrics,
     };
