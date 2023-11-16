@@ -212,7 +212,7 @@ export class StatsService {
             timestamp: Math.round(date.getTime() / 1000),
           }
         : {
-            ...Object.assign({}, ...Object.keys(defaultValue).map((e) => ({ [e]: 0 }))),
+            ...defaultValue,
             timestamp: Math.round(date.getTime() / 1000),
           };
     });

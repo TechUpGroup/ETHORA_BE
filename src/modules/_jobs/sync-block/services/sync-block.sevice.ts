@@ -75,7 +75,9 @@ export class JobSyncBlockService {
 
   private async handleLogs(allLogs: Log[], network: Network) {
     if (!allLogs.length) return 0;
-    const targetLogs = allLogs.filter(log => log.topics.includes(TOPIC.EXPIRE) || log.topics.includes(TOPIC.EXERCISE));
+    const targetLogs = allLogs.filter(
+      (log) => log.topics.includes(TOPIC.EXPIRE) || log.topics.includes(TOPIC.EXERCISE),
+    );
     const eventHashes = targetLogs.map((event) => `${event.transactionHash.toLowerCase().trim()}_${event.logIndex}`);
     const txsHashExists = await this.historiesService.findTransactionHashBlockExists(eventHashes, network);
     const events = this.helperService.filterEvents(targetLogs, txsHashExists);
@@ -108,12 +110,12 @@ export class JobSyncBlockService {
 
     // filter status trade
     const trades = await this.tradesService.getAllTradesByOptionIdsAndTargetContract(contractOptionIds);
-    trades.forEach(trade => {
+    trades.forEach((trade) => {
       if (trade.optionId) {
         const profit = profits[trade.optionId];
         let status = TRADE_STATUS.LOSS;
-        if(profit > Number(trade.tradeSize)) {
-          status = TRADE_STATUS.WIN
+        if (profit > Number(trade.tradeSize)) {
+          status = TRADE_STATUS.WIN;
         }
         bulkUpdate.push({
           updateOne: {
@@ -129,7 +131,7 @@ export class JobSyncBlockService {
           },
         });
       }
-    })
+    });
 
     await Promise.all([
       historyCreateArr.length ? this.historiesService.saveHistoriesBlock(historyCreateArr) : undefined,
