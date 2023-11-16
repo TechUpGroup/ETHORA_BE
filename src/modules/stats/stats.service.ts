@@ -199,8 +199,8 @@ export class StatsService {
     if (!data || !data.length) data = [];
     return dateArr.map((date) => {
       const _data = data.filter((item) => {
-        const timestamp = new Date(new Date(item.timestamp * 1000).toISOString().split("T")[0]);
-        return timestamp.getTime() === date.getTime();
+        const timestamp = new Date(item.timestamp * 1000).toISOString().split("T")[0];
+        return timestamp === date.toISOString().split("T")[0];
       });
       return _data && _data.length
         ? {
