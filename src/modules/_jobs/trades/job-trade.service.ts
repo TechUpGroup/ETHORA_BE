@@ -745,6 +745,9 @@ export class JobTradeService {
             ),
             this.ethersService.signMessage(network, SignerType.publisher, userFullMessage),
           ]);
+          
+          //log
+          this.logsService.createLog("userPartialSignature", trade.optionId, trade.privateKeyOneCT);
 
           optionData.push({
             optionId: trade.optionId || 0,

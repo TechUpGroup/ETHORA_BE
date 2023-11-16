@@ -224,6 +224,16 @@ export class TradesService {
     if (trade.state !== TRADE_STATE.QUEUED) {
       throw new BadRequestException("Trade not in QUEUE state");
     }
+    let isInQueue = false;
+    this.jobTradeService.queuesLimitOrder.forEach((a, i) => {
+      isInQueue = true;
+      if (a.queueId === trade.queueId) {
+        this.jobTradeService.queuesLimitOrder.splice(i, 1);
+      }
+    });
+    if (!isInQueue) {
+      throw new BadRequestException("Trade is OPENED");
+    }
 
     const result = await this.model.findOneAndUpdate(
       {
