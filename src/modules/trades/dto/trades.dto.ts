@@ -154,10 +154,6 @@ export class CloseTradeDto {
   @ApiProperty()
   @IsMongoId()
   _id: string;
-
-  @ApiProperty({ default: "" })
-  @IsString()
-  closingTime: string;
 }
 
 export class OpenTradeDto {}
