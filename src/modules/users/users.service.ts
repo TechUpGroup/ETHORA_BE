@@ -230,8 +230,8 @@ export class UsersService {
     let totalTrade = 0;
     const metrics: UserStatsResponse["metrics"] = {
       referral: {
-        totalRebateEarned: 0,
-        totalVolumeTrades: 0,
+        totalRebateEarned: "0",
+        totalVolumeTrades: "0",
         totalTrades: 0,
         tier: 1,
       },
@@ -269,12 +269,13 @@ export class UsersService {
     data.activeData?.forEach((e) => (metrics[e.optionContract.token].openInterest += +e.totalFee));
 
     // referral
+    console.log(data.referralDatas);
     const referralData = data.referralDatas[0];
     if (referralData) {
       metrics["referral"] = {
         totalRebateEarned: referralData.totalRebateEarned,
-        totalVolumeTrades: referralData.totalVolumeOfReferredTrades,
-        totalTrades: referralData.referrers.length,
+        totalVolumeTrades: referralData.referrersVolumeTradedWeekly,
+        totalTrades: referralData.referrersTraded.length,
         tier: 1,
       };
     }

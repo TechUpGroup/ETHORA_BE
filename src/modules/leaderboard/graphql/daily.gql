@@ -2,10 +2,10 @@ query ($address: String!, $timestamp: String!, $timestampReward: String!) {
   userStats: leaderboards(
     orderBy: netPnL
     orderDirection: desc
-    first: 100
+    first: 10
     where: {
       timestamp: $timestamp
-      totalTrades_gte: 5
+      # totalTrades_gte: 5
       user_not_in: [
         "0x361e9013d7e4f2e4a035ba97fdb42cb7d2540259"
         "0x6fae0eed696ec28c81269b99240ee960570666f1"
@@ -40,10 +40,10 @@ query ($address: String!, $timestamp: String!, $timestampReward: String!) {
   loserStats: leaderboards(
     orderBy: netPnL
     orderDirection: asc
-    first: 100
+    first: 10
     where: {
       timestamp: $timestamp
-      totalTrades_gte: 5
+      # totalTrades_gte: 5
       user_not_in: [
         "0x361e9013d7e4f2e4a035ba97fdb42cb7d2540259"
         "0x6fae0eed696ec28c81269b99240ee960570666f1"
