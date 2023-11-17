@@ -2,7 +2,7 @@ query ($address: String!, $timestamp: String!, $timestampReward: String!) {
   userStats: weeklyLeaderboards(
     orderBy: netPnL
     orderDirection: desc
-    first: 100
+    first: 10
     where: {
       timestamp: $timestamp
       totalTrades_gte: 3
@@ -40,7 +40,7 @@ query ($address: String!, $timestamp: String!, $timestampReward: String!) {
   loserStats: weeklyLeaderboards(
     orderBy: netPnL
     orderDirection: asc
-    first: 100
+    first: 10
     where: {
       timestamp: $timestamp
       totalTrades_gte: 3
@@ -78,7 +78,7 @@ query ($address: String!, $timestamp: String!, $timestampReward: String!) {
   winnerWinrate: weeklyLeaderboards(
     orderBy: winRate
     orderDirection: desc
-    first: 100
+    first: 10
     where: {
       timestamp: $timestamp
       totalTrades_gte: 5

@@ -29,13 +29,17 @@ export interface MetricsGql {
       token: any;
       asset: any;
     };
-    amount: any
+    amount: any;
     payout: any;
     totalFee: any;
     expirationTime: any;
   }>;
   referralDatas: Array<{
     referrers: string[];
+    referrersTraded: string[];
+    referrersWeeklyTimestamp: string;
+    referrersTradedWeekly: string[];
+    referrersVolumeTradedWeekly: string;
     totalTradesReferred: any;
     totalVolumeOfReferredTrades: any;
     totalRebateEarned: any;
@@ -88,8 +92,8 @@ export interface UserStatsResponse {
   };
   metrics: {
     referral: {
-      totalRebateEarned: number;
-      totalVolumeTrades: number;
+      totalRebateEarned: string;
+      totalVolumeTrades: string;
       totalTrades: number;
       tier: number;
     };
