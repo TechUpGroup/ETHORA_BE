@@ -659,7 +659,7 @@ export class JobTradeService {
           _tradeRetry.map((e) => e.queueId),
         );
       }
-      if (_tradeCancelled.length || (e.reason && !Object.values(ERROR_RETRY).includes(e.reason))) {
+      if (_tradeCancelled.length || (e.reason && !Object.values(ERROR_RETRY).includes(e.reason)) || (e.code && e.code !== ERROR_RETRY.NETWORK_ERROR)) {
         const _trades = e.reason && !Object.values(ERROR_RETRY).includes(e.reason) ? trades : _tradeCancelled;
         this.tradesService.bulkWrite(
           _trades.map((item) => ({

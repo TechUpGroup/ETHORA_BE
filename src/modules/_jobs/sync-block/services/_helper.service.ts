@@ -34,7 +34,7 @@ export class HelperService {
         this.syncBlock[network] = 30;
       }
       const blockNumber = router?.blocknumber_synced || 0;
-      const provider = this.ethersService.getProviderSyncBlock(network);
+      const provider = this.ethersService.getProvider(network, true);
       const fromBlock = blocknumber_synced - 5;
       const nextBlock = blocknumber_synced + this.syncBlock[network];
       const targetBlock = nextBlock > blockNumber ? blockNumber : nextBlock;

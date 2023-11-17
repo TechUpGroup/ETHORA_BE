@@ -19,6 +19,7 @@ import { LogsService } from "modules/logs/logs.service";
 
 interface EtherProvider {
   provider: JsonRpcBatchProvider;
+  providerJob: JsonRpcBatchProvider;
   signers: Map<SignerType, Wallet>;
 }
 
@@ -27,7 +28,9 @@ export class EthersService {
   private readonly ethersMap: Map<Network, EtherProvider>;
   private readonly currentBlockNumber: Map<Network, number>;
   private readonly currentGas: Map<Network, string>;
+  private readonly signerTypes: Map<SignerType, Wallet>;
   private chooseRPC = 0;
+  private chooseRPCJob = 3;
 
   constructor(
     private readonly logsService: LogsService,
@@ -35,18 +38,19 @@ export class EthersService {
     this.ethersMap = new Map<Network, EtherProvider>();
     this.currentBlockNumber = new Map<Network, number>();
     this.currentGas = new Map<Network, string>();
+    this.signerTypes = new Map<SignerType, Wallet>();
     for (const network of allNetworks) {
-      const provider = new JsonRpcBatchProvider(config.listRPC(network)[2]);
+      const provider = new JsonRpcBatchProvider(config.listRPC(network)[1]);
+      const providerJob = new JsonRpcBatchProvider(config.listRPC(network)[2]);
 
-      const signerTypes = new Map<SignerType, Wallet>();
       const prkOperator = configPrivate.get<string>(`blockchain.private_key.operator`);
       const prkSfPublisher = configPrivate.get<string>(`blockchain.private_key.sfPublisher`);
       const prkPublisher = configPrivate.get<string>(`blockchain.private_key.publisher`);
-      if (prkOperator) signerTypes.set(SignerType.operator, getWallet(prkOperator, provider));
-      if (prkSfPublisher) signerTypes.set(SignerType.sfPublisher, getWallet(prkSfPublisher, provider));
-      if (prkPublisher) signerTypes.set(SignerType.publisher, getWallet(prkPublisher, provider));
+      if (prkOperator) this.signerTypes.set(SignerType.operator, getWallet(prkOperator, provider));
+      if (prkSfPublisher) this.signerTypes.set(SignerType.sfPublisher, getWallet(prkSfPublisher, provider));
+      if (prkPublisher) this.signerTypes.set(SignerType.publisher, getWallet(prkPublisher, provider));
 
-      this.ethersMap.set(network, { provider, signers: signerTypes });
+      this.ethersMap.set(network, { provider, providerJob, signers: this.signerTypes });
     }
     this.getCurrentBlockNumber();
     this.syncCurrentGas();
@@ -60,7 +64,7 @@ export class EthersService {
           const blockNumber = await this.getLastBlockNumber(network);
           this.currentBlockNumber.set(network, blockNumber);
         } catch {
-          this.switchRPC(network);
+          this.switchRPCOfJob(network);
         }
       }),
     );
@@ -80,19 +84,20 @@ export class EthersService {
     );
   }
 
-  switchRPC(network: Network) {
-    this.chooseRPC = (this.chooseRPC + 1) % 3;
-    const provider = new JsonRpcBatchProvider(config.listRPC(network)[this.chooseRPC]);
-    const signerTypes = new Map<SignerType, Wallet>();
-    const prkOperator = configPrivate.get<string>(`blockchain.private_key.operator`);
-    const prkSfPublisher = configPrivate.get<string>(`blockchain.private_key.sfPublisher`);
-    const prkPublisher = configPrivate.get<string>(`blockchain.private_key.publisher`);
-    if (prkOperator) signerTypes.set(SignerType.operator, getWallet(prkOperator, provider));
-    if (prkSfPublisher) signerTypes.set(SignerType.sfPublisher, getWallet(prkSfPublisher, provider));
-    if (prkPublisher) signerTypes.set(SignerType.publisher, getWallet(prkPublisher, provider));
+  switchRPCOfJob(network: Network) {
+    this.chooseRPCJob = (this.chooseRPCJob + 1) % 3;
+    const provider = this.getProvider(network);
+    const providerJob = new JsonRpcBatchProvider(config.listRPC(network)[this.chooseRPCJob]);
+    this.ethersMap.set(network, { provider, providerJob, signers: this.signerTypes });
+    this.logsService.createLog("chooseRPCJob", config.listRPC(network)[this.chooseRPC]);
+  }
 
-    this.ethersMap.set(network, { provider, signers: signerTypes });
-    this.logsService.createLog("chooseRPC", config.listRPC(network)[this.chooseRPC]);
+  switchRPC(network: Network) {
+    this.chooseRPC = (this.chooseRPC + 1) % 2;
+    const providerJob = this.getProvider(network);
+    const provider = new JsonRpcBatchProvider(config.listRPC(network)[this.chooseRPC]);
+    this.ethersMap.set(network, { provider, providerJob, signers: this.signerTypes });
+    this.logsService.createLog("chooseRPCJob", config.listRPC(network)[this.chooseRPC]);
   }
 
   getCurrentGas(network: Network) {
@@ -114,16 +119,11 @@ export class EthersService {
     return getWallet(privateKey, provider);
   }
 
-  getProvider(network: Network) {
+  getProvider(network: Network, isJob = false) {
+    if (isJob) {
+      return this.getNetwork(network).providerJob;
+    }
     return this.getNetwork(network).provider;
-  }
-
-  getProviderSyncBlock(network: Network) {
-    return new JsonRpcBatchProvider(config.listRPC(network)[config.listRPC(network).length - 1]);
-  }
-
-  getProviderSyncEvent(network: Network) {
-    return new JsonRpcBatchProvider(config.listRPC(network)[config.listRPC(network).length - 2]);
   }
 
   private getSigner(network: Network, type: SignerType) {
@@ -174,12 +174,12 @@ export class EthersService {
   }
 
   getContractSyncEvent<T extends Contract = Contract>(network: Network, address: string, ABI: any) {
-    const provider = this.getProviderSyncEvent(network);
+    const provider = this.getProvider(network, true);
     return getContract<T>(address, ABI, provider);
   }
 
   getLastBlockNumber(network: Network) {
-    return this.getProvider(network).getBlockNumber();
+    return this.getProvider(network, true).getBlockNumber();
   }
 
   getBalance(address: string, network: Network) {
@@ -192,7 +192,7 @@ export class EthersService {
 
   async getBlockTime(network: Network, blockNumber: number) {
     try {
-      const block = await this.getProvider(network).getBlock(blockNumber);
+      const block = await this.getProvider(network, true).getBlock(blockNumber);
       return Number(block.timestamp);
     } catch (e) {
       console.log("ERROR_BLOCK_TIME ` : ", e);
