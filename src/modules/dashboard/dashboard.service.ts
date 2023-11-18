@@ -21,19 +21,28 @@ export class DashboardService {
     });
 
     // Open Interest
-    // TODO: fake
     const openInterest = {
       OIstats: {
-        totalVolume: "0",
+        totalVolume:
+          data.activeData?.reduce((a, b) => a + Number(b.totalFee), Number(0)).toFixed(0) || "0",
       },
       USDCIOstats: {
-        totalVolume: "0",
+        totalVolume:
+          data.activeData
+            ?.filter((e) => e.optionContract.token === "USDC")
+            .reduce((a, b) => a + Number(b.totalFee), Number(0))
+            .toFixed(0) || "0",
       },
       ETRIOstats: {
-        totalVolume: "0",
+        totalVolume:
+          data.activeData
+            ?.filter((e) => e.optionContract.token === "ETR")
+            .reduce((a, b) => a + Number(b.totalFee), Number(0))
+            .toFixed(0) || "0",
       },
     };
 
+    data.activeData = undefined;
     return {
       tradingStartDate: config.trading.startDate,
       ...data,

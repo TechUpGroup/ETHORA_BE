@@ -44,4 +44,11 @@ query ($prevDayEpoch: Int!) {
     amount
     settlementFee
   }
+  activeData: userOptionDatas(first: 1000, where: { state: 1 }) {
+    optionContract {
+      address
+      token
+    }
+    totalFee
+  }
 }
