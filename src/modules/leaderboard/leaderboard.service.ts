@@ -22,10 +22,18 @@ import {
 import { LeaderboardType } from "common/enums/leaderboard.enums";
 import { DailyTournamentConfig, WeeklyTournamentConfig } from "common/constants/leaderboard";
 import BigNumber from "bignumber.js";
+import { InjectModel } from "@nestjs/mongoose";
+import { LEADERBOARD_CONFIG_MODEL, LeaderboardConfigDocument } from "./schemas/leaderboard.schema";
+import { PaginateModel } from "mongoose";
 
 @Injectable()
 export class LeaderboardService {
-  constructor() {}
+  constructor(
+    @InjectModel(LEADERBOARD_CONFIG_MODEL)
+    private readonly leaderboardConfigModel: PaginateModel<LeaderboardConfigDocument>,
+  ) {
+    this.initConfigData();
+  }
 
   async getOffsets(network: Network): Promise<any> {
     return {
@@ -36,12 +44,12 @@ export class LeaderboardService {
     };
   }
 
-  getSummary(
+  async getSummary(
     network: Network,
     type: LeaderboardType,
     data: LeaderboardGqlDto,
     // query: LeaderboardRequest,
-  ): LeaderboardSummaryResponse {
+  ): Promise<LeaderboardSummaryResponse> {
     const endDateTime = type === LeaderboardType.DAILY ? getTimeLeftOfDay() : getTimeLeftOfWeek();
     const configValue =
       type === LeaderboardType.DAILY ? DailyTournamentConfig[network] : WeeklyTournamentConfig[network];
@@ -51,9 +59,10 @@ export class LeaderboardService {
     //   query.offset;
     const endDate = new Date(endDateTime.date);
     // endDate.setDate(endDate.getDate() - (type === LeaderboardType.DAILY ? _offset : 7 * _offset));
+    // get start, end
+    const lbConfig = await this.leaderboardConfigModel.findOne({});
     // calc summary
     const summary: LeaderboardSummaryResponse["summary"] = {
-      // TODO: calc totalRewardPool
       totalRewardPool: "0",
       timeLeftByMs: endDateTime.ms,
       endDate: endDate,
@@ -72,6 +81,7 @@ export class LeaderboardService {
       .toString();
 
     return {
+      config: lbConfig as any,
       summary,
       user: data.userData?.[0] || null,
     };
@@ -92,7 +102,7 @@ export class LeaderboardService {
       winners: data.userStats,
       winnersWinrate: data.winnerWinrate,
       losers: data.loserStats,
-      ...this.getSummary(network, type, data),
+      ...(await this.getSummary(network, type, data)),
     };
   }
 
@@ -124,5 +134,18 @@ export class LeaderboardService {
     });
 
     return data;
+  }
+
+  private async initConfigData() {
+    const lbConfig = await this.leaderboardConfigModel.findOne({});
+    if (!lbConfig) {
+      console.log("Init leaderboard configure...");
+      await this.leaderboardConfigModel.create({
+        dailyStart: new Date(),
+        dailyEnd: new Date(new Date().setDate(90)),
+        weeklyStart: new Date(),
+        weeklyEnd: new Date(new Date().setDate(90)),
+      });
+    }
   }
 }
