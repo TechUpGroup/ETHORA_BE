@@ -110,6 +110,7 @@ query ($address: String!, $timestampDaily: String!, $timestampWeekly: String!) {
     referrers
     referrersWeeklyTimestamp
     referrersTradedWeekly
+    referrersTraded
     referrersVolumeTradedWeekly
     totalTradesReferred
     totalVolumeOfReferredTrades
