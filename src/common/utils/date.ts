@@ -1,6 +1,8 @@
 import { DailyTournamentConfig, WeeklyTournamentConfig } from "common/constants/leaderboard";
 import { Network } from "common/enums/network.enum";
 
+// 0 -> 0h UTC
+const PREFIX_TIME = 0;
 const MSINWEEK = 604800000;
 
 (Date as any).prototype.addDays = function (days: any) {
@@ -47,7 +49,7 @@ export function getDayId(offset: number = 0): number {
   if (offset > 0) {
     timestamp = timestamp - offset * 86400;
   }
-  const dayTimestamp = Math.floor((timestamp - 16 * 3600) / 86400);
+  const dayTimestamp = Math.floor((timestamp - PREFIX_TIME * 3600) / 86400);
   return dayTimestamp;
 }
 
@@ -67,7 +69,7 @@ export function getWeekId(offset: number = 0): number {
   if (offset > 0) {
     timestamp = timestamp - offset * (86400 * 7);
   }
-  const dayTimestamp = Math.floor((timestamp - 4 * 86400 - 16 * 3600) / (86400 * 7));
+  const dayTimestamp = Math.floor((timestamp - 4 * 86400 - PREFIX_TIME * 3600) / (86400 * 7));
   return dayTimestamp;
 }
 3;
