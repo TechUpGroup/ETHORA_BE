@@ -14,7 +14,7 @@ import { randomBytes } from "crypto";
 import { encryptAES } from "common/utils/encrypt";
 import { Network } from "common/enums/network.enum";
 import { ContractName } from "common/constants/contract";
-import { getCurrentDayIndex, getDayTimestamp, getWeekTimestamp } from "common/utils/date";
+import { getCurrentDayIndex, getDayTimestamp, getWeekId, getWeekTimestamp } from "common/utils/date";
 
 @Injectable()
 export class UsersService {
@@ -269,12 +269,14 @@ export class UsersService {
     data.activeData?.forEach((e) => (metrics[e.optionContract.token].openInterest += +e.totalFee));
 
     // referral
+    const weeklyId = getWeekId();
     const referralData = data.referralDatas[0];
     if (referralData) {
       metrics["referral"] = {
         totalRebateEarned: referralData.totalRebateEarned,
-        totalVolumeTrades: referralData.referrersVolumeTradedWeekly,
-        totalTrades: referralData.referrersTraded.length,
+        totalVolumeTrades:
+          `${weeklyId}` === referralData.referrersWeeklyTimestamp ? referralData.referrersVolumeTradedWeekly : "0",
+        totalTrades: `${weeklyId}` === referralData.referrersWeeklyTimestamp ? referralData.referrersTraded.length : 0,
         tier: 1,
       };
     }
