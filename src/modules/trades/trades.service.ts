@@ -64,7 +64,7 @@ export class TradesService {
     ]);
 
     const now = new Date();
-    const maxOI = this.jobTradeService.currenMaxOI[pairContractName];
+    const maxOI = this.jobTradeService.currentMaxOI[pairContractName];
     if (lastTrade.length && new Date(lastTrade[0].queuedDate.getTime() + 1000) > now) {
       throw new BadRequestException("Call too quickly");
     }

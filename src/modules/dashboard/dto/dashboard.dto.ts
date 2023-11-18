@@ -35,4 +35,5 @@ export interface DashboardOverviewGql {
   USDC24stats: Dashboard24hStatsGql[];
   ETR24stats: Dashboard24hStatsGql[];
   ARB24stats: Dashboard24hStatsGql[];
+  activeData?: any[];
 }

@@ -95,7 +95,7 @@ export class StatsService {
     // calc pool
     const poolGql = readFile("./graphql/pool.gql", __dirname);
     const dataPool: any = await request<any>(graphql.mainnetDummyUri, poolGql, {
-      timestamp_start: 0,
+      timestamp_start: start,
       timestamp_end: end,
     }).catch((error) => {
       console.error(error);

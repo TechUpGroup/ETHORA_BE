@@ -230,8 +230,8 @@ export class UsersService {
     let totalTrade = 0;
     const metrics: UserStatsResponse["metrics"] = {
       referral: {
-        totalRebateEarned: 0,
-        totalVolumeTrades: 0,
+        totalRebateEarned: "0",
+        totalVolumeTrades: "0",
         totalTrades: 0,
         tier: 1,
       },
@@ -262,26 +262,8 @@ export class UsersService {
       }
       metrics[token].totalPayout += +e.payout;
       metrics[token].volume += +e.totalFee;
-      metrics[token].netPnl += e.payout > 0 ? e.payout - e.totalFee : -e.amount;
+      metrics[token].netPnl += Number(e.payout) - Number(e.totalFee);
     });
-
-    //
-    const openInterest = data.activeData.reduce(
-      (accumulator, currentValue) => {
-        const token = currentValue.optionContract.token;
-        return token in accumulator
-          ? {
-              ...accumulator,
-              [token]: accumulator[token] + Number(currentValue.totalFee),
-            }
-          : {
-              ...accumulator,
-              [token]: Number(currentValue.totalFee),
-            };
-      },
-      {} as Record<string, string>,
-    );
-    Object.keys(openInterest).map((token) => (metrics[token]["openInterest"] = openInterest[token]));
 
     // interest
     data.activeData?.forEach((e) => (metrics[e.optionContract.token].openInterest += +e.totalFee));
@@ -291,8 +273,8 @@ export class UsersService {
     if (referralData) {
       metrics["referral"] = {
         totalRebateEarned: referralData.totalRebateEarned,
-        totalVolumeTrades: referralData.totalVolumeOfReferredTrades,
-        totalTrades: referralData.referrers.length,
+        totalVolumeTrades: referralData.referrersVolumeTradedWeekly,
+        totalTrades: referralData.referrersTraded.length,
         tier: 1,
       };
     }
@@ -305,7 +287,7 @@ export class UsersService {
         totalTrade,
         mostTradedContract:
           Object.keys(tmpMostAssets)
-            .sort((a, b) => tmpMostAssets[a] - tmpMostAssets[b])[0]
+            .sort((a, b) => tmpMostAssets[b] - tmpMostAssets[a])[0]
             ?.replace("USD", "-USD") || null,
       },
       metrics,

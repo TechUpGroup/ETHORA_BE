@@ -37,7 +37,7 @@ export const WeeklyTournamentConfig: {
     startTimestamp: 1696982400000,
     endDay: 9,
     rewardFixedAmount: "1000",
-    poolPercent: "5",
+    poolPercent: "10",
     winrateStartWeek: 5,
     minTradesToQualifyPNL: 3,
     minTradesToQualifyWinrate: 5,

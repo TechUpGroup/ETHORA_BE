@@ -32,7 +32,7 @@ export class JobTradeService {
   public queueCloseAnytime: TradesDocument[];
   public queuesMarket: TradesDocument[];
   public queuesLimitOrder: TradesDocument[];
-  public currenMaxOI: any;
+  public currentMaxOI: any;
   private isProcessingTradeMarket = false;
   private isProcessingTradeLimit = false;
   private isClosingTradesAnyTime = false;
@@ -49,7 +49,7 @@ export class JobTradeService {
     this.queueCloseAnytime = [];
     this.queuesMarket = [];
     this.queuesLimitOrder = [];
-    this.currenMaxOI = {};
+    this.currentMaxOI = {};
     void this.start();
   }
 
@@ -485,7 +485,7 @@ export class JobTradeService {
           BtcusdBinaryOptions__factory.abi,
         );
         const amount = await contract.getMaxOI();
-        this.currenMaxOI[pairContractName] = BigNumber(amount.toString()).toFixed(0);
+        this.currentMaxOI[pairContractName] = BigNumber(amount.toString()).toFixed(0);
       } catch (e) {
         console.log(e);
       }
