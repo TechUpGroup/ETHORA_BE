@@ -262,14 +262,13 @@ export class UsersService {
       }
       metrics[token].totalPayout += +e.payout;
       metrics[token].volume += +e.totalFee;
-      metrics[token].netPnl += e.payout > 0 ? e.payout - e.totalFee : -e.amount;
+      metrics[token].netPnl += Number(e.payout) - Number(e.totalFee);
     });
 
     // interest
     data.activeData?.forEach((e) => (metrics[e.optionContract.token].openInterest += +e.totalFee));
 
     // referral
-    console.log(data.referralDatas);
     const referralData = data.referralDatas[0];
     if (referralData) {
       metrics["referral"] = {
