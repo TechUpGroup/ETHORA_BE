@@ -287,7 +287,7 @@ export class UsersService {
         totalTrade,
         mostTradedContract:
           Object.keys(tmpMostAssets)
-            .sort((a, b) => tmpMostAssets[a] - tmpMostAssets[b])[0]
+            .sort((a, b) => tmpMostAssets[b] - tmpMostAssets[a])[0]
             ?.replace("USD", "-USD") || null,
       },
       metrics,
