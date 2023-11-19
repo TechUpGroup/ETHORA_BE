@@ -201,10 +201,10 @@ export class JobSyncRouterService {
     );
 
     try {
-      await contract.estimateGas.updateReferrerTier(address, tier, {
+      await contract.estimateGas.setReferrerTier(address, tier, {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
-      await contract.updateReferrerTier(address, tier, {
+      await contract.setReferrerTier(address, tier, {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
     } catch (error) {
