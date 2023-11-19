@@ -187,7 +187,7 @@ export class JobSyncRouterService {
     if (
       !referralConfig ||
       totalTrades < referralConfig.referrers ||
-      Number(totalVolumeTrades) / 1e6 < referralConfig.totalVolume
+      Number(totalVolumeTrades) < referralConfig.totalVolume
     ) {
       return;
     }
