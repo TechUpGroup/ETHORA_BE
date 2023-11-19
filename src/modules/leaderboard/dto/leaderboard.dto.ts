@@ -45,7 +45,7 @@ export class LeaderboardSummaryDto {
 export class LeaderboardUserDto {}
 
 export class LeaderboardSummaryResponse {
-  config?: LeaderboardConfigDocument;
+  config: LeaderboardConfigDocument;
   summary: LeaderboardSummaryDto;
   user: LeaderboardUserDto;
 }
