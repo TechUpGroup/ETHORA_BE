@@ -1,0 +1,10 @@
+query ($address: String!) {
+  referralDatas(where: { id: $address }) {
+    userTier
+    referrersWeeklyTimestamp
+    referrersTradedWeekly
+    referrersTraded
+    referrersVolumeTradedWeekly
+    totalRebateEarned
+  }
+}

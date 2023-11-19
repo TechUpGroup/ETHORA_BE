@@ -5,6 +5,7 @@ import { IsOffsetInRange } from "common/decorators/leaderboard.decorator";
 import { NetworkDto } from "common/dto/network.dto";
 import { LeaderboardType } from "common/enums/leaderboard.enums";
 import { UserStatsGql } from "modules/users/dto/stats.dto";
+import { LeaderboardConfigDocument } from "../schemas/leaderboard.schema";
 
 export class LeaderboardRequest extends NetworkDto {
   @ApiProperty()
@@ -44,6 +45,7 @@ export class LeaderboardSummaryDto {
 export class LeaderboardUserDto {}
 
 export class LeaderboardSummaryResponse {
+  config: LeaderboardConfigDocument;
   summary: LeaderboardSummaryDto;
   user: LeaderboardUserDto;
 }

@@ -14,7 +14,7 @@ import { randomBytes } from "crypto";
 import { encryptAES } from "common/utils/encrypt";
 import { Network } from "common/enums/network.enum";
 import { ContractName } from "common/constants/contract";
-import { getCurrentDayIndex, getDayTimestamp, getWeekTimestamp } from "common/utils/date";
+import { getCurrentDayIndex, getDayTimestamp, getWeekId, getWeekTimestamp } from "common/utils/date";
 
 @Injectable()
 export class UsersService {
@@ -269,13 +269,16 @@ export class UsersService {
     data.activeData?.forEach((e) => (metrics[e.optionContract.token].openInterest += +e.totalFee));
 
     // referral
+    const weeklyId = getWeekId();
     const referralData = data.referralDatas[0];
     if (referralData) {
       metrics["referral"] = {
         totalRebateEarned: referralData.totalRebateEarned,
-        totalVolumeTrades: referralData.referrersVolumeTradedWeekly,
-        totalTrades: referralData.referrersTraded.length,
-        tier: 1,
+        totalVolumeTrades:
+          `${weeklyId}` === referralData.referrersWeeklyTimestamp ? referralData.referrersVolumeTradedWeekly : "0",
+        totalTrades:
+          `${weeklyId}` === referralData.referrersWeeklyTimestamp ? referralData.referrersTradedWeekly.length : 0,
+        tier: referralData.userTier,
       };
     }
 
@@ -292,6 +295,42 @@ export class UsersService {
       },
       metrics,
     };
+  }
+
+  async getReferralTier(address: string, network: Network) {
+    if (!address) {
+      throw new BadRequestException("userAddress cannot empty");
+    }
+
+    const metricsGql = readFile("./graphql/referral-tier.gql", __dirname);
+    const graphql = config.getGraphql(network);
+    const data: MetricsGql = await request<MetricsGql>(graphql.uri, metricsGql, {
+      address: address.toLowerCase(),
+    }).catch((error) => {
+      console.error(error);
+      return {} as MetricsGql;
+    });
+
+    // referral
+    const weeklyId = getWeekId();
+    const referralData = data.referralDatas[0];
+    if (referralData) {
+      return {
+        totalRebateEarned: referralData.totalRebateEarned,
+        totalVolumeTrades:
+          `${weeklyId}` === referralData.referrersWeeklyTimestamp ? referralData.referrersVolumeTradedWeekly : "0",
+        totalTrades:
+          `${weeklyId}` === referralData.referrersWeeklyTimestamp ? referralData.referrersTradedWeekly.length : 0,
+        tier: referralData.userTier,
+      };
+    } else {
+      return {
+        totalRebateEarned: "0",
+        totalVolumeTrades: "0",
+        totalTrades: 0,
+        tier: 1,
+      };
+    }
   }
 
   async getListUserByIds(ids: string[]) {

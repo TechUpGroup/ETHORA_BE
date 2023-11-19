@@ -2,6 +2,7 @@ export enum ContractName {
   ROUTER = "router",
   REGISTER = "register",
   USDC = "usdc",
+  REFERRAL = "referral",
 }
 
 export enum PairContractName {
