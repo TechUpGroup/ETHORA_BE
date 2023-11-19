@@ -276,8 +276,9 @@ export class UsersService {
         totalRebateEarned: referralData.totalRebateEarned,
         totalVolumeTrades:
           `${weeklyId}` === referralData.referrersWeeklyTimestamp ? referralData.referrersVolumeTradedWeekly : "0",
-        totalTrades: `${weeklyId}` === referralData.referrersWeeklyTimestamp ? referralData.referrersTraded.length : 0,
-        tier: 1,
+        totalTrades:
+          `${weeklyId}` === referralData.referrersWeeklyTimestamp ? referralData.referrersTradedWeekly.length : 0,
+        tier: referralData.userTier,
       };
     }
 
