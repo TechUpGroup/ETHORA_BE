@@ -297,6 +297,42 @@ export class UsersService {
     };
   }
 
+  async getReferralTier(address: string, network: Network) {
+    if (!address) {
+      throw new BadRequestException("userAddress cannot empty");
+    }
+
+    const metricsGql = readFile("./graphql/referral-tier.gql", __dirname);
+    const graphql = config.getGraphql(network);
+    const data: MetricsGql = await request<MetricsGql>(graphql.uri, metricsGql, {
+      address: address.toLowerCase(),
+    }).catch((error) => {
+      console.error(error);
+      return {} as MetricsGql;
+    });
+
+    // referral
+    const weeklyId = getWeekId();
+    const referralData = data.referralDatas[0];
+    if (referralData) {
+      return {
+        totalRebateEarned: referralData.totalRebateEarned,
+        totalVolumeTrades:
+          `${weeklyId}` === referralData.referrersWeeklyTimestamp ? referralData.referrersVolumeTradedWeekly : "0",
+        totalTrades:
+          `${weeklyId}` === referralData.referrersWeeklyTimestamp ? referralData.referrersTradedWeekly.length : 0,
+        tier: referralData.userTier,
+      };
+    } else {
+      return {
+        totalRebateEarned: "0",
+        totalVolumeTrades: "0",
+        totalTrades: 0,
+        tier: 1,
+      };
+    }
+  }
+
   async getListUserByIds(ids: string[]) {
     const users = await this.usersModel.aggregate([
       { $match: { _id: { $in: ids } } },
