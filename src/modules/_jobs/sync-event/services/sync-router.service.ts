@@ -95,7 +95,7 @@ export class JobSyncRouterService {
           this.jobTradeService.listActives[index]["expirationDate"] = expiration.toString();
 
           // update tier
-          this.updateUserTier(network, account);
+          await this.updateUserTier(network, account);
         }
         if (nameEvent === ROUTER_EVENT.CANCELTRADE) {
           const { queueId, reason } = (event as CancelTradeEvent).args;
@@ -179,10 +179,8 @@ export class JobSyncRouterService {
 
   private async updateUserTier(network: Network, address: string) {
     // get stats
-    const userStats = await this.usersService.getStats(address, network);
-    const userReferral = userStats.metrics.referral;
-    const { tier, totalTrades, totalVolumeTrades } = userReferral;
-    const referralConfig = REFERRAL_TIER[userReferral.tier - 1];
+    const { tier, totalTrades, totalVolumeTrades } = await this.usersService.getReferralTier(address, network);
+    const referralConfig = REFERRAL_TIER[tier - 1];
 
     if (
       !referralConfig ||
