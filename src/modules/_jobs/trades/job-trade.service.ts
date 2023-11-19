@@ -22,7 +22,6 @@ import {
   generateMessage,
 } from "common/utils/signature";
 import { SignerType } from "common/enums/signer.enum";
-import { ERROR_RETRY } from "common/constants/event";
 import { JOB_TIME } from "common/constants/trades";
 import { TradesService } from "modules/trades/trades.service";
 
@@ -638,11 +637,7 @@ export class JobTradeService {
     } catch (e) {
       const _tradeRetry = trades.filter((trade) => trade.call_open <= config.maximumRetry);
       const _tradeCancelled = trades.filter((trade) => trade.call_open > config.maximumRetry);
-      if (
-        ((e.code && e.code === ERROR_RETRY.NETWORK_ERROR) ||
-          (e.reason && Object.values(ERROR_RETRY).includes(e.reason))) &&
-        _tradeRetry.length
-      ) {
+      if (_tradeRetry.length) {
         //  switch rpc
         this.ethersService.switchRPC(network);
 
@@ -659,10 +654,9 @@ export class JobTradeService {
           _tradeRetry.map((e) => e.queueId),
         );
       }
-      if (_tradeCancelled.length || (e.reason && !Object.values(ERROR_RETRY).includes(e.reason)) || (e.code && e.code !== ERROR_RETRY.NETWORK_ERROR)) {
-        const _trades = e.reason && !Object.values(ERROR_RETRY).includes(e.reason) ? trades : _tradeCancelled;
+      if (_tradeCancelled.length) {
         this.tradesService.bulkWrite(
-          _trades.map((item) => ({
+          _tradeCancelled.map((item) => ({
             updateOne: {
               filter: {
                 _id: item._id,
@@ -747,7 +741,7 @@ export class JobTradeService {
           ]);
           
           //log
-          this.logsService.createLog("userPartialSignature", trade.optionId, trade.privateKeyOneCT);
+          this.logsService.createLog("userPartialSignature", trade.optionId || "", trade.privateKeyOneCT);
 
           optionData.push({
             optionId: trade.optionId || 0,
@@ -777,13 +771,9 @@ export class JobTradeService {
       });
     } catch (e) {
       const _tradeRetry = trades.filter((trade) => trade.call_close <= config.maximumRetry);
-      if (
-        ((e.code && e.code === ERROR_RETRY.NETWORK_ERROR) ||
-          (e.reason && Object.values(ERROR_RETRY).includes(e.reason))) &&
-        _tradeRetry.length
-      ) {
+      if (_tradeRetry.length) {
         //  switch rpc
-        // this.ethersService.switchRPC(network);
+        this.ethersService.switchRPC(network);
 
         const _trades = _tradeRetry.map((trade) => {
           return { ...trade, call_close: trade.call_close + 1 };
@@ -915,13 +905,9 @@ export class JobTradeService {
       });
     } catch (e) {
       const _tradeRetry = trades.filter((trade) => trade.call_close <= config.maximumRetry);
-      if (
-        ((e.code && e.code === ERROR_RETRY.NETWORK_ERROR) ||
-          (e.reason && Object.values(ERROR_RETRY).includes(e.reason))) &&
-        _tradeRetry.length
-      ) {
+      if (_tradeRetry.length) {
         //  switch rpc
-        // this.ethersService.switchRPC(network);
+        this.ethersService.switchRPC(network);
 
         const _trades = _tradeRetry.map((trade) => {
           return { ...trade, call_close: trade.call_close + 1 };

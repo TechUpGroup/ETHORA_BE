@@ -91,10 +91,15 @@ export class TradesController {
     return this.service.getCancelledUserTrades(query?.userAddress || user?.address, query);
   }
 
-  @Get("queue")
-  @Auth()
+  @Get("trade-call-closed-unsuccess")
   @ApiOperation({ summary: `Get queue` })
-  getQueue() {
-    return this.service.queue();
+  closeUnsuccess() {
+    return this.service.closeUnsuccess();
+  }
+
+  @Get("retry-tx")
+  @ApiOperation({ summary: `Get queue` })
+  retryTx() {
+    return this.service.retryTX();
   }
 }

@@ -618,12 +618,73 @@ export class TradesService {
     }
   }
 
-  queue() {
-    return {
-      queuesMarket: this.jobTradeService.queuesMarket,
-      queuesLimitOrder: this.jobTradeService.queuesLimitOrder,
-      listActives: this.jobTradeService.listActives,
-      queueCloseAnytime: this.jobTradeService.queueCloseAnytime,
-    };
+  closeUnsuccess() {
+    return this.model.aggregate([
+      {
+        $match: {
+          state: TRADE_STATE.CLOSED,
+          tx_close: null,
+          optionId: { $ne: null},
+          call_close: { $gt: config.maximumRetry}
+        },
+      },
+    ]);
+  }
+
+  async retryTX() {
+    let tradeCloseUnsuccess = await this.model.aggregate([
+      {
+        $match: {
+          state: TRADE_STATE.CLOSED,
+          tx_close: null,
+          optionId: { $ne: null},
+          call_close: { $gt: config.maximumRetry },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userAddress",
+          foreignField: "address",
+          as: "user",
+          pipeline: [
+            {
+              $lookup: {
+                from: "wallets",
+                localField: "_id",
+                foreignField: "userId",
+                as: "wallet",
+              },
+            },
+            {
+              $unwind: {
+                path: "$wallet",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$user",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
+    if (tradeCloseUnsuccess.length) {
+      console.log("[ActiveTrade] Loaded", tradeCloseUnsuccess.length, "activeTrade to listActives");
+      tradeCloseUnsuccess = tradeCloseUnsuccess
+        .filter((trade) => trade.user.wallet && trade.user.wallet.privateKey)
+        .map((trade) => {
+          return {
+            ...trade,
+            oneCT: trade.user.oneCT,
+            privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
+          };
+        });
+      this.jobTradeService.listActives.push(...tradeCloseUnsuccess);
+    }
+    return;
   }
 }
