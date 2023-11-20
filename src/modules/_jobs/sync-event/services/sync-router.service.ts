@@ -179,7 +179,12 @@ export class JobSyncRouterService {
 
   private async updateUserTier(network: Network, address: string) {
     // get stats
-    const { tier, totalTrades, totalVolumeTrades } = await this.usersService.getReferralTier(address, network);
+    const { referrer } = await this.usersService.getReferralTier(address, network);
+    if (referrer === "0x0000000000000000000000000000000000000000") {
+      console.log("[UpgradeTier] Ignore since no referrer");
+      return;
+    }
+    const { tier, totalTrades, totalVolumeTrades } = await this.usersService.getReferralTier(referrer, network);
     const referralConfig = REFERRAL_TIER[tier - 1];
 
     if (
@@ -187,6 +192,7 @@ export class JobSyncRouterService {
       totalTrades < referralConfig.referrers ||
       Number(totalVolumeTrades) < referralConfig.totalVolume
     ) {
+      console.log("[UpgradeTier] Ignore since data not match", referralConfig, totalTrades, totalVolumeTrades);
       return;
     }
 
@@ -199,10 +205,10 @@ export class JobSyncRouterService {
     );
 
     try {
-      await contract.estimateGas.setReferrerTier(address, tier, {
+      await contract.estimateGas.setReferrerTier(referrer, tier, {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
-      await contract.setReferrerTier(address, tier, {
+      await contract.setReferrerTier(referrer, tier, {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
     } catch (error) {

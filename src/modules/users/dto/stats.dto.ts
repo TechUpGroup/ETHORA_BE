@@ -34,6 +34,7 @@ export interface MetricsGql {
   }>;
   referralDatas: Array<{
     userTier: number;
+    referrer: string;
     referrers: string[];
     referrersTraded: string[];
     referrersWeeklyTimestamp: string;
