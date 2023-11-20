@@ -69,10 +69,9 @@ export function getWeekId(offset: number = 0): number {
   if (offset > 0) {
     timestamp = timestamp - offset * (86400 * 7);
   }
-  const dayTimestamp = Math.floor((timestamp - 4 * 86400 - PREFIX_TIME * 3600) / (86400 * 7));
+  const dayTimestamp = Math.floor((timestamp - PREFIX_TIME * 3600) / (86400 * 7));
   return dayTimestamp;
 }
-3;
 
 export const useWeekOfTournament = (chain: Network) => {
   const { startTimestamp } = WeeklyTournamentConfig[chain];
