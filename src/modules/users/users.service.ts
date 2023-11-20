@@ -341,6 +341,7 @@ export class UsersService {
         totalTrades:
           `${weeklyId}` === referralData.referrersWeeklyTimestamp ? referralData.referrersTradedWeekly.length : 0,
         tier: referralData.userTier,
+        referrer: referralData.referrer,
       };
     } else {
       return {
@@ -348,6 +349,7 @@ export class UsersService {
         totalVolumeTrades: "0",
         totalTrades: 0,
         tier: 1,
+        referrer: "0x0000000000000000000000000000000000000000",
       };
     }
   }
