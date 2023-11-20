@@ -106,7 +106,7 @@ export class LeaderboardService {
     };
   }
 
-  private async getDaily(network: Network, address: string, timestamp: string) {
+  async getDaily(network: Network, address: string, timestamp: string) {
     const graphql = config.getGraphql(network);
     const metricsGql = readFile("./graphql/daily.gql", __dirname);
     const data: LeaderboardGqlDto = await request<LeaderboardGqlDto>(graphql.uri, metricsGql, {
@@ -121,7 +121,7 @@ export class LeaderboardService {
     return data;
   }
 
-  private async getWeekly(network: Network, address, timestamp: string) {
+  async getWeekly(network: Network, address, timestamp: string) {
     const graphql = config.getGraphql(network);
     const metricsGql = readFile("./graphql/weekly.gql", __dirname);
     const data: LeaderboardGqlDto = await request<LeaderboardGqlDto>(graphql.uri, metricsGql, {
