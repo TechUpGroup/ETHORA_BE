@@ -21,8 +21,6 @@ export interface UserStatsGql {
 }
 
 export interface MetricsGql {
-  userStatsDaily: Array<UserStatsGql>;
-  userStatsWeekly: Array<UserStatsGql>;
   userOptionDatas: Array<{
     optionContract: {
       address: any;

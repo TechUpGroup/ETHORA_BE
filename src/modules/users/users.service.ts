@@ -15,6 +15,7 @@ import { encryptAES } from "common/utils/encrypt";
 import { Network } from "common/enums/network.enum";
 import { ContractName } from "common/constants/contract";
 import { getCurrentDayIndex, getDayTimestamp, getWeekId, getWeekTimestamp } from "common/utils/date";
+import { LeaderboardService } from "modules/leaderboard/leaderboard.service";
 
 @Injectable()
 export class UsersService {
@@ -24,6 +25,7 @@ export class UsersService {
     @InjectModel(WALLETS_MODEL)
     private readonly walletsModel: PaginateModel<WalletsDocument>,
     private readonly ethersService: EthersService,
+    private readonly leaderboardService: LeaderboardService,
   ) {}
 
   private generateMnemonic() {
@@ -222,8 +224,25 @@ export class UsersService {
     });
 
     // rank
-    const daily = data.userStatsDaily?.findIndex((e) => e.user.toLowerCase() === address.toLowerCase()) + 1 || -1;
-    const weekly = data.userStatsWeekly?.findIndex((e) => e.user.toLowerCase() === address.toLowerCase()) + 1 || -1;
+    const { userStats: winnerDaily, loserStats: loserDaily } = await this.leaderboardService.getDaily(
+      network,
+      address,
+      timestampDaily + "",
+    );
+    const {
+      userStats: winnerWeekly,
+      loserStats: loserWeekly,
+      winnerWinrate: winrateWeekly,
+    } = await this.leaderboardService.getWeekly(network, address, timestampWeekly + "");
+    const daily =
+      winnerDaily?.findIndex((e) => e.user.toLowerCase() === address.toLowerCase()) + 1 ||
+      loserDaily?.findIndex((e) => e.user.toLowerCase() === address.toLowerCase()) + 1 ||
+      -1;
+    const weekly =
+      winnerWeekly?.findIndex((e) => e.user.toLowerCase() === address.toLowerCase()) + 1 ||
+      winrateWeekly?.findIndex((e) => e.user.toLowerCase() === address.toLowerCase()) + 1 ||
+      loserWeekly?.findIndex((e) => e.user.toLowerCase() === address.toLowerCase()) + 1 ||
+      -1;
 
     //
     let winTrade = 0;
