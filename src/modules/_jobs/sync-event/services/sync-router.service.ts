@@ -94,8 +94,8 @@ export class JobSyncRouterService {
           this.jobTradeService.listActives[index]["optionId"] = +optionId.toString();
           this.jobTradeService.listActives[index]["expirationDate"] = expiration.toString();
 
-          // update tier
-          await this.updateUserTier(network, account);
+          // update tier, delay since data analytic delay
+          setTimeout(() => this.updateUserTier(network, account), 10000);
         }
         if (nameEvent === ROUTER_EVENT.CANCELTRADE) {
           const { queueId, reason } = (event as CancelTradeEvent).args;
@@ -179,32 +179,33 @@ export class JobSyncRouterService {
 
   private async updateUserTier(network: Network, address: string) {
     // get stats
-    const { referrer } = await this.usersService.getReferralTier(address, network);
-    if (referrer === "0x0000000000000000000000000000000000000000") {
-      console.log("[UpgradeTier] Ignore since no referrer");
-      return;
-    }
-    const { tier, totalTrades, totalVolumeTrades } = await this.usersService.getReferralTier(referrer, network);
-    const referralConfig = REFERRAL_TIER[tier - 1];
-
-    if (
-      !referralConfig ||
-      totalTrades < referralConfig.referrers ||
-      Number(totalVolumeTrades) < referralConfig.totalVolume
-    ) {
-      console.log("[UpgradeTier] Ignore since data not match", referralConfig, totalTrades, totalVolumeTrades);
-      return;
-    }
-
-    // contract
-    const contract = this.ethersService.getContract(
-      network,
-      config.getContract(network, ContractName.REFERRAL).address,
-      ReferralStorage__factory.abi,
-      SignerType.operator,
-    );
-
     try {
+      const { referrer } = await this.usersService.getReferralTier(address, network);
+      if (referrer === "0x0000000000000000000000000000000000000000") {
+        console.log("[UpgradeTier] Ignore since no referrer");
+        return;
+      }
+      const { tier, totalTrades, totalVolumeTrades } = await this.usersService.getReferralTier(referrer, network);
+      const referralConfig = REFERRAL_TIER[tier - 1];
+
+      if (
+        !referralConfig ||
+        totalTrades < referralConfig.referrers ||
+        Number(totalVolumeTrades) < referralConfig.totalVolume
+      ) {
+        console.log("[UpgradeTier] Ignore since data not match", referralConfig, totalTrades, totalVolumeTrades);
+        return;
+      }
+
+      // contract
+      const contract = this.ethersService.getContract(
+        network,
+        config.getContract(network, ContractName.REFERRAL).address,
+        ReferralStorage__factory.abi,
+        SignerType.operator,
+      );
+
+      // contract
       await contract.estimateGas.setReferrerTier(referrer, tier, {
         gasPrice: this.ethersService.getCurrentGas(network),
       });
