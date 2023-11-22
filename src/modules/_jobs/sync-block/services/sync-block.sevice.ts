@@ -111,7 +111,7 @@ export class JobSyncBlockService {
     // filter status trade
     const trades = await this.tradesService.getAllTradesByOptionIdsAndTargetContract(contractOptionIds);
     trades.forEach((trade) => {
-      if (trade.optionId) {
+      if (trade.optionId !== null) {
         const profit = profits[trade.optionId];
         let status = TRADE_STATUS.LOSS;
         if (profit > Number(trade.tradeSize)) {
