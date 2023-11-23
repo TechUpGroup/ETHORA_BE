@@ -161,7 +161,7 @@ export class JobSyncRouterService {
               oneCT: trade.user.oneCT,
               privateKeyOneCT: decryptAES(trade.user.wallet.privateKey as string),
             };
-            if (_trade.closingTIme) {
+            if (_trade.closingTime) {
               this.jobTradeService.queueCloseAnytime.push(_trade);
             } else {
               this.jobTradeService.listActives.push(_trade);
