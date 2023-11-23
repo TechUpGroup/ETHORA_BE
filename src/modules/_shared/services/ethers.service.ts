@@ -32,9 +32,7 @@ export class EthersService {
   private chooseRPC = 0;
   private chooseRPCJob = 2;
 
-  constructor(
-    private readonly logsService: LogsService,
-  ) {
+  constructor(private readonly logsService: LogsService) {
     this.ethersMap = new Map<Network, EtherProvider>();
     this.currentBlockNumber = new Map<Network, number>();
     this.currentGas = new Map<Network, string>();
@@ -85,7 +83,7 @@ export class EthersService {
   }
 
   switchRPCOfJob(network: Network) {
-    this.chooseRPCJob = (this.chooseRPCJob + 1) % 3 + 2;
+    this.chooseRPCJob = ((this.chooseRPCJob + 1) % 3) + 2;
     const provider = this.getProvider(network);
     const providerJob = new JsonRpcBatchProvider(config.listRPC(network)[this.chooseRPCJob]);
     this.ethersMap.set(network, { provider, providerJob, signers: this.signerTypes });
