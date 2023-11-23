@@ -87,6 +87,7 @@ export class JobSyncRouterService {
                 contractOption: `${targetContract.toLowerCase().trim()}_${optionId.toString()}`,
                 tradeSize: revisedFee.toString(),
                 tx_open: transactionHash.toLowerCase().trim(),
+                isLimitOrder: false
               },
             },
           });
