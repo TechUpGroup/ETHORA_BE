@@ -184,7 +184,8 @@ export class TradesService {
     }
 
     // TODO:
-    const now = Math.floor(new Date().getTime() / 1000).toString();
+    const now = (Math.floor(new Date().getTime() / 1000) + 1).toString();
+
     let isTradeActive = false;
     this.jobTradeService.listActives.forEach((a, i) => {
       if (a.queueId === trade.queueId) {
@@ -207,6 +208,7 @@ export class TradesService {
       },
       {
         $set: {
+          closingTime: now,
           userCloseDate: new Date(+now * 1000),
           state: TRADE_STATE.CLOSED,
         },

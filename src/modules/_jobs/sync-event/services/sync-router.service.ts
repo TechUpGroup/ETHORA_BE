@@ -62,13 +62,21 @@ export class JobSyncRouterService {
       const txsHashExists = await this.historyService.findTransactionHashExists(eventHashes);
       const events = this.helperService.filterEvents(listEvents, txsHashExists);
 
+      // get time of block
+      const blocktimestamps = {};
+      const listBlockNumber = [...new Set(events.map((i) => i.blockNumber))];
+      const listBlockTime = await Promise.all(
+        listBlockNumber.map((blockNumber) => this.ethersService.getBlockTime(contract.network, blockNumber)),
+      );
+      listBlockTime.forEach((blockTime, i) => (blocktimestamps[listBlockNumber[i]] = blockTime));
+
       const historyCreateArr: any[] = [];
       const bulkUpdate: any[] = [];
       const retryCloseTrades: any[] = [];
 
       const now = new Date();
       for (const event of events) {
-        const { transactionHash, event: nameEvent, logIndex } = event;
+        const { transactionHash, event: nameEvent, logIndex, blockNumber } = event;
         historyCreateArr.push({
           transaction_hash: transactionHash.toLowerCase().trim(),
           log_index: logIndex,
@@ -89,6 +97,7 @@ export class JobSyncRouterService {
                 tx_open: transactionHash.toLowerCase().trim(),
                 isLimitOrder: false,
                 state: TRADE_STATE.OPENED,
+                openDate: new Date(blocktimestamps[blockNumber])
               },
             },
           });
