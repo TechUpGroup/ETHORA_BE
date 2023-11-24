@@ -23,12 +23,15 @@ export class Trades {
   @Prop({ required: true })
   strike: number;
 
-  @Prop({ required: false, default: function () {
-    const { strike } = this;
-    if (isNil(strike)) {
-      return strike;
-    }
-  }, })
+  @Prop({
+    required: false,
+    default: function () {
+      const { strike } = this;
+      if (isNil(strike)) {
+        return strike;
+      }
+    },
+  })
   strikeOld?: number;
 
   @Prop({ required: true })
@@ -108,7 +111,7 @@ export class Trades {
   @Prop({
     required: false,
     enum: TRADE_STATUS,
-    default: TRADE_STATUS.LOSS
+    default: TRADE_STATUS.LOSS,
   })
   status?: TRADE_STATUS;
 
@@ -118,12 +121,21 @@ export class Trades {
   @Prop({
     type: String,
     required: false,
-    index: true
+    index: true,
   })
   contractOption?: string;
 
   @Prop({ index: true })
   isLimitOrder: boolean;
+
+  @Prop({
+    required: false,
+    default: function () {
+      const { isLimitOrder } = this;
+      return isLimitOrder;
+    },
+  })
+  isLimitOrderOld?: boolean;
 
   @Prop()
   limitOrderExpirationDate: Date;

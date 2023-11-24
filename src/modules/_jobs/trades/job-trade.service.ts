@@ -715,7 +715,7 @@ export class JobTradeService {
             isAbove: trade.isAbove,
             timestamp: Math.floor(now.getTime() / 1000),
           };
-          if (!trade.isLimitOrder) {
+          if (!trade.isLimitOrderOld) {
             messageUserPartialSignature = {
               ...messageUserPartialSignature,
               settlementFee: trade.settlementFee,
@@ -734,7 +734,7 @@ export class JobTradeService {
               network,
               this.ethersService.getWallet(trade.privateKeyOneCT, network),
               config.getContract(network, ContractName.ROUTER).address,
-              trade.isLimitOrder ? MarketDirectionSignature : MarketDirectionSignatureWithSettlementFee,
+              trade.isLimitOrderOld ? MarketDirectionSignature : MarketDirectionSignatureWithSettlementFee,
               messageUserPartialSignature,
             ),
             this.ethersService.signMessage(network, SignerType.publisher, userFullMessage),
@@ -829,7 +829,7 @@ export class JobTradeService {
             isAbove: trade.isAbove,
             timestamp: Math.floor(now.getTime() / 1000),
           };
-          if (!trade.isLimitOrder) {
+          if (!trade.isLimitOrderOld) {
             messageUserPartialSignature = {
               ...messageUserPartialSignature,
               settlementFee: trade.settlementFee,
@@ -853,7 +853,7 @@ export class JobTradeService {
               network,
               this.ethersService.getWallet(trade.privateKeyOneCT, network),
               config.getContract(network, ContractName.ROUTER).address,
-              trade.isLimitOrder ? MarketDirectionSignature : MarketDirectionSignatureWithSettlementFee,
+              trade.isLimitOrderOld ? MarketDirectionSignature : MarketDirectionSignatureWithSettlementFee,
               messageUserPartialSignature,
             ),
             this.ethersService.signTypeDataWithSinger(
