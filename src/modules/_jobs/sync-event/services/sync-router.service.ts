@@ -97,7 +97,7 @@ export class JobSyncRouterService {
                 tx_open: transactionHash.toLowerCase().trim(),
                 isLimitOrder: false,
                 state: TRADE_STATE.OPENED,
-                openDate: new Date(blocktimestamps[blockNumber])
+                openDate: new Date(blocktimestamps[blockNumber] * 1000)
               },
             },
           });
