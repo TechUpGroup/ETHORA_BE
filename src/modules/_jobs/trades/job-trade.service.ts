@@ -79,6 +79,7 @@ export class JobTradeService {
           updateOne: {
             filter: {
               _id: trade._id,
+              state: TRADE_STATE.QUEUED,
             },
             update: {
               $set: {

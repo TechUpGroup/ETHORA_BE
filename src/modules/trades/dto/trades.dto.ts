@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsDate,
   IsEthereumAddress,
   IsMongoId,
@@ -9,7 +10,7 @@ import {
   Max,
   Min,
 } from "class-validator";
-import { ToLowerCase, Trim } from "common/decorators/transforms.decorator";
+import { ToArray, ToLowerCase, Trim } from "common/decorators/transforms.decorator";
 import { ApiProperty } from "@nestjs/swagger";
 import { TRADE_TOKEN } from "common/enums/trades.enum";
 import { NetworkAndPaginationAndSortDto, NetworkDto } from "common/dto/network.dto";
@@ -157,3 +158,10 @@ export class CloseTradeDto {
 }
 
 export class OpenTradeDto {}
+
+export class RetryTradeDto {
+  @ApiProperty()
+  @IsArray()
+  @ToArray()
+  queueIds: number[];
+}

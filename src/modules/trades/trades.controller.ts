@@ -10,6 +10,7 @@ import {
   CloseTradeDto,
   CreateTradeDto,
   GetTradesUserActiveDto,
+  RetryTradeDto,
   UpdateTradeDto,
 } from "./dto/trades.dto";
 import { UsersDocument } from "modules/users/schemas/users.schema";
@@ -99,7 +100,7 @@ export class TradesController {
 
   @Get("retry-tx")
   @ApiOperation({ summary: `Get queue` })
-  retryTx() {
-    return this.service.retryTX();
+  retryTx(@Query() params: RetryTradeDto) {
+    return this.service.retryTX(params.queueIds);
   }
 }

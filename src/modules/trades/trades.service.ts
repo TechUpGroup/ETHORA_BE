@@ -633,14 +633,14 @@ export class TradesService {
     ]);
   }
 
-  async retryTX() {
+  async retryTX(queueIds: number[]) {
     let tradeCloseUnsuccess = await this.model.aggregate([
       {
         $match: {
           state: TRADE_STATE.CLOSED,
           tx_close: null,
           optionId: { $ne: null},
-          call_close: { $gt: config.maximumRetry },
+          queueId: { $in: queueIds },
         },
       },
       {
