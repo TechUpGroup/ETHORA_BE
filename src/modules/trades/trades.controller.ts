@@ -98,9 +98,9 @@ export class TradesController {
     return this.service.closeUnsuccess();
   }
 
-  @Get("retry-tx")
-  @ApiOperation({ summary: `Get queue` })
-  retryTx(@Query() params: RetryTradeDto) {
-    return this.service.retryTX(params.queueIds);
+  @Post("retry-tx")
+  @ApiOperation({ summary: `Retry tx` })
+  retryTx(@Body() body: RetryTradeDto) {
+    return this.service.retryTX(body.queueIds);
   }
 }
