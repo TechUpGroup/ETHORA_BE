@@ -124,16 +124,8 @@ export class JobSyncRouterService {
               },
             },
           });
-          this.logsService.createLog(
-            "listActives => before",
-            this.jobTradeService.listActives.map((e) => `${e.queueId}_${e.optionId || ""}`),
-          );
           const index = this.jobTradeService.listActives.findIndex((a) => a.queueId === +queueId.toString());
           this.jobTradeService.listActives.splice(index, 1);
-          this.logsService.createLog(
-            "listActives => after",
-            this.jobTradeService.listActives.map((e) => `${e.queueId}_${e.optionId || ""}`),
-          );
         }
         if (nameEvent === ROUTER_EVENT.FAILRESOLVE) {
           const { queueId, reason } = (event as FailResolveEvent).args;
@@ -152,8 +144,16 @@ export class JobSyncRouterService {
                 },
               },
             });
+            this.logsService.createLog(
+              "listActives => before",
+              this.jobTradeService.listActives.map((e) => `${e.queueId}_${e.optionId || ""}`),
+            );
             const index = this.jobTradeService.listActives.findIndex((a) => a.queueId === +queueId.toString());
             this.jobTradeService.listActives.splice(index, 1);
+            this.logsService.createLog(
+              "listActives => after",
+              this.jobTradeService.listActives.map((e) => `${e.queueId}_${e.optionId || ""}`),
+            );
           }
         }
         if (nameEvent === ROUTER_EVENT.FAILUNLOCK) {
