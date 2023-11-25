@@ -93,3 +93,22 @@ export const calcLockedAmount = async (contract, userAddress: string, data: Trad
     throw e;
   }
 };
+
+export const checkDateTrade = (currentDate: Date) => {
+  const dayOfWeek = currentDate.getDay();
+  const startDate1 = new Date(currentDate.getFullYear(), 11, 25);
+  const endDate1 = new Date(currentDate.getFullYear(), 11, 27);
+  const startDate2 = new Date(currentDate.getFullYear(), 1, 1);
+  const endDate2 = new Date(currentDate.getFullYear(), 1, 2);
+  const currentHour = currentDate.getHours();
+  if ((currentDate >= startDate1 && currentDate <= endDate1) || (currentDate >= startDate2 && currentDate <= endDate2)) {
+    return false;
+  }
+  if (dayOfWeek === 0 || dayOfWeek === 6) {
+    return false;
+  }
+  if (dayOfWeek > 0 && dayOfWeek < 6 && (currentHour < 6 || currentHour > 16)) {
+    return false;
+  }
+  return true;
+}

@@ -26,4 +26,11 @@ export enum PairContractType {
   BINARY_OPTION = "binaryOptions",
 }
 
+export enum PairForex {
+  XAUUSD = "XAUUSD",
+  XAGUSD = "XAGUSD",
+  EURUSD = "EURUSD",
+  GBPUSD = "GBPUSD",
+}
+
 export enum Token {}

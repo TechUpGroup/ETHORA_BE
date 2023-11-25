@@ -18,8 +18,8 @@ import { NetworkAndPaginationAndSortDto } from "common/dto/network.dto";
 import { JobTradeService } from "modules/_jobs/trades/job-trade.service";
 import { EthersService } from "modules/_shared/services/ethers.service";
 import config from "common/config";
-import { PairContractName, PairContractType } from "common/constants/contract";
-import { calcLockedAmount } from "common/utils/trades";
+import { PairContractName, PairContractType, PairForex } from "common/constants/contract";
+import { calcLockedAmount, checkDateTrade } from "common/utils/trades";
 import { SETTLEMENT_FEE } from "common/constants/fee";
 import { decryptAES } from "common/utils/encrypt";
 import BigNumber from "bignumber.js";
@@ -42,6 +42,14 @@ export class TradesService {
   async createTrade(user: UsersDocument, data: CreateTradeDto) {
     const { isLimitOrder, pair, period, targetContract, allowPartialFill, tradeSize, isAbove, slippage } = data;
     const userAddress = user.address;
+    const now = new Date();
+
+    if (Object.keys(PairForex).includes(pair.replace(/[^a-zA-Z]/, "").toUpperCase())) {
+      const date = isLimitOrder ? new Date(data.limitOrderDuration * 1000 + now.getTime()) : now;
+      if(!checkDateTrade(date)) {
+        throw new BadRequestException("Invalid timming");
+      }
+    }
 
     if (slippage < 1) {
       throw new BadRequestException("Slippage is invalid");
@@ -63,7 +71,6 @@ export class TradesService {
       calcLockedAmount(contract, userAddress, data),
     ]);
 
-    const now = new Date();
     const maxOI = this.jobTradeService.currentMaxOI[pairContractName];
     if (lastTrade.length && new Date(lastTrade[0].queuedDate.getTime() + 1000) > now) {
       throw new BadRequestException("Call too quickly");
