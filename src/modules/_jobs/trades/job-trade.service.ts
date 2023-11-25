@@ -175,9 +175,7 @@ export class JobTradeService {
                 _id: item._id,
               },
               update: {
-                state: TRADE_STATE.OPENED,
                 strike: BigNumber(item.price).toFixed(0),
-                openDate: now,
                 $inc: {
                   call_open: 1,
                 },
@@ -373,9 +371,7 @@ export class JobTradeService {
                 _id: item._id,
               },
               update: {
-                state: TRADE_STATE.CLOSED,
                 expiryPrice: BigNumber(item.price).toFixed(0),
-                closeDate: now,
                 $inc: {
                   call_close: 1,
                 },

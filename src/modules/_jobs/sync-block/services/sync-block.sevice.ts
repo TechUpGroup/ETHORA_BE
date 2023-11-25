@@ -13,8 +13,9 @@ import { HistoryService } from "modules/history/history.service";
 import { HelperService } from "./_helper.service";
 import { messageErr } from "common/constants/event";
 import config from "common/config";
-import { TRADE_STATUS } from "common/enums/trades.enum";
+import { TRADE_STATE, TRADE_STATUS } from "common/enums/trades.enum";
 import { TradesService } from "modules/trades/trades.service";
+import { EthersService } from "modules/_shared/services/ethers.service";
 
 const IBinaryOptions = new Interface(BtcusdBinaryOptions__factory.abi);
 
@@ -26,6 +27,7 @@ export class JobSyncBlockService {
     private readonly logsService: LogsService,
     private readonly historiesService: HistoryService,
     private readonly tradesService: TradesService,
+    private readonly ethersService: EthersService,
   ) {}
   private isRunning = false;
 
@@ -82,13 +84,22 @@ export class JobSyncBlockService {
     const txsHashExists = await this.historiesService.findTransactionHashBlockExists(eventHashes, network);
     const events = this.helperService.filterEvents(targetLogs, txsHashExists);
 
+    // get time of block
+    const blocktimestamps = {};
+    const listBlockNumber = [...new Set(events.map((i) => i.blockNumber))];
+    const listBlockTime = await Promise.all(
+      listBlockNumber.map((blockNumber) => this.ethersService.getBlockTime(network, blockNumber)),
+    );
+    listBlockTime.forEach((blockTime, i) => (blocktimestamps[listBlockNumber[i]] = blockTime));
+
     const historyCreateArr: any[] = [];
     const bulkUpdate: any[] = [];
     const contractOptionIds: string[] = [];
     const profits: any = {};
     const txClosed: any = {};
+    const txBlockNumber: any = {};
     for (const event of events) {
-      const { transactionHash, topics, logIndex, address } = event;
+      const { transactionHash, topics, logIndex, address, blockNumber } = event;
       historyCreateArr.push({
         tx_hash_log_index: `${transactionHash.toLowerCase().trim()}_${logIndex}`,
         contract_address: address.toLowerCase().trim(),
@@ -99,12 +110,14 @@ export class JobSyncBlockService {
         contractOptionIds.push(`${address.toLowerCase().trim()}_${id.toString()}`);
         profits[+id.toString()] = 0;
         txClosed[+id.toString()] = transactionHash.toLowerCase().trim();
+        txBlockNumber[+id.toString()] = blockNumber;
       }
       if (topics.includes(TOPIC.EXERCISE)) {
         const { id, profit } = IBinaryOptions.parseLog(event).args;
         contractOptionIds.push(`${address.toLowerCase().trim()}_${id.toString()}`);
         profits[+id.toString()] = +profit.toString();
         txClosed[+id.toString()] = transactionHash.toLowerCase().trim();
+        txBlockNumber[+id.toString()] = blockNumber;
       }
     }
 
@@ -127,6 +140,8 @@ export class JobSyncBlockService {
               profit,
               pnl: profit - Number(trade.tradeSize),
               tx_close: txClosed[trade.optionId],
+              state: TRADE_STATE.CLOSED,
+              closeDate: new Date(blocktimestamps[txBlockNumber[trade.optionId]] * 1000)
             },
           },
         });

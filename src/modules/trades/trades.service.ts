@@ -471,6 +471,7 @@ export class TradesService {
       {
         $match: {
           state: TRADE_STATE.OPENED,
+          call_close: { $lt: config.maximumRetry }
         },
       },
       {
@@ -525,6 +526,7 @@ export class TradesService {
         $match: {
           state: TRADE_STATE.QUEUED,
           isLimitOrder: false,
+          call_open: { $lt: config.maximumRetry }
         },
       },
       {
@@ -579,6 +581,7 @@ export class TradesService {
         $match: {
           state: TRADE_STATE.QUEUED,
           isLimitOrder: true,
+          call_open: { $lt: config.maximumRetry }
         },
       },
       {
