@@ -317,10 +317,10 @@ export class JobTradeService {
           return;
         }
 
-        this.logsService.createLog(
-          "listActives => before",
-          this.listActives.map((e) => `${e.queueId}_${e.optionId || ""}`),
-        );
+        // this.logsService.createLog(
+        //   "listActives => before",
+        //   this.listActives.map((e) => `${e.queueId}_${e.optionId || ""}`),
+        // );
 
         const indexes: number[] = [];
         const trades: any[] = [];
@@ -357,10 +357,10 @@ export class JobTradeService {
         // remove actives
         this.listActives = this.listActives.filter((item, index) => !indexes.includes(index));
 
-        this.logsService.createLog(
-          "listActives => after",
-          this.listActives.map((e) => `${e.queueId}_${e.optionId || ""}`),
-        );
+        // this.logsService.createLog(
+        //   "listActives => after",
+        //   this.listActives.map((e) => `${e.queueId}_${e.optionId || ""}`),
+        // );
 
         // Call smartcontract
         this.excuteOptionContract(trades);
