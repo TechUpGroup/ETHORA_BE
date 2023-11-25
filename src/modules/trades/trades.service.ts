@@ -150,6 +150,9 @@ export class TradesService {
 
     const now = new Date();
     const index = this.jobTradeService.queuesLimitOrder.findIndex((order) => order.queueId === trade.queueId);
+    if(index === -1 ) {
+      throw new NotFoundException("Trade not in QUEUED");
+    }
     this.jobTradeService.queuesLimitOrder[index] = {
       ...(this.jobTradeService.queuesLimitOrder[index] as any),
       ...data,

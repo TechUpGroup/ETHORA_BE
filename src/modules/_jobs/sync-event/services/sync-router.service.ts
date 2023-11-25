@@ -102,8 +102,10 @@ export class JobSyncRouterService {
             },
           });
           const index = this.jobTradeService.listActives.findIndex((a) => a.queueId === +queueId.toString());
-          this.jobTradeService.listActives[index]["optionId"] = +optionId.toString();
-          this.jobTradeService.listActives[index]["expirationDate"] = expiration.toString();
+          if (index !== -1) {
+            this.jobTradeService.listActives[index]["optionId"] = +optionId.toString();
+            this.jobTradeService.listActives[index]["expirationDate"] = expiration.toString();
+          }
 
           // update tier, delay since data analytic delay
           setTimeout(() => this.updateUserTier(network, account), 10000);
@@ -125,7 +127,9 @@ export class JobSyncRouterService {
             },
           });
           const index = this.jobTradeService.listActives.findIndex((a) => a.queueId === +queueId.toString());
-          this.jobTradeService.listActives.splice(index, 1);
+          if(index !== -1 ) {
+            this.jobTradeService.listActives.splice(index, 1);
+          }
         }
         if (nameEvent === ROUTER_EVENT.FAILRESOLVE) {
           const { queueId, reason } = (event as FailResolveEvent).args;
@@ -144,16 +148,10 @@ export class JobSyncRouterService {
                 },
               },
             });
-            this.logsService.createLog(
-              "listActives => before",
-              this.jobTradeService.listActives.map((e) => `${e.queueId}_${e.optionId || ""}`),
-            );
             const index = this.jobTradeService.listActives.findIndex((a) => a.queueId === +queueId.toString());
-            this.jobTradeService.listActives.splice(index, 1);
-            this.logsService.createLog(
-              "listActives => after",
-              this.jobTradeService.listActives.map((e) => `${e.queueId}_${e.optionId || ""}`),
-            );
+            if(index !== -1 ) {
+              this.jobTradeService.listActives.splice(index, 1);
+            }
           }
         }
         if (nameEvent === ROUTER_EVENT.FAILUNLOCK) {
