@@ -36,7 +36,7 @@ export const WeeklyTournamentConfig: {
   [Network.goerli]: {
     startTimestamp: 1700524800000,
     endDay: 9,
-    rewardFixedAmount: "1000",
+    rewardFixedAmount: "0",
     poolPercent: "10",
     winrateStartWeek: 5,
     minTradesToQualifyPNL: 3,
