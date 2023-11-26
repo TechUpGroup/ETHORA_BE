@@ -124,6 +124,7 @@ export class StatsService {
 
     const _tradingStats = this.calcTradersData(tradingStats);
     return {
+      overviewStats: dataOverview,
       USDC24stats,
       volumeStats: this.mappingDateArray(this.calcVolumesData(volumeStats), dateArr, {
         movingAverageAll: 0,
@@ -138,7 +139,6 @@ export class StatsService {
         cumulative: 0,
         amount: 0,
       }),
-      overviewStats: dataOverview,
       poolStats: {
         stats: poolStats.stats || {
           maxGlpAmount: 0,
