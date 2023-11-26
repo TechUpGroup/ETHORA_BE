@@ -1,5 +1,10 @@
 query ($timestamp: String!) {
-  volumePerContracts(orderBy: timestamp, orderDirection: desc, first: 1000, where: { timestamp_gt: $timestamp }) {
+  volumePerContracts(
+    orderBy: timestamp
+    orderDirection: desc
+    first: 1000
+    where: { depositToken: "total", timestamp_gt: $timestamp }
+  ) {
     optionContract {
       address
       currentUtilization
