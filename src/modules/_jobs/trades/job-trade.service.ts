@@ -504,9 +504,9 @@ export class JobTradeService {
         // );
         // const amount = await contract.getMaxOI();
         this.currentIV[pairContractName] = {
-          IV: "0",
+          IV: "1384",
           IVFactorOTM: "50",
-          IVFactorITM: "100",
+          IVFactorITM: "1000",
         }
       } catch (e) {
         console.log(e);
