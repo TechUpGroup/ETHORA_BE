@@ -32,6 +32,7 @@ export class JobTradeService {
   public queuesMarket: TradesDocument[];
   public queuesLimitOrder: TradesDocument[];
   public currentMaxOI: any;
+  public currentIV: any;
   private isProcessingTradeMarket = false;
   private isProcessingTradeLimit = false;
   private isClosingTradesAnyTime = false;
@@ -49,12 +50,14 @@ export class JobTradeService {
     this.queuesMarket = [];
     this.queuesLimitOrder = [];
     this.currentMaxOI = {};
+    this.currentIV = {};
     void this.start();
   }
 
   private async start() {
     await Promise.all([
       this.syncMaxOI(),
+      this.syncIV(),
       this.cancelTrade(),
       this.tradesService.loadActiveTrades(),
       this.tradesService.loadTradesMarket(),
@@ -481,6 +484,30 @@ export class JobTradeService {
         );
         const amount = await contract.getMaxOI();
         this.currentMaxOI[pairContractName] = BigNumber(amount.toString()).toFixed(0);
+      } catch (e) {
+        console.log(e);
+      }
+    });
+  }
+
+  @Cron(CronExpression.EVERY_10_MINUTES, { name: "syncIV" })
+  async syncIV() {
+    // const network = config.isDevelopment ? Network.goerli : Network.base;
+    Object.values(PairContractName).forEach(async (pair) => {
+      try {
+        const pairContractName = pair.replace(/[^a-zA-Z]/, "").toUpperCase() as PairContractName;
+        // const contractInfo = config.getPairContract(network, pairContractName, PairContractType.BINARY_OPTION);
+        // const contract = this.ethersService.getContract(
+        //   network,
+        //   contractInfo.address,
+        //   BtcusdBinaryOptions__factory.abi,
+        // );
+        // const amount = await contract.getMaxOI();
+        this.currentIV[pairContractName] = {
+          IV: "0",
+          IVFactorOTM: "50",
+          IVFactorITM: "100",
+        }
       } catch (e) {
         console.log(e);
       }

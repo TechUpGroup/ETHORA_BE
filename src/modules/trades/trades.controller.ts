@@ -92,6 +92,13 @@ export class TradesController {
     return this.service.getCancelledUserTrades(query?.userAddress || user?.address, query);
   }
 
+  @Get("iv-config")
+  @ApiOperation({ summary: `Get IV Config` })
+  getIVConffg() {
+    return this.service.getIVConfig();
+  }
+
+
   @Get("trade-call-closed-unsuccess")
   @ApiOperation({ summary: `Get queue` })
   closeUnsuccess() {

@@ -701,4 +701,8 @@ export class TradesService {
     }
     return;
   }
+
+  getIVConfig() {
+    return this.jobTradeService.currentIV;
+  }
 }
