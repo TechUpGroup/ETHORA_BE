@@ -68,9 +68,9 @@ export class JobSyncBlockService {
         await this.handleBlock(updatedBlock);
       }
     } catch (err) {
-      console.log("JobSyncBlockService -> handleBlock: ", err);
       if (!err?.message?.includes(messageErr)) {
         this.logsService.createLog("JobSyncBlockService -> handleBlock:", err.message);
+        this.ethersService.switchRPCOfJob(block.network);
       }
     }
   }

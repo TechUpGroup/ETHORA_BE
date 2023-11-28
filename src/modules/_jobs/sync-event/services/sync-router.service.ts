@@ -50,6 +50,7 @@ export class JobSyncRouterService {
       });
     } catch (err) {
       this.logsService.createLog("JobSyncRouterService -> start:", err);
+      this.ethersService.switchRPCOfJob(router.network);
     } finally {
       this.isRunning = false;
     }
