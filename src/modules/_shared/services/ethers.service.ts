@@ -19,7 +19,8 @@ import { LogsService } from "modules/logs/logs.service";
 
 interface EtherProvider {
   provider: JsonRpcBatchProvider;
-  providerJob: JsonRpcBatchProvider;
+  providerJobEvent: JsonRpcBatchProvider;
+  providerJobBlock: JsonRpcBatchProvider;
   signers: Map<SignerType, Wallet>;
 }
 
@@ -30,7 +31,8 @@ export class EthersService {
   private readonly currentGas: Map<Network, string>;
   private readonly signerTypes: Map<SignerType, Wallet>;
   private chooseRPC = 0;
-  private chooseRPCJob = 2;
+  private chooseRPCJobEvent = 0;
+  private chooseRPCJobBlock = 0;
 
   constructor(private readonly logsService: LogsService) {
     this.ethersMap = new Map<Network, EtherProvider>();
@@ -39,7 +41,8 @@ export class EthersService {
     this.signerTypes = new Map<SignerType, Wallet>();
     for (const network of allNetworks) {
       const provider = new JsonRpcBatchProvider(config.listRPC(network)[1]);
-      const providerJob = new JsonRpcBatchProvider(config.listRPC(network)[2]);
+      const providerJobEvent = new JsonRpcBatchProvider(config.listRPCJobSyncEvent(network)[0]);
+      const providerJobBlock = new JsonRpcBatchProvider(config.listRPCJobSyncBlock(network)[0]);
 
       const prkOperator = configPrivate.get<string>(`blockchain.private_key.operator`);
       const prkSfPublisher = configPrivate.get<string>(`blockchain.private_key.sfPublisher`);
@@ -48,7 +51,7 @@ export class EthersService {
       if (prkSfPublisher) this.signerTypes.set(SignerType.sfPublisher, getWallet(prkSfPublisher, provider));
       if (prkPublisher) this.signerTypes.set(SignerType.publisher, getWallet(prkPublisher, provider));
 
-      this.ethersMap.set(network, { provider, providerJob, signers: this.signerTypes });
+      this.ethersMap.set(network, { provider, providerJobEvent, providerJobBlock, signers: this.signerTypes });
     }
     this.getCurrentBlockNumber();
     this.syncCurrentGas();
@@ -62,7 +65,7 @@ export class EthersService {
           const blockNumber = await this.getLastBlockNumber(network);
           this.currentBlockNumber.set(network, blockNumber);
         } catch {
-          this.switchRPCOfJob(network);
+          this.switchRPC(network);
         }
       }),
     );
@@ -82,19 +85,30 @@ export class EthersService {
     );
   }
 
-  switchRPCOfJob(network: Network) {
-    this.chooseRPCJob = ((this.chooseRPCJob + 1) % 3) + 2;
+  switchRPCOfJobEvent(network: Network) {
+    this.chooseRPCJobEvent = (this.chooseRPCJobEvent + 1) % 2;
     const provider = this.getProvider(network);
-    const providerJob = new JsonRpcBatchProvider(config.listRPC(network)[this.chooseRPCJob]);
-    this.ethersMap.set(network, { provider, providerJob, signers: this.signerTypes });
-    this.logsService.createLog("chooseRPCJob", config.listRPC(network)[this.chooseRPC]);
+    const providerJobBlock = this.getProvider(network, false, true);
+    const providerJobEvent = new JsonRpcBatchProvider(config.listRPCJobSyncEvent(network)[this.chooseRPCJobEvent]);
+    this.ethersMap.set(network, { provider, providerJobEvent, providerJobBlock, signers: this.signerTypes });
+    this.logsService.createLog("chooseRPCJobEvent", config.listRPCJobSyncEvent(network)[this.chooseRPCJobEvent]);
+  }
+
+  switchRPCOfJobBlock(network: Network) {
+    this.chooseRPCJobBlock = (this.chooseRPCJobBlock + 1) % 2;
+    const provider = this.getProvider(network);
+    const providerJobEvent = this.getProvider(network, true);
+    const providerJobBlock = new JsonRpcBatchProvider(config.listRPCJobSyncBlock(network)[this.chooseRPCJobBlock]);
+    this.ethersMap.set(network, { provider, providerJobEvent, providerJobBlock,  signers: this.signerTypes });
+    this.logsService.createLog("chooseRPCJobBlock", config.listRPCJobSyncBlock(network)[this.chooseRPCJobBlock]);
   }
 
   switchRPC(network: Network) {
     this.chooseRPC = (this.chooseRPC + 1) % 2;
-    const providerJob = this.getProvider(network);
+    const providerJobEvent = this.getProvider(network, true);
+    const providerJobBlock = this.getProvider(network, false, true);
     const provider = new JsonRpcBatchProvider(config.listRPC(network)[this.chooseRPC]);
-    this.ethersMap.set(network, { provider, providerJob, signers: this.signerTypes });
+    this.ethersMap.set(network, { provider, providerJobEvent, providerJobBlock, signers: this.signerTypes });
     this.logsService.createLog("chooseRPC", config.listRPC(network)[this.chooseRPC]);
   }
 
@@ -117,9 +131,12 @@ export class EthersService {
     return getWallet(privateKey, provider);
   }
 
-  getProvider(network: Network, isJob = false) {
-    if (isJob) {
-      return this.getNetwork(network).providerJob;
+  getProvider(network: Network, isJobEvent = false, isJobBlock = false) {
+    if (isJobEvent) {
+      return this.getNetwork(network).providerJobEvent;
+    }
+    if (isJobBlock) {
+      return this.getNetwork(network).providerJobBlock;
     }
     return this.getNetwork(network).provider;
   }

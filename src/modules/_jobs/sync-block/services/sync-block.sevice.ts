@@ -70,7 +70,7 @@ export class JobSyncBlockService {
     } catch (err) {
       if (!err?.message?.includes(messageErr)) {
         this.logsService.createLog("JobSyncBlockService -> handleBlock:", err.message);
-        this.ethersService.switchRPCOfJob(block.network);
+        this.ethersService.switchRPCOfJobBlock(block.network);
       }
     }
   }

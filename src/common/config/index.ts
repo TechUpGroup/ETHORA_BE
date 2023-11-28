@@ -150,11 +150,26 @@ class Config {
       ? [
           "https://arbitrum-goerli.publicnode.com",
           "https://snowy-shy-panorama.arbitrum-goerli.quiknode.pro/81a77d33ccdb1c2f76a6e3895eb210961b811c72/",
+        ]
+      : ["https://base.publicnode.com", "https://base.publicnode.com"];
+  }
+
+  listRPCJobSyncEvent(network: Network) {
+    return network === Network.goerli
+      ? [
           "https://newest-spring-paper.arbitrum-goerli.quiknode.pro/f7111cc1edaf4f2954028793cf0322bfea9b7ec9/",
-          "https://fittest-chaotic-liquid.arbitrum-goerli.quiknode.pro/fbe8d1ff6f9e2a471ff2d09679624d13152f6892/",
           "https://compatible-intensive-theorem.arbitrum-goerli.quiknode.pro/d5c04dc63c58fbda8e2490faad3cb764ad4fda68/",
         ]
-      : ["https://base.publicnode.com", "https://base.publicnode.com", "https://base.publicnode.com", "https://base.publicnode.com"];
+      : ["https://base.publicnode.com", "https://base.publicnode.com"];
+  }
+
+  listRPCJobSyncBlock(network: Network) {
+    return network === Network.goerli
+      ? [
+          "https://newest-spring-paper.arbitrum-goerli.quiknode.pro/f7111cc1edaf4f2954028793cf0322bfea9b7ec9/",
+          "https://compatible-intensive-theorem.arbitrum-goerli.quiknode.pro/d5c04dc63c58fbda8e2490faad3cb764ad4fda68/",
+        ]
+      : ["https://base.publicnode.com", "https://base.publicnode.com"];
   }
 
   get listOperater() {
