@@ -167,7 +167,7 @@ class Config {
     return network === Network.goerli
       ? [
           "https://newest-spring-paper.arbitrum-goerli.quiknode.pro/f7111cc1edaf4f2954028793cf0322bfea9b7ec9/",
-          "https://compatible-intensive-theorem.arbitrum-goerli.quiknode.pro/d5c04dc63c58fbda8e2490faad3cb764ad4fda68/",
+          "https://long-wispy-research.arbitrum-goerli.quiknode.pro/2f1e2b0949a040bd4b174fda4262e5ffbfa62dce/",
         ]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
   }
