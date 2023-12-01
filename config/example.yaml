@@ -89,5 +89,9 @@ blockchain:
         blocknumber_creator: 0
     pairContract:
       BTCUSD:
-        address: ""
-        blocknumber_creator: 0
+        binaryOptions:
+          address: ""
+          blocknumber_creator: 0
+        configOptions:
+          address: ""
+          blocknumber_creator: 0
