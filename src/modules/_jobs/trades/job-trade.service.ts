@@ -514,12 +514,12 @@ export class JobTradeService {
           contractBinary.ivFactorOTM(),
         ]);
         this.currentIV[pairContractName] = {
-          IV: iv || "1384",
-          IVFactorOTM: ivFactorOTM || "50",
-          IVFactorITM: ivFactorITM || "1000",
-        }
+          IV: iv.toString() || "1384",
+          IVFactorOTM: ivFactorOTM.toString() || "50",
+          IVFactorITM: ivFactorITM.toString() || "1000",
+        };
       } catch (e) {
-        console.log(e);
+        this.logsService.createLog("syncIV", e);
       }
     });
   }
@@ -772,7 +772,7 @@ export class JobTradeService {
             ),
             this.ethersService.signMessage(network, SignerType.publisher, userFullMessage),
           ]);
-          
+
           //log
           this.logsService.createLog("userPartialSignature", trade.optionId || "", trade.privateKeyOneCT);
 
