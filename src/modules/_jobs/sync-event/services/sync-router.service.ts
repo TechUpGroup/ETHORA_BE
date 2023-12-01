@@ -34,7 +34,7 @@ export class JobSyncRouterService {
   ) {}
   private isRunning = false;
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_5_SECONDS)
   private async start() {
     const router = await this.contractService.getContractByName(ContractName.ROUTER);
     if (!router) return;
