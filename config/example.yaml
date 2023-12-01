@@ -34,9 +34,6 @@ ws:
   priceUpdate:
     url: wss://hermes.pyth.network/ws
 
-trading:
-  startDate: "2023-10-11T00:00:00.000Z"
-
 network_supported: [8453, 84531]
 
 blockchain:
