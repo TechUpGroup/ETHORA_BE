@@ -5,6 +5,7 @@ import config from "common/config";
 import { readFile } from "common/utils/string";
 import request from "graphql-request";
 import { getLinuxTimestampBefore24Hours } from "common/utils/date";
+import { DailyTournamentConfig } from "common/constants/leaderboard";
 
 @Injectable()
 export class DashboardService {
@@ -23,8 +24,7 @@ export class DashboardService {
     // Open Interest
     const openInterest = {
       OIstats: {
-        totalVolume:
-          data.activeData?.reduce((a, b) => a + Number(b.totalFee), Number(0)).toFixed(0) || "0",
+        totalVolume: data.activeData?.reduce((a, b) => a + Number(b.totalFee), Number(0)).toFixed(0) || "0",
       },
       USDCIOstats: {
         totalVolume:
@@ -43,8 +43,9 @@ export class DashboardService {
     };
 
     data.activeData = undefined;
+    const dailyConfig = DailyTournamentConfig[network];
     return {
-      tradingStartDate: config.trading.startDate,
+      tradingStartDate: new Date(dailyConfig.startTimestamp),
       ...data,
       ...openInterest,
     } as any;
