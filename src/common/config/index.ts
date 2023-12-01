@@ -148,8 +148,8 @@ class Config {
   listRPC(network: Network) {
     return network === Network.goerli
       ? [
-          "https://arbitrum-goerli.publicnode.com",
-          "https://snowy-shy-panorama.arbitrum-goerli.quiknode.pro/81a77d33ccdb1c2f76a6e3895eb210961b811c72/",
+          "https://base-goerli.publicnode.com",
+          "https://sparkling-intensive-energy.base-goerli.quiknode.pro/e5f606843dee4573dfc88d9a656c98df363e0767/",
         ]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
   }
@@ -157,8 +157,8 @@ class Config {
   listRPCJobSyncEvent(network: Network) {
     return network === Network.goerli
       ? [
-          "https://newest-spring-paper.arbitrum-goerli.quiknode.pro/f7111cc1edaf4f2954028793cf0322bfea9b7ec9/",
-          "https://compatible-intensive-theorem.arbitrum-goerli.quiknode.pro/d5c04dc63c58fbda8e2490faad3cb764ad4fda68/",
+          "https://white-special-flower.base-goerli.quiknode.pro/829c1e340cf9fbabb503cb0c29b12ab298ef6703/",
+          "https://ancient-sleek-card.base-goerli.quiknode.pro/fa47d6bb19526d186933f82de3610f3cf144246c/",
         ]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
   }
@@ -166,8 +166,8 @@ class Config {
   listRPCJobSyncBlock(network: Network) {
     return network === Network.goerli
       ? [
-          "https://newest-spring-paper.arbitrum-goerli.quiknode.pro/f7111cc1edaf4f2954028793cf0322bfea9b7ec9/",
-          "https://long-wispy-research.arbitrum-goerli.quiknode.pro/2f1e2b0949a040bd4b174fda4262e5ffbfa62dce/",
+          "https://bold-side-frog.base-goerli.quiknode.pro/4d4b0fe6731d1cf0ba7a9413858335a710b5d573/",
+          "https://proud-empty-shape.base-goerli.quiknode.pro/4d240f1a429aed8ad5f667e3b17a990efbab652c/",
         ]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
   }

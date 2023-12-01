@@ -24,6 +24,7 @@ export enum PairContractName {
 
 export enum PairContractType {
   BINARY_OPTION = "binaryOptions",
+  CONFIG_OPTION = "configOptions",
 }
 
 export enum PairForex {

@@ -1,7 +1,7 @@
 import { Inject, Injectable, forwardRef } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import BigNumber from "bignumber.js";
-import { BtcusdBinaryOptions__factory, RouterAbi__factory } from "common/abis/types";
+import { BtcusdBinaryOptions__factory, OptionConfig__factory, RouterAbi__factory } from "common/abis/types";
 import config from "common/config";
 import { ContractName, PairContractName, PairContractType } from "common/constants/contract";
 import { FEED_IDS } from "common/constants/price";
@@ -492,21 +492,31 @@ export class JobTradeService {
 
   @Cron(CronExpression.EVERY_10_MINUTES, { name: "syncIV" })
   async syncIV() {
-    // const network = config.isDevelopment ? Network.goerli : Network.base;
+    const network = config.isDevelopment ? Network.goerli : Network.base;
     Object.values(PairContractName).forEach(async (pair) => {
       try {
         const pairContractName = pair.replace(/[^a-zA-Z]/, "").toUpperCase() as PairContractName;
-        // const contractInfo = config.getPairContract(network, pairContractName, PairContractType.BINARY_OPTION);
-        // const contract = this.ethersService.getContract(
-        //   network,
-        //   contractInfo.address,
-        //   BtcusdBinaryOptions__factory.abi,
-        // );
-        // const amount = await contract.getMaxOI();
+        const contractBinaryInfo = config.getPairContract(network, pairContractName, PairContractType.BINARY_OPTION);
+        const contractConfigInfo = config.getPairContract(network, pairContractName, PairContractType.CONFIG_OPTION);
+        const contractBinary = this.ethersService.getContract(
+          network,
+          contractBinaryInfo.address,
+          BtcusdBinaryOptions__factory.abi,
+        );
+        const contractConfig = this.ethersService.getContract(
+          network,
+          contractConfigInfo.address,
+          OptionConfig__factory.abi,
+        );
+        const [iv, ivFactorITM, ivFactorOTM] = await Promise.all([
+          contractConfig.iv(),
+          contractBinary.ivFactorITM(),
+          contractBinary.ivFactorOTM(),
+        ]);
         this.currentIV[pairContractName] = {
-          IV: "1384",
-          IVFactorOTM: "50",
-          IVFactorITM: "1000",
+          IV: iv || "1384",
+          IVFactorOTM: ivFactorOTM || "50",
+          IVFactorITM: ivFactorITM || "1000",
         }
       } catch (e) {
         console.log(e);
