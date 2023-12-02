@@ -88,7 +88,7 @@ export class JobTradeService {
               $set: {
                 state: TRADE_STATE.CANCELLED,
                 isCancelled: true,
-                cancellationReason: trade.limitOrderDuration !== 0 ? "Limit order expired" : "Wait time is hight",
+                cancellationReason: trade.limitOrderDuration !== 0 ? "Limit order expired" : "Hight wait time",
                 cancellationDate: now,
               },
             },
