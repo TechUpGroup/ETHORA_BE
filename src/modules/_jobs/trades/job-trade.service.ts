@@ -88,12 +88,23 @@ export class JobTradeService {
               $set: {
                 state: TRADE_STATE.CANCELLED,
                 isCancelled: true,
-                cancellationReason: "Limit order expired",
+                cancellationReason: trade.limitOrderDuration !== 0 ? "Limit order expired" : "Hight wait time",
                 cancellationDate: now,
               },
             },
           },
         });
+        if (trade.limitOrderDuration !== 0) {
+          const index = this.queuesLimitOrder.findIndex((a) => a.queueId === trade.queueId);
+          if (index !== -1) {
+            this.queuesLimitOrder.splice(index, 1);
+          }
+        } else {
+          const index = this.queuesMarket.findIndex((a) => a.queueId === trade.queueId);
+          if (index !== -1) {
+            this.queuesMarket.splice(index, 1);
+          }
+        }
       }
     });
 
