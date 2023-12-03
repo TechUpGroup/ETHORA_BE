@@ -1,10 +1,10 @@
 export const REFERRAL_TIER = [
   {
-    referrers: 2,
-    totalVolume: 200000000,
+    referrers: 15,
+    totalVolume: 5_000_000 * 1_000_000,
   },
   {
-    referrers: 3,
-    totalVolume: 300000000,
+    referrers: 30,
+    totalVolume: 15_000_000 * 1_000_000,
   },
 ];
