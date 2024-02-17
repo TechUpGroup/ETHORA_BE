@@ -151,7 +151,7 @@ class Config {
   listRPCJobSyncEvent(network: Network) {
     return network === Network.goerli
       ? [
-          "https://white-special-flower.base-goerli.quiknode.pro/829c1e340cf9fbabb503cb0c29b12ab298ef6703/",
+          "https://base-goerli.publicnode.com",
           "https://ancient-sleek-card.base-goerli.quiknode.pro/fa47d6bb19526d186933f82de3610f3cf144246c/",
         ]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
@@ -160,7 +160,7 @@ class Config {
   listRPCJobSyncBlock(network: Network) {
     return network === Network.goerli
       ? [
-          "https://bold-side-frog.base-goerli.quiknode.pro/4d4b0fe6731d1cf0ba7a9413858335a710b5d573/",
+          "https://base-goerli.publicnode.com",
           "https://proud-empty-shape.base-goerli.quiknode.pro/4d240f1a429aed8ad5f667e3b17a990efbab652c/",
         ]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
