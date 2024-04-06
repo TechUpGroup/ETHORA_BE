@@ -89,6 +89,7 @@ export interface UserStatsResponse {
     winTrade: number;
     totalTrade: number;
     mostTradedContract: string | null;
+    point: number | null;
   };
   metrics: {
     referral: {

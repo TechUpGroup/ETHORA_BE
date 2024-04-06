@@ -263,6 +263,7 @@ export class UsersService {
       },
     };
     const tmpMostAssets: { [key: string]: number } = {};
+    let point = 0;
     data.userOptionDatas?.forEach((e) => {
       const { asset, address, token } = e.optionContract;
       totalTrade++;
@@ -282,6 +283,7 @@ export class UsersService {
       metrics[token].totalPayout += +e.payout;
       metrics[token].volume += +e.totalFee;
       metrics[token].netPnl += Number(e.payout) - Number(e.totalFee);
+      point += +e.totalFee;
     });
 
     // interest
@@ -299,6 +301,7 @@ export class UsersService {
           `${weeklyId}` === referralData.referrersWeeklyTimestamp ? referralData.referrersTradedWeekly.length : 0,
         tier: referralData.userTier,
       };
+      point += referralData.totalRebateEarned;
     }
 
     return {
@@ -311,6 +314,7 @@ export class UsersService {
           Object.keys(tmpMostAssets)
             .sort((a, b) => tmpMostAssets[b] - tmpMostAssets[a])[0]
             ?.replace("USD", "-USD") || null,
+        point 
       },
       metrics,
     };
