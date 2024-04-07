@@ -34,7 +34,7 @@ ws:
   priceUpdate:
     url: wss://hermes.pyth.network/ws
 
-network_supported: [8453, 84531]
+network_supported: [8453, 84532]
 
 blockchain:
   private_key:
@@ -67,9 +67,9 @@ blockchain:
       BTCUSD:
         address: ""
         blocknumber_creator: 0
-  84531:
+  84532:
     provider: https://1rpc.io/base-goerli
-    chain_id: 84531
+    chain_id: 84532
     graphql:
       uri: ""
       burnedUri: ""

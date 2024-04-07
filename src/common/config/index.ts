@@ -142,8 +142,8 @@ class Config {
   listRPC(network: Network) {
     return network === Network.goerli
       ? [
-          "https://base-goerli.publicnode.com",
-          "https://sparkling-intensive-energy.base-goerli.quiknode.pro/e5f606843dee4573dfc88d9a656c98df363e0767/",
+          "https://base-sepolia-rpc.publicnode.com",
+          "https://rpc.notadegen.com/base/sepolia",
         ]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
   }
@@ -151,8 +151,8 @@ class Config {
   listRPCJobSyncEvent(network: Network) {
     return network === Network.goerli
       ? [
-          "https://base-goerli.publicnode.com",
-          "https://ancient-sleek-card.base-goerli.quiknode.pro/fa47d6bb19526d186933f82de3610f3cf144246c/",
+          "https://base-sepolia-rpc.publicnode.com",
+          "https://sepolia.base.org",
         ]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
   }
@@ -160,8 +160,8 @@ class Config {
   listRPCJobSyncBlock(network: Network) {
     return network === Network.goerli
       ? [
-          "https://base-goerli.publicnode.com",
-          "https://proud-empty-shape.base-goerli.quiknode.pro/4d240f1a429aed8ad5f667e3b17a990efbab652c/",
+          "https://base-sepolia-rpc.publicnode.com",
+          "https://public.stackup.sh/api/v1/node/base-sepolia",
         ]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
   }
