@@ -16,6 +16,7 @@ import { Network } from "common/enums/network.enum";
 import { ContractName } from "common/constants/contract";
 import { getCurrentDayIndex, getDayTimestamp, getWeekId, getWeekTimestamp } from "common/utils/date";
 import { LeaderboardService } from "modules/leaderboard/leaderboard.service";
+import BigNumber from "bignumber.js";
 
 @Injectable()
 export class UsersService {
@@ -314,7 +315,7 @@ export class UsersService {
           Object.keys(tmpMostAssets)
             .sort((a, b) => tmpMostAssets[b] - tmpMostAssets[a])[0]
             ?.replace("USD", "-USD") || null,
-        point 
+        point: +BigNumber(point).dividedBy(1e6).toFixed(0)
       },
       metrics,
     };
