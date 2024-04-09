@@ -160,7 +160,7 @@ class Config {
   listRPCJobSyncBlock(network: Network) {
     return network === Network.goerli
       ? [
-          "https://base-sepolia.g.alchemy.com/v2/9L8NaZPgsXgOO2ZBvYbJPmMUpb62ab_m",
+          "https://rpc.notadegen.com/base/sepolia",
           "https://base-sepolia.g.alchemy.com/v2/9L8NaZPgsXgOO2ZBvYbJPmMUpb62ab_m",
         ]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
