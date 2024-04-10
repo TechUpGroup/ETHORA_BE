@@ -143,7 +143,7 @@ class Config {
     return network === Network.goerli
       ? [
           "https://base-sepolia-rpc.publicnode.com",
-          "https://rpc.notadegen.com/base/sepolia",
+          "https://base-sepolia.g.alchemy.com/v2/EzsFIOuriinLn55OjgLuL3hKAtGvhJyF",
         ]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
   }
