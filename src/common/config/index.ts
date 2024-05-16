@@ -142,7 +142,7 @@ class Config {
   listRPC(network: Network) {
     return network === Network.goerli
       ? [
-          "https://greatest-ancient-violet.base-sepolia.quiknode.pro/9bd059e8220f42a7a7b522884adc85cc911fd010/",
+          "https://base-sepolia-rpc.publicnode.com",
           "https://greatest-ancient-violet.base-sepolia.quiknode.pro/9bd059e8220f42a7a7b522884adc85cc911fd010/",
         ]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
@@ -152,7 +152,7 @@ class Config {
     return network === Network.goerli
       ? [
           "https://ancient-morning-arm.base-sepolia.quiknode.pro/d0f314252ada93bf9f2db48e4d5d904f3fdcb302/",
-          "https://greatest-ancient-violet.base-sepolia.quiknode.pro/9bd059e8220f42a7a7b522884adc85cc911fd010/",
+          "https://sepolia.base.org",
         ]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
   }
