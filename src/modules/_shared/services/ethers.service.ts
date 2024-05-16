@@ -77,7 +77,7 @@ export class EthersService {
       allNetworks.map(async (network) => {
         try {
           const gasPrice = await this.getGasPrice(network);
-          this.currentGas.set(network, (formatDecimal(gasPrice) * 2).toFixed(0));
+          this.currentGas.set(network, (formatDecimal(gasPrice) * 1.3).toFixed(0));
         } catch {
           this.switchRPC(network);
         }
