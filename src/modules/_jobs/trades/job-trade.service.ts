@@ -674,7 +674,7 @@ export class JobTradeService {
       // write contract
       await contract.openTrades(openTxn, {
         gasPrice: this.ethersService.getCurrentGas(network),
-        gasLimit: "2500000",
+        gasLimit: "10000000",
       });
 
       this.listActives.push(...trades);
