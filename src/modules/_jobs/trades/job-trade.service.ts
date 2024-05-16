@@ -115,7 +115,7 @@ export class JobTradeService {
     }
   }
 
-  @Cron(JOB_TIME.EVERY_3_SECONDS, { name: "TradeMarket" })
+  @Cron(JOB_TIME.EVERY_SECOND, { name: "TradeMarket" })
   private async processTradeMarket() {
     if (this.isProcessingTradeMarket) {
       console.log("[TradeMarket] Waiting for last job to finish...");
@@ -205,7 +205,7 @@ export class JobTradeService {
     this.isProcessingTradeMarket = false;
   }
 
-  @Cron(JOB_TIME.EVERY_3_SECONDS, { name: "TradeLimit" })
+  @Cron(JOB_TIME.EVERY_SECOND, { name: "TradeLimit" })
   private async processTradeLimit() {
     if (this.isProcessingTradeLimit) {
       console.log("[TradeLimit] Waiting for last job to finish...");
@@ -303,7 +303,7 @@ export class JobTradeService {
     this.isProcessingTradeLimit = false;
   }
 
-  @Cron(JOB_TIME.EVERY_3_SECONDS, { name: "ExcuteOptions" })
+  @Cron(JOB_TIME.EVERY_SECOND, { name: "ExcuteOptions" })
   private async excuteOptions() {
     if (this.isExcuteOption) {
       console.log("[ExcuteOptions] Waiting for close last job to finish...");
@@ -401,7 +401,7 @@ export class JobTradeService {
     this.isExcuteOption = false;
   }
 
-  @Cron(JOB_TIME.EVERY_3_SECONDS, { name: "CloseTradesAnyTime" })
+  @Cron(JOB_TIME.EVERY_SECOND, { name: "CloseTradesAnyTime" })
   private async closeTradesAnyTime() {
     if (this.isClosingTradesAnyTime) {
       console.log("[CloseTradesAnyTime] Waiting for close last job to finish...");
@@ -674,7 +674,7 @@ export class JobTradeService {
       // write contract
       await contract.openTrades(openTxn, {
         gasPrice: this.ethersService.getCurrentGas(network),
-        gasLimit: "10000000",
+        gasLimit: "20000000",
       });
 
       this.listActives.push(...trades);

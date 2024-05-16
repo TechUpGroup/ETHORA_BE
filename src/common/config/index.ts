@@ -106,7 +106,7 @@ class Config {
   }
 
   get quantityTxTrade() {
-    return 10;
+    return 20;
   }
 
   get maximumRetry() {
