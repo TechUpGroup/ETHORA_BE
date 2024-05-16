@@ -142,8 +142,8 @@ class Config {
   listRPC(network: Network) {
     return network === Network.goerli
       ? [
-          "https://base-sepolia-rpc.publicnode.com",
-          "https://base-sepolia.g.alchemy.com/v2/EzsFIOuriinLn55OjgLuL3hKAtGvhJyF",
+          "https://greatest-ancient-violet.base-sepolia.quiknode.pro/9bd059e8220f42a7a7b522884adc85cc911fd010/",
+          "https://greatest-ancient-violet.base-sepolia.quiknode.pro/9bd059e8220f42a7a7b522884adc85cc911fd010/",
         ]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
   }
@@ -151,8 +151,8 @@ class Config {
   listRPCJobSyncEvent(network: Network) {
     return network === Network.goerli
       ? [
-          "https://base-sepolia-rpc.publicnode.com",
-          "https://sepolia.base.org",
+          "https://ancient-morning-arm.base-sepolia.quiknode.pro/d0f314252ada93bf9f2db48e4d5d904f3fdcb302/",
+          "https://greatest-ancient-violet.base-sepolia.quiknode.pro/9bd059e8220f42a7a7b522884adc85cc911fd010/",
         ]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
   }
@@ -160,8 +160,8 @@ class Config {
   listRPCJobSyncBlock(network: Network) {
     return network === Network.goerli
       ? [
-          "https://rpc.notadegen.com/base/sepolia",
-          "https://base-sepolia.g.alchemy.com/v2/9L8NaZPgsXgOO2ZBvYbJPmMUpb62ab_m",
+          "https://fragrant-solemn-market.base-sepolia.quiknode.pro/5f201867966be3972fbc18ad86dda11065e5b513/",
+          "https://greatest-ancient-violet.base-sepolia.quiknode.pro/9bd059e8220f42a7a7b522884adc85cc911fd010/",
         ]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
   }
