@@ -109,7 +109,7 @@ export class LeaderboardService {
     const totalPages = Math.ceil(totalCount / limit);
 
     return {
-      docs: points,
+      docs: points || [],
       totalDocs: totalCount,
       limit,
       totalPages,
