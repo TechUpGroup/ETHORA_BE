@@ -2,7 +2,7 @@ import { Controller, Get, Query, UseInterceptors } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { LeaderboardService } from "./leaderboard.service";
-import { LeaderboardRequest } from "./dto/leaderboard.dto";
+import { LeaderboardPointsRequest, LeaderboardRequest } from "./dto/leaderboard.dto";
 import { User } from "common/decorators/user.decorator";
 import { UsersDocument } from "modules/users/schemas/users.schema";
 import { AuthOptional } from "common/decorators/http.decorators";
@@ -29,5 +29,12 @@ export class LeaderboardController {
   @ApiOperation({ summary: `Get data leaderboard` })
   getDaily(@User() user: UsersDocument, @Query() query: LeaderboardRequest) {
     return this.service.getLeaderboard(user?.address || "", query);
+  }
+
+  @Get("points")
+  @CacheTTL(60 * 1000)
+  @ApiOperation({ summary: `Get data leaderboard points` })
+  getLeaderboardPoints(@Query() query: LeaderboardPointsRequest) {
+    return this.service.getLeaderboardPoints(query);
   }
 }
