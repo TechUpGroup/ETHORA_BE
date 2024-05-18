@@ -1,11 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsOptional } from "class-validator";
+import { IsDefined, IsEnum, IsOptional } from "class-validator";
 import { IsOffsetInRange } from "common/decorators/leaderboard.decorator";
 import { NetworkDto } from "common/dto/network.dto";
 import { LeaderboardType } from "common/enums/leaderboard.enums";
 import { UserStatsGql } from "modules/users/dto/stats.dto";
 import { LeaderboardConfigDocument } from "../schemas/leaderboard.schema";
+import { PaginationDtoAndSortDto } from "common/dto/pagination.dto";
+import { Network } from "common/enums/network.enum";
+import { NetworkAvailable } from "common/constants/network";
 
 export class LeaderboardRequest extends NetworkDto {
   @ApiProperty()
@@ -18,13 +21,49 @@ export class LeaderboardRequest extends NetworkDto {
   offset: number;
 }
 
+export class LeaderboardPointsRequest extends PaginationDtoAndSortDto {
+  @ApiProperty({
+    default: Network.goerli,
+  })
+  @IsDefined()
+  @IsEnum(NetworkAvailable)
+  @Transform(({ value }) => Number(value))
+  readonly network: Network;
+}
+
+export class TotalDataGql {
+  totalTrades: number;
+  volume: string;
+}
+
+export class RewardGql {
+  settlementFee: string;
+  totalFee: string;
+}
+
 export class SummaryGqlDto {
-  totalData: {
-    totalTrades: number;
-    volume: string;
-  }[];
-  reward: { settlementFee: string; totalFee: string }[];
+  totalData: TotalDataGql[];
+  reward: RewardGql[];
   userData: UserStatsGql[];
+}
+
+export class CountLeaderboardPointsGql {
+  id: "count";
+  totalCount: number;
+}
+
+export class PointsGql {
+  id: string;
+  point: string;
+  totalTrades: number;
+  volume: string;
+  usdcVolume: string;
+  usdcTotalTrades: number;
+}
+
+export class LeaderboardPointsGqlDto {
+  count: CountLeaderboardPointsGql[];
+  points: PointsGql[];
 }
 
 export class LeaderboardGqlDto extends SummaryGqlDto {

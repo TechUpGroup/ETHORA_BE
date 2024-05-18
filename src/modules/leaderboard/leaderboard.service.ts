@@ -5,6 +5,8 @@ import { readFile } from "common/utils/string";
 import { request } from "graphql-request";
 import {
   LeaderboardGqlDto,
+  LeaderboardPointsGqlDto,
+  LeaderboardPointsRequest,
   LeaderboardRequest,
   LeaderboardResponse,
   LeaderboardSummaryResponse,
@@ -25,6 +27,7 @@ import BigNumber from "bignumber.js";
 import { InjectModel } from "@nestjs/mongoose";
 import { LEADERBOARD_CONFIG_MODEL, LeaderboardConfigDocument } from "./schemas/leaderboard.schema";
 import { PaginateModel } from "mongoose";
+import { SortType } from "common/enums/dto.enum";
 
 @Injectable()
 export class LeaderboardService {
@@ -84,6 +87,38 @@ export class LeaderboardService {
       config: lbConfig as any,
       summary,
       user: data.userData?.[0] || null,
+    };
+  }
+
+  async getLeaderboardPoints(query: LeaderboardPointsRequest) {
+    const { limit, network, page, sortBy = "totalTrades", sortType = SortType.DESC } = query;
+    const graphql = config.getGraphql(network);
+    const metricsGql = readFile("./graphql/points.gql", __dirname);
+    const data: LeaderboardPointsGqlDto = await request<LeaderboardPointsGqlDto>(graphql.uri, metricsGql, {
+      first: limit,
+      skip: (page - 1) * limit,
+      orderBy: sortBy,
+      orderDirection: sortType,
+    }).catch((error) => {
+      console.error(error);
+      return {} as LeaderboardPointsGqlDto;
+    });
+
+    const { count, points } = data;
+    const totalCount = count?.[0]?.totalCount || 0;
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return {
+      docs: points,
+      totalDocs: totalCount,
+      limit,
+      totalPages,
+      page,
+      pagingCounter: (page - 1) * limit + 1,
+      hasPrevPage: page > 1,
+      hasNextPage: page < totalPages,
+      prevPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
     };
   }
 

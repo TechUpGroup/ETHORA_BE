@@ -1,0 +1,14 @@
+query ($first: Int!, $skip: Int!, $orderBy: String!, $orderDirection: String!) {
+  count: countLeaderboardPoints {
+    id
+    totalCount
+  }
+  points: leaderboardPoints(first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection) {
+    id
+    point
+    totalTrades
+    volume
+    usdcVolume
+    usdcTotalTrades
+  }
+}
