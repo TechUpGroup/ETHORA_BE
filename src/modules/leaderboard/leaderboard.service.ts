@@ -97,7 +97,7 @@ export class LeaderboardService {
     const data: LeaderboardPointsGqlDto = await request<LeaderboardPointsGqlDto>(graphql.uri, metricsGql, {
       first: limit,
       skip: (page - 1) * limit,
-      orderBy: sortBy,
+      orderBy: (sortBy as any) === -1 ? SortType.DESC : SortType.ASC,
       orderDirection: sortType,
     }).catch((error) => {
       console.error(error);
