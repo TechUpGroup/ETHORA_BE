@@ -302,7 +302,7 @@ export class UsersService {
           `${weeklyId}` === referralData.referrersWeeklyTimestamp ? referralData.referrersTradedWeekly.length : 0,
         tier: referralData.userTier,
       };
-      point += referralData.totalRebateEarned;
+      point += +referralData.totalRebateEarned;
     }
 
     return {
