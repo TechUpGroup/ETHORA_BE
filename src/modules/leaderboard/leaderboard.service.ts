@@ -91,14 +91,14 @@ export class LeaderboardService {
   }
 
   async getLeaderboardPoints(query: LeaderboardPointsRequest) {
-    const { limit, network, page, sortBy = "totalTrades", sortType = SortType.DESC } = query;
+    const { limit, network, page, sortBy = "point", sortType = SortType.DESC } = query;
     const graphql = config.getGraphql(network);
     const metricsGql = readFile("./graphql/points.gql", __dirname);
     const data: LeaderboardPointsGqlDto = await request<LeaderboardPointsGqlDto>(graphql.uri, metricsGql, {
       first: limit,
       skip: (page - 1) * limit,
       orderBy: sortBy,
-      orderDirection: sortType,
+      orderDirection: (sortType as any) === 1 ? SortType.ASC : SortType.DESC,
     }).catch((error) => {
       console.error(error);
       return {} as LeaderboardPointsGqlDto;

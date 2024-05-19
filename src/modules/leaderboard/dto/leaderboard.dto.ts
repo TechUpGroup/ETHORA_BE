@@ -29,6 +29,10 @@ export class LeaderboardPointsRequest extends PaginationDtoAndSortDto {
   @IsEnum(NetworkAvailable)
   @Transform(({ value }) => Number(value))
   readonly network: Network;
+
+  @IsOptional()
+  @ApiProperty({ type: String, required: false, default: "point" })
+  sortBy?: string;
 }
 
 export class TotalDataGql {
