@@ -34,46 +34,20 @@ ws:
   priceUpdate:
     url: wss://hermes.pyth.network/ws
 
-network_supported: [8453, 84532]
+network_supported: [84532]
 
 blockchain:
   private_key:
     operator: ""
     sfPublisher: ""
-  8453:
-    provider: https://base.publicnode.com
-    chain_id: 8453
-    graphql:
-      uri: ""
-      burnedUri: ""
-      mainnetDummyUri: ""
-    contract:
-      factory_v2:
-        address: "0xFDa619b6d20975be80A10332cD39b9a4b0FAa8BB"
-        blocknumber_creator: 0
-      factory_v3:
-        address: "0x38015D05f4fEC8AFe15D7cc0386a126574e8077B"
-        blocknumber_creator: 0
-      router:
-        address: ""
-        blocknumber_creator: 0
-      register:
-        address: ""
-        blocknumber_creator: 0
-      usdc:
-        address: ""
-        blocknumber_creator: 0
-    pairContract:
-      BTCUSD:
-        address: ""
-        blocknumber_creator: 0
+    publisher: ""
   84532:
-    provider: https://1rpc.io/base-goerli
+    provider: https://base-sepolia-rpc.publicnode.com
     chain_id: 84532
     graphql:
-      uri: ""
-      burnedUri: ""
-      mainnetDummyUri: ""
+      uri:
+      burnedUri:
+      mainnetDummyUri:
     contract:
       router:
         address: ""
@@ -82,6 +56,9 @@ blockchain:
         address: ""
         blocknumber_creator: 0
       usdc:
+        address: ""
+        blocknumber_creator: 0
+      referral:
         address: ""
         blocknumber_creator: 0
     pairContract:
@@ -92,3 +69,97 @@ blockchain:
         configOptions:
           address: ""
           blocknumber_creator: 0
+      ETHUSD:
+        binaryOptions:
+          address: ""
+          blocknumber_creator: 0
+        configOptions:
+          address: ""
+          blocknumber_creator: 0
+      LINKUSD:
+        binaryOptions:
+          address: ""
+          blocknumber_creator: 0
+        configOptions:
+          address: ""
+          blocknumber_creator: 0
+      TONUSD:
+        binaryOptions:
+          address: ""
+          blocknumber_creator: 0
+        configOptions:
+          address: ""
+          blocknumber_creator: 0
+      ARBUSD:
+        binaryOptions:
+          address: ""
+          blocknumber_creator: 0
+        configOptions:
+          address: ""
+          blocknumber_creator: 0
+      XRPUSD:
+        binaryOptions:
+          address: ""
+          blocknumber_creator: 0
+        configOptions:
+          address: ""
+          blocknumber_creator: 0
+      SOLUSD:
+        binaryOptions:
+          address: ""
+          blocknumber_creator: 0
+        configOptions:
+          address: ""
+          blocknumber_creator: 0
+      BNBUSD:
+        binaryOptions:
+          address: ""
+          blocknumber_creator: 0
+        configOptions:
+          address: ""
+          blocknumber_creator: 0
+      XAUUSD:
+        binaryOptions:
+          address: ""
+          blocknumber_creator: 0
+        configOptions:
+          address: ""
+          blocknumber_creator: 0
+      XAGUSD:
+        binaryOptions:
+          address: ""
+          blocknumber_creator: 0
+        configOptions:
+          address: ""
+          blocknumber_creator: 0
+      EURUSD:
+        binaryOptions:
+          address: ""
+          blocknumber_creator: 0
+        configOptions:
+          address: ""
+          blocknumber_creator: 0
+      GBPUSD:
+        binaryOptions:
+          address: ""
+          blocknumber_creator: 0
+        configOptions:
+          address: ""
+          blocknumber_creator: 0
+      WIFUSD:
+        binaryOptions:
+          address: ""
+          blocknumber_creator: 0
+        configOptions:
+          address: ""
+          blocknumber_creator: 0
+      PEPEUSD:
+        binaryOptions:
+          address: ""
+          blocknumber_creator: 0
+        configOptions:
+          address: ""
+          blocknumber_creator: 0
+list:
+  rpcs: []
+  operaters: []

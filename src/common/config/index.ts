@@ -131,6 +131,10 @@ class Config {
     return 60 * 60;
   }
 
+  get rpcs() {
+    return this.getArray("list.rpcs");
+  }
+
   getChainId(network: Network) {
     return this.getNumber(`blockchain.${network}.chain_id`);
   }
@@ -141,39 +145,24 @@ class Config {
 
   listRPC(network: Network) {
     return network === Network.goerli
-      ? [
-          "https://base-sepolia-rpc.publicnode.com",
-          "https://greatest-ancient-violet.base-sepolia.quiknode.pro/9bd059e8220f42a7a7b522884adc85cc911fd010/",
-        ]
+      ? ["https://base-sepolia-rpc.publicnode.com", this.rpcs[0]]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
   }
 
   listRPCJobSyncEvent(network: Network) {
     return network === Network.goerli
-      ? [
-          "https://ancient-morning-arm.base-sepolia.quiknode.pro/d0f314252ada93bf9f2db48e4d5d904f3fdcb302/",
-          "https://sepolia.base.org",
-        ]
+      ? [this.rpcs[1], "https://sepolia.base.org"]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
   }
 
   listRPCJobSyncBlock(network: Network) {
     return network === Network.goerli
-      ? [
-          "https://fragrant-solemn-market.base-sepolia.quiknode.pro/5f201867966be3972fbc18ad86dda11065e5b513/",
-          "https://greatest-ancient-violet.base-sepolia.quiknode.pro/9bd059e8220f42a7a7b522884adc85cc911fd010/",
-        ]
+      ? [this.rpcs[2], this.rpcs[0]]
       : ["https://base.publicnode.com", "https://base.publicnode.com"];
   }
 
   get listOperater() {
-    return [
-      "dcfd8d38aff7af1c55ce5875dfb5382d496a484b263ebe3aeedc95606a2b1259",
-      "f49d455f0c7fd7ee1b9050aedb68a9e279100b25d7fdc68f3ed3e78fcb8ee3b4",
-      "7d18b18b1829bcafbb980009f0431af04fc2f8ea3cd21014bc700d36af098cc4",
-      "e134829f76a045213e79ea33371ebc3b0428534bce6285fc58af0fc2c4e66943",
-      "37a02b463835aad4666ca3b96320009283bb8cacb1f78097023414eb78896286",
-    ];
+    return this.getArray("list.operaters");
   }
 
   get listAddressOperater() {
